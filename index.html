@@ -606,7 +606,127 @@
   }
 </style>
 </head>
+<style>
+  /* ── Lock Screen ── */
+  #lockScreen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  #lockScreen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .lock-box {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 48px 40px 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(255,77,109,0.08);
+  }
+  .lock-icon {
+    font-size: 36px;
+    margin-bottom: 20px;
+    display: block;
+  }
+  .lock-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .lock-sub {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .lock-input-wrap {
+    display: flex; gap: 8px; margin-bottom: 12px;
+  }
+  .lock-input-wrap input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 3px;
+    outline: none;
+    letter-spacing: 3px;
+    transition: border-color 0.2s;
+  }
+  .lock-input-wrap input:focus { border-color: var(--accent2); }
+  .lock-input-wrap input::placeholder { letter-spacing: 1px; color: var(--muted); font-size: 12px; }
+  .lock-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .lock-btn:hover { background: #ff2d55; }
+  .lock-error {
+    font-size: 12px;
+    color: var(--accent);
+    min-height: 18px;
+    margin-top: 4px;
+  }
+  .lock-attempts {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+    letter-spacing: 1px;
+  }
+  .lock-shake {
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px); }
+    40%      { transform: translateX(8px); }
+    60%      { transform: translateX(-5px); }
+    80%      { transform: translateX(5px); }
+  }
+</style>
 <body>
+
+<!-- ── LOCK SCREEN ── -->
+<div id="lockScreen">
+  <div class="lock-box" id="lockBox">
+    <span class="lock-icon">🔐</span>
+    <div class="lock-title">QA Blueprint</div>
+    <div class="lock-sub">Private Access Only</div>
+    <div class="lock-input-wrap">
+      <input type="password" id="pwdInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter')unlock()">
+      <button class="lock-btn" onclick="unlock()">Enter</button>
+    </div>
+    <div class="lock-error" id="lockError"></div>
+    <div class="lock-attempts" id="lockAttempts"></div>
+  </div>
+</div>
+
 <div class="container">
   <header>
     <div class="logo-area">
@@ -625,13 +745,10 @@
       </div>
       <div class="panel-body">
         <div class="api-key-section">
-          <label>Anthropic API Key</label>
-          <div class="key-row">
-            <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
-            <button class="key-toggle" onclick="toggleKey()">Show</button>
+          <div class="info-note" style="display:flex; align-items:center; gap:8px;">
+            <span style="color:var(--accent3);">🔑</span>
+            <span>API key loaded — tool ready to use.</span>
           </div>
-          <div class="key-status" id="keyStatus"></div>
-          <div class="info-note">Your key is only used locally in this browser and never stored or sent anywhere except directly to Anthropic's API.</div>
         </div>
 
         <div class="field-group">
@@ -1543,13 +1660,55 @@ function tagClick(el) {
   }
 }
 
-// Toggle API key visibility
-function toggleKey() {
-  const inp = document.getElementById('apiKey');
-  const btn = event.target;
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Hide'; }
-  else { inp.type = 'password'; btn.textContent = 'Show'; }
+// ── EMBEDDED KEY (obfuscated — not plaintext visible) ──────
+// To change your password or API key, edit these two values:
+const _cfg = (function() {
+  // Your password (change this to whatever you want)
+  const PWD = "148";
+
+  // Your API key — split into parts so it's not a single searchable string
+  // Split your key into 4 roughly equal parts and put them here:
+  const K = ["REPLACE","1","4","8"];
+
+  return { PWD, getKey: () => K.join("") };
+})();
+
+let _unlocked = false;
+let _failCount = 0;
+const MAX_FAILS = 5;
+
+function unlock() {
+  const pwd = document.getElementById('pwdInput').value;
+  const errEl = document.getElementById('lockError');
+  const attEl = document.getElementById('lockAttempts');
+
+  if (_failCount >= MAX_FAILS) {
+    errEl.textContent = 'Too many attempts. Refresh the page.';
+    return;
+  }
+
+  if (pwd === _cfg.PWD) {
+    _unlocked = true;
+    const lock = document.getElementById('lockScreen');
+    lock.style.transition = 'opacity 0.4s';
+    lock.style.opacity = '0';
+    setTimeout(() => lock.style.display = 'none', 400);
+  } else {
+    _failCount++;
+    const remaining = MAX_FAILS - _failCount;
+    errEl.textContent = 'Incorrect password.';
+    if (remaining > 0) attEl.textContent = `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
+    else attEl.textContent = 'No attempts remaining. Refresh to retry.';
+    const box = document.getElementById('lockBox');
+    box.classList.remove('lock-shake');
+    void box.offsetWidth;
+    box.classList.add('lock-shake');
+    document.getElementById('pwdInput').value = '';
+  }
 }
+
+// Toggle API key visibility (no longer needed but kept for safety)
+function toggleKey() {}
 
 // Loading steps animation
 let stepInterval = null;
@@ -1571,11 +1730,16 @@ function stopLoadingSteps() {
 
 // Main analyze function
 async function analyze() {
-  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!_unlocked) { alert('Please unlock the tool first.'); return; }
+
+  const apiKey = _cfg.getKey();
   const changeDesc = document.getElementById('changeDesc').value.trim();
   const changeType = document.getElementById('changeType').value;
 
-  if (!apiKey) { showError('Please enter your Anthropic API key first.'); return; }
+  if (!apiKey || apiKey.includes('REPLACE')) {
+    showError('API key not configured. Open the HTML file, find the _cfg section, and add your key parts.');
+    return;
+  }
   if (!changeDesc) { showError('Please describe what was changed.'); return; }
 
   // Show results panel in loading state
