@@ -6,6 +6,7 @@
 <title>QA Blueprint — Impact Analyzer</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
+
   :root {
     --bg: #0a0a0f;
     --surface: #111118;
@@ -604,16 +605,139 @@
     min-width: 24px;
     padding-top: 1px;
   }
+
+</style>
+<style>
+
+  /* ── Lock Screen ── */
+  #lockScreen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  #lockScreen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .lock-box {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 48px 40px 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(255,77,109,0.08);
+  }
+  .lock-icon {
+    font-size: 36px;
+    margin-bottom: 20px;
+    display: block;
+  }
+  .lock-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .lock-sub {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .lock-input-wrap {
+    display: flex; gap: 8px; margin-bottom: 12px;
+  }
+  .lock-input-wrap input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 3px;
+    outline: none;
+    letter-spacing: 3px;
+    transition: border-color 0.2s;
+  }
+  .lock-input-wrap input:focus { border-color: var(--accent2); }
+  .lock-input-wrap input::placeholder { letter-spacing: 1px; color: var(--muted); font-size: 12px; }
+  .lock-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .lock-btn:hover { background: #ff2d55; }
+  .lock-error {
+    font-size: 12px;
+    color: var(--accent);
+    min-height: 18px;
+    margin-top: 4px;
+  }
+  .lock-attempts {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+    letter-spacing: 1px;
+  }
+  .lock-shake {
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px); }
+    40%      { transform: translateX(8px); }
+    60%      { transform: translateX(-5px); }
+    80%      { transform: translateX(5px); }
+  }
+
 </style>
 </head>
 <body>
+
+<!-- ── LOCK SCREEN ── -->
+<div id="lockScreen">
+  <div class="lock-box" id="lockBox">
+    <span class="lock-icon">🔐</span>
+    <div class="lock-title">QA Blueprint</div>
+    <div class="lock-sub">Private Access Only</div>
+    <div class="lock-input-wrap">
+      <input type="password" id="pwdInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter')unlock()">
+      <button class="lock-btn" onclick="unlock()">Enter</button>
+    </div>
+    <div class="lock-error" id="lockError"></div>
+    <div class="lock-attempts" id="lockAttempts"></div>
+  </div>
+</div>
+
 <div class="container">
   <header>
     <div class="logo-area">
-      <span class="logo-label">// QA Intelligence Suite v1.0</span>
-      <h1>Blueprint <span>Impact</span> Analyzer</h1>
+      <span class="logo-label">// Game Blueprint by Kunal Jade</span>
+      <h1><span> Hitwicket </span> Blueprint <span>Impact</span> Analyzer</h1>
     </div>
-    <div class="header-badge">AI-Powered</div>
+    <div class="header-badge">AI-Powered · Secure and Safe</div>
   </header>
 
   <div class="main-grid">
@@ -625,13 +749,10 @@
       </div>
       <div class="panel-body">
         <div class="api-key-section">
-          <label>Anthropic API Key</label>
-          <div class="key-row">
-            <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
-            <button class="key-toggle" onclick="toggleKey()">Show</button>
+          <div class="info-note" style="display:flex; align-items:center; gap:8px;">
+            <span style="color:var(--accent3);">🔑</span>
+            <span>Secure mode active — API key stored server-side only.</span>
           </div>
-          <div class="key-status" id="keyStatus"></div>
-          <div class="info-note">Your key is only used locally in this browser and never stored or sent anywhere except directly to Anthropic's API.</div>
         </div>
 
         <div class="field-group">
@@ -642,41 +763,41 @@
         <div class="field-group">
           <label>Quick-select feature area</label>
           <div class="feature-tags" id="featureTags">
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE / Offline Mode & Initial Setup">FTUE: Offline & Setup</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Scouting & Match 1">Scouting & Match 1</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="SA / Super Ability">SA / Super Ability</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Training Tutorial">Training Tutorial</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Notifications & Connectivity">Notifications & Connectivity</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Match 2 / Match 3 Flow">Match 2 / Match 3</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Store / Chest opening">Store & Chests</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="ESP Trigger & Dashboard icons">ESP & Dashboard</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="League Unlock & League Mode">League Mode</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="PK Match Flow">PK Match</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Post-LM1 Popups & Unlocks">Post-LM1 Unlocks</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="App Launch – Icon & PLAY CTA, App Launch – Login Methods">App Launch & Login</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 1 – Offline Mode & Initial Setup">FTUE: Offline & Setup</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 2 – Scouting & Match 1">Scouting & Match 1</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 3 – Training Tutorial">Training Tutorial</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 4 – Notifications & Connectivity">Notifications & Connectivity</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 5 – Match 2 Flow, FTUE 6 – Store & Super Chest">Match 2 / Store / Chest</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 7 – ESP Trigger & Dashboard">ESP & Dashboard (FTUE)</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 8 – League Unlock, FTUE 9 – PK Match Flow">League Unlock / PK Match</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 10 – Post-LM1 Popups & Unlocks">Post-LM1 Unlocks</span>
             <span class="feature-tag" onclick="tagClick(this)" data-val="Manager Profile">Manager Profile</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Dashboard HUD & Icons">Dashboard HUD</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="My Team / Squad">My Team / Squad</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Inventory">Inventory</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Auction System">Auction</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance System">Alliance</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Co-op / Huddle / Automatch">Co-op & Automatch</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Icons Logic & Dashboard, HUD – Dashboard Elements">Dashboard & Icons</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Offers, Store – Season Store, Store – Featured Items">Store – Offers & Featured</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Chests">Store – Chests</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Get Player, Store – Currencies">Store – Get Player & Currencies</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="HUDs – Energy / TP / HC">HUDs (Energy / TP / HC)</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="My Team – Squad, My Team – Player Detail">My Team – Squad & Player Detail</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="My Team – Lineup">Lineup & Team OVR</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Inventory – General, Inventory – Cosmetics, Inventory – Powerups">Inventory</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Auction">Auction</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Details & Join, Alliance – Friendlies & Search">Alliance – Details & Search</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Chat, Battle & Chibis">Alliance – Chat & Chibis</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Daily Co-op, Alliance – Huddle & Invite / Automatch">Alliance – Co-op & Automatch</span>
             <span class="feature-tag" onclick="tagClick(this)" data-val="Training Nets">Training Nets</span>
             <span class="feature-tag" onclick="tagClick(this)" data-val="Season Pass">Season Pass</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Quests / SP Points">Quests System</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Quests System">Quests System</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Play Button – Game Modes, League Mode">League Mode</span>
             <span class="feature-tag" onclick="tagClick(this)" data-val="PvP Mode">PvP Mode</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="PvP Mania">PvP Mania</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Hamburger Menu">Hamburger Menu</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Leaderboards & Daily Login">Leaderboards</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Friends & Hitwicket TV">Friends & HW TV</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Settings & Social Connect">Settings</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="App Launch / Login / Auth">App Launch & Login</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Get Players / EPB / SPB scouting">Get Players / Scouting</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Hamburger – My Feed, Hamburger – Community">Hamburger Menu</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Inbox, Invite System">Inbox & Invite</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Leaderboard, Daily Login">Leaderboard & Daily Login</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Friends, Hitwicket TV">Friends & HW TV</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Settings – Audio & Quality, Settings – Connect & Social HC, Settings – Support & Rate Us">Settings</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Trophy Road, PvP Road">Trophy & PvP Road</span>
             <span class="feature-tag" onclick="tagClick(this)" data-val="MRP Progression Unlocks">MRP Progression</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Player Detail screen">Player Detail</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Currency / HC / TP / Energy balance">Currency & Economy</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Animations & Visual FX">Animations & FX</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Popup / Dialogue flow">Popups & Dialogues</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Navigation / Back / Home CTAs">Navigation & CTAs</span>
+            <span class="feature-tag" onclick="tagClick(this)" data-val="Animations, SA activation, dialogue popup, hand pointer, fire animation, shatter animation">Animations & Visual FX</span>
           </div>
         </div>
 
@@ -695,7 +816,7 @@
 
         <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
           <span class="btn-shimmer"></span>
-          ⚡ Analyze Impact
+          ⚡ Hey let's Analyze Impact
         </button>
       </div>
     </div>
@@ -708,16 +829,14 @@
       </div>
       <div style="padding: 14px 20px 10px; border-bottom: 1px solid var(--border);">
         <div style="font-size: 11px; color: var(--muted); line-height: 1.6;">
-          The analyzer cross-references your change against <strong style="color: var(--text);">500+ checklist items</strong> across <strong style="color: var(--text);">35 feature sections</strong> — every single item from your FTUE hygiene doc and app launch sheet is loaded into the AI's context.
+          The analyzer cross-references your change against <strong style="color: var(--text);">548 checklist items</strong> across <strong style="color: var(--text);">54 sections</strong> — covering both new user FTUE flow and the full current system. Every item from your hygiene doc and app launch sheet is loaded into the AI's context.
         </div>
       </div>
-      <div class="checklist-chips" id="checklistChips">
-        <!-- populated by JS -->
-      </div>
+      <div class="checklist-chips" id="checklistChips"></div>
       <div style="padding: 14px 20px;">
         <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase;">How to use</div>
         <div style="font-size: 12px; color: #b0b0c0; line-height: 1.7;">
-          1. Enter your Anthropic API key above<br>
+          1. Enter password to unlock<br>
           2. Describe what the developer changed<br>
           3. Optionally quick-select the feature area<br>
           4. Click <span style="color: var(--accent);">Analyze Impact</span> — the AI will tell you exactly which test cases are at risk, what edge cases to check, and which downstream features could break.
@@ -732,27 +851,21 @@
         <span class="panel-title">Impact Analysis Report</span>
         <span id="analysisTimestamp" style="margin-left: auto; font-size: 11px; color: var(--muted);"></span>
       </div>
-
-      <!-- Loading -->
       <div class="loading-state" id="loadingState">
         <div class="loader-ring"></div>
         <div class="loading-text">Analyzing change impact...</div>
         <div class="loading-steps">
           <div class="loading-step" id="step1">Parsing change description</div>
-          <div class="loading-step" id="step2">Cross-referencing 500+ checklist items across 35 sections</div>
+          <div class="loading-step" id="step2">Cross-referencing 548 items across 54 sections</div>
           <div class="loading-step" id="step3">Identifying at-risk test cases</div>
           <div class="loading-step" id="step4">Generating edge case scenarios</div>
           <div class="loading-step" id="step5">Mapping downstream dependencies</div>
         </div>
       </div>
-
-      <!-- Error -->
       <div class="error-state" id="errorState">
         <div style="font-size: 24px; margin-bottom: 12px;">⚠</div>
-        <div id="errorMsg">Something went wrong. Check your API key and try again.</div>
+        <div id="errorMsg">Something went wrong.</div>
       </div>
-
-      <!-- Summary bar -->
       <div class="summary-bar" id="summaryBar" style="display:none;">
         <div class="summary-stat stat-critical">
           <span class="stat-num" id="countCritical">0</span>
@@ -775,23 +888,72 @@
           <span class="stat-label">Test Cases Flagged</span>
         </div>
       </div>
-
-      <!-- Impact cards -->
       <div class="impact-grid" id="impactGrid"></div>
-
-      <!-- Specific test cases -->
       <div id="testCasesContainer"></div>
     </div>
   </div>
 </div>
 
 <script>
-// ============================================================
-// COMPLETE QA CHECKLIST — All items from both documents
-// ============================================================
+// ── CONFIG — update this with your Cloudflare Worker URL ─────
+const WORKER_URL = 'https://orange-waterfall-030e.kunal-249.workers.dev';
+// e.g.  'https://qa-blueprint-proxy.johndoe.workers.dev'
+// Get this from Cloudflare dashboard after deploying worker.js
+// ─────────────────────────────────────────────────────────────
+
+// ── API KEY → never here, lives in Cloudflare secret only ────
+// ── PASSWORD → never here, checked by Cloudflare Worker only ─
+
+let _sessionToken = null;
+let _failCount = 0;
+const MAX_FAILS = 5;
+
+async function unlock() {
+  const pwd = document.getElementById('pwdInput').value;
+  const errEl = document.getElementById('lockError');
+  const attEl = document.getElementById('lockAttempts');
+
+  if (_failCount >= MAX_FAILS) {
+    errEl.textContent = 'Too many attempts. Refresh the page.';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${WORKER_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.ok) {
+      _sessionToken = data.token;
+      const lock = document.getElementById('lockScreen');
+      lock.style.transition = 'opacity 0.4s';
+      lock.style.opacity = '0';
+      setTimeout(() => lock.style.display = 'none', 400);
+    } else {
+      _failCount++;
+      const remaining = MAX_FAILS - _failCount;
+      errEl.textContent = data.error || 'Incorrect password.';
+      if (remaining > 0) attEl.textContent = `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
+      else attEl.textContent = 'No attempts remaining. Refresh to retry.';
+      const box = document.getElementById('lockBox');
+      box.classList.remove('lock-shake');
+      void box.offsetWidth;
+      box.classList.add('lock-shake');
+      document.getElementById('pwdInput').value = '';
+    }
+  } catch(e) {
+    errEl.textContent = 'Connection error. Is the server running?';
+  }
+}
+
 const QA_CHECKLIST = {
 
-  // ── DOC 1: FTUE Hygiene Checklist ──────────────────────────
+  // ════════════════════════════════════════════════════════════
+  // SECTION A: NEW USER FLOW (FTUE)
+  // ════════════════════════════════════════════════════════════
 
   "FTUE 1 – Offline Mode & Initial Setup": [
     "Game loads completely in offline mode",
@@ -932,311 +1094,374 @@ const QA_CHECKLIST = {
     "Inventory tab unlocks",
   ],
 
-  "FTUE 11 – Manager Profile": [
+  // ════════════════════════════════════════════════════════════
+  // SECTION B: APP LAUNCH (OLD + NEW USER)
+  // ════════════════════════════════════════════════════════════
+
+  "App Launch – Icon & PLAY CTA": [
+    "App Icon is accurate with no spacing or sizing issues",
+    "PLAY CTA has the breathing & shine animation",
+    "PLAY CTA is clickable",
+    "Addressables/Assets downloaded on loading screen after PLAY tap (old user)",
+    "Install Release build on top of current PlayStore/Live build and check",
+  ],
+
+  "App Launch – Login Methods": [
+    "Login: Google Play / Apple ID / Game Center works",
+    "Login: Facebook works",
+    "Login: Hitwicket ID works",
+    "Login: WhatsApp works",
+    "Login: Recover Account through Recover account popup",
+    "Login: Recover Account through 'Recover account' CTA",
+    "Contact Us — redirects outside of game correctly",
+  ],
+
+  // ════════════════════════════════════════════════════════════
+  // SECTION C: CURRENT SYSTEM — FULL FEATURE STRUCTURE
+  // ════════════════════════════════════════════════════════════
+
+  "Manager Profile": [
+    "Manager Profile surfaced at top-left of dashboard",
     "Team Name displays current name",
     "Team Name Edit CTA opens rename screen",
     "Team Name saves with valid input (min 3 chars)",
     "User Name displays current name",
     "User Name Edit CTA opens edit screen",
     "User Name rejects special characters",
-    "City field shows FTUE selected city",
-    "City field editable with valid cities",
+    "City field shows FTUE-selected city",
+    "City Edit CTA opens city selection",
+    "City updates and saves correctly",
     "Total Matches Played stat displays correctly",
     "Win Rate displays as percentage",
-    "Trophies count displays accurately",
+    "Trophies count in Stats displays accurately",
     "Players Scouted count displays correctly",
     "Badges display with correct icons",
+    "Badge tooltip appears on badge tap",
+    "All owned Badges visible",
+    "Trophies section shows all owned trophies",
     "Level shows current MRP number",
-    "XP progression bar shows to next level",
-    "League Level displays current tier",
-    "Alliance Name shows 'No Alliance' or joined name",
-    "Team OVR shows Batting/Bowling power split",
+    "XP value matches admin panel",
+    "XP progression bar fills correctly toward next level",
+    "League Level displays current tier (matches League lobby)",
+    "Alliance Name shows 'No Alliance' or joined alliance name (matches Alliance lobby)",
+    "PvP Reputation Rank visible and matches PvP page",
+    "Team OVR value matches dashboard display",
+    "Batting Power value correct",
+    "Bowling Power value correct",
+    "Lineup section shows correct player cards with correct rarity",
+    "Lineup in Manager Profile matches actual in-game lineup",
     "Player card tap opens Player Detail screen",
     "Close CTA returns to Dashboard",
   ],
 
-  "FTUE 12 – Dashboard Icons Logic": [
-    "Store icon accessible with Golden glow if free chest",
-    "Offers section shows ESP Thala Epics/SSP etc",
-    "Season Pass icon accessible",
-    "Featured Items tab functional",
-    "Chests tab shows Free/Super/10x options",
-    "Get Player tab shows SPB/EPB options",
-    "Currencies display accurate balances",
+  "Icons Logic & Dashboard": [
+    "All dashboard icon logic works per unlock state",
+    "Store icon accessible",
+    "Store shows Golden glow effect if free chest available",
+    "Store shows Free tag when free item available",
+    "Small event CTA available above event banners",
+    "Offer image, timer, price, Close all functional on Offer icon",
     "All HUD icons display correct values",
     "Back button returns to Dashboard",
     "Home button returns to Dashboard",
   ],
 
-  "FTUE 13 – Store Complete Validation": [
-    "Left panel shows all navigation tabs",
-    "Store tab loads without crashes",
+  "Store – Offers": [
     "Offers tab displays active offers",
-    "Season Store tab accessible",
-    "Featured Items tab shows current featured",
-    "Chests tab shows all chest types",
-    "Get Player tab shows scouting options",
-    "Currencies tab shows all currency types",
     "Offer image displays correctly",
     "Offer timer countdown works",
     "Offer discount tag visible",
     "Offer Close CTA dismisses popup",
     "Two-tap offer purchase flow works",
     "Payment success credits rewards instantly",
+  ],
+
+  "Store – Season Store": [
+    "Season Store tab accessible",
     "Season Store purchase deducts HC",
     "Season Store rewards credit to account",
+    "Season Store shows SP exclusive items with correct pricing",
+  ],
+
+  "Store – Featured Items": [
+    "Featured Items tab shows current featured items",
+    "Featured item purchase flow works",
+    "Featured item rewards credit correctly",
+  ],
+
+  "Store – Chests": [
+    "Chests tab shows Free, Super, and 10x options",
     "Free chest 'i' button shows contents",
     "Super chest 'i' button shows contents",
     "10x chest 'i' button shows contents",
     "Chest rewards credit to inventory",
     "2-hour chest timer displays correctly for free chest",
     "RV free chest accessible via ads",
-    "10x reward animation plays fully when used 10x option",
+    "10x reward animation plays fully",
+    "No HC deducted from free Super Chest opening",
+  ],
+
+  "Store – Get Player": [
+    "Get Player tab shows SPB and EPB scouting options",
     "SPB scouting deducts correct HC",
     "EPB scouting deducts correct HC",
     "Scouted player added to squad",
-    "Shard scouting deducts fragments",
+    "Shard scouting deducts fragments correctly",
     "Reliable/Brilliant/WC scouting works post-MRP 5",
+    "'i' button shows player image and pity counters for EPB, SPB, PB, Player Scout",
+    "Medium card opens after tapping background for EPB & SPB",
+    "Scout counter & shards quantity matches Store display",
+    "Ticker counter appears for EPB, SPB & PB but NOT for Player Scout",
+    "Player Scout (Reliable/Brilliant/WC) updated value matches Get Players and Store",
   ],
 
-  "FTUE 14 – My Team Complete": [
+  "Store – Currencies": [
+    "Currencies tab shows all currency types",
+    "Currency balances display accurately",
+    "HC purchase flow works",
+    "HC buy redirects to store",
+  ],
+
+  "HUDs – Energy / TP / HC": [
+    "Energy balance displays correctly on HUD",
+    "Energy refill with HC works",
+    "Get Elite Pass CTA functional from energy HUD",
+    "Training Points count accurate on HUD",
+    "TP tooltip appears on tap",
+    "Hitcoins balance updates on all transactions",
+    "Hitcoins HUD taps redirect to Store",
+    "Daily PvP wins tooltip on PLAY CTA",
+  ],
+
+  "My Team – Squad": [
     "Squad tab loads with all players",
     "All filter shows complete squad",
     "Batsmen filter shows only batsmen",
     "Bowlers filter shows only bowlers",
-    "Not Found filter shows Locked Player (Not Scouted)",
-    "Get Player button functional",
-    "Rarity filter sorts players correctly",
-    "Red dot appears on untrained players or available equipment",
-    "Player card tap opens Player Detail",
+    "Not Found filter shows Locked / Unscouted players",
+    "Get Player button functional from My Team",
+    "By Rarity filter sorts players correctly",
+    "Red dot appears on untrained players",
+    "Red dot appears on players with available equipment",
+    "Player card tap opens Player Detail screen",
     "Rename player function works",
     "Fire player removes from squad",
     "Star-up animation triggers at MRP 9 or above",
+  ],
+
+  "My Team – Player Detail": [
+    "Player Detail screen accessible via player card tap",
+    "Player name, rarity, and stats display correctly",
+    "Train button visible and functional",
     "Train deducts TP correctly",
     "Train updates player power",
     "Power-up animation plays on level gain",
-    "Trait unlock at Lvl 7, 14 correctly",
+    "Trait unlock at Lvl 7 works correctly",
+    "Trait unlock at Lvl 14 works correctly",
     "EQ equip boosts power correctly",
     "Enhancer equip works correctly",
     "Passive trait upgrade functional",
     "Stats page Next/Previous navigation works",
     "Stats page double-tap zoom works",
-    "Lineup tab accessible",
-    "Batsmen lineup filter works",
-    "Bowler lineup filter works",
-    "Player swap via tap+drag-drop works",
-    "Bowling sequence reorder saves",
+  ],
+
+  "My Team – Lineup": [
+    "Lineup tab accessible from My Team",
+    "Batsmen filter shows correct players",
+    "Bowler filter shows correct players",
+    "Player swap via tap + drag-drop works",
+    "Bowling sequence reorder saves correctly",
     "AUTO PICK generates optimal lineup",
     "SAVE CTA persists lineup changes",
-    "Team OVR recalculates on swaps",
+    "Team OVR recalculates correctly when player is swapped",
+    "Team OVR logic verified after lineup change",
   ],
 
-  "FTUE 15 – Inventory": [
+  "Inventory – General": [
     "General panel loads correctly",
-    "Cosmetics panel loads correctly",
-    "Powerups panel loads correctly",
     "Tokens visible and equippable",
     "Basic EQ visible and equippable",
-    "Skins show preview on equip",
-    "Powerups assignable to players",
-    "Sell function deducts items",
-    "Sell function credits HC",
-    "'i' buttons show detailed stats",
+    "'i' buttons show detailed stats for items",
+    "Sell function deducts items from inventory",
+    "Sell function credits HC correctly",
   ],
 
-  "FTUE 16 – Auction (MRP 6+)": [
-    "Timer displays remaining auction time",
+  "Inventory – Cosmetics": [
+    "Cosmetics panel loads correctly",
+    "Skins display correctly",
+    "Skin preview shows on equip",
+  ],
+
+  "Inventory – Powerups": [
+    "Powerups panel loads correctly",
+    "Powerups (EQ) visible and assignable to players",
+  ],
+
+  "Auction": [
+    "Timer displays remaining auction time correctly",
     "Result tab shows completed auctions",
-    "Cash balance displays correctly",
-    "Tokens balance displays correctly",
+    "Cash balance (HUD) displays correctly",
+    "Tokens balance (HUD) displays correctly",
     "'i' button shows auction rules",
     "History tab loads past auctions",
-    "Bids History shows user bids",
-    "World Class players visible",
-    "Brilliant players visible",
-    "Reliable players visible",
-    "Player card 'i' button shows stats",
+    "Bids History shows user's bids",
+    "World Class players visible in auction",
+    "Brilliant players visible in auction",
+    "Reliable players visible in auction",
+    "Player card 'i' button shows player stats",
     "Bid CTA opens bid popup",
-    "SP character triggers Season Pass popup",
-    "+ button increases bid amount",
-    "- button decreases bid amount",
-    "Dismiss CTA closes bid popup",
+    "When SP character available — Buy Season Pass popup triggers",
+    "Place Bid — '+' button increases bid amount",
+    "Place Bid — '-' button decreases bid amount",
+    "Dismiss CTA closes bid popup without placing bid",
     "Bid CTA places bid successfully",
     "Winning bid adds player to squad",
   ],
 
-  "FTUE 17 – Alliance System (MRP 5+)": [
+  "Alliance – Details & Join": [
     "Alliance Name displays correctly",
     "Alliance Details page loads",
     "Join Button opens WhatsApp link",
     "Join Button opens Discord link",
-    "Leave Alliance CTA shows confirmation",
-    "Leaderboard player tap opens Detail",
+    "Leave Alliance CTA shows confirmation before leaving",
+    "Player Detail accessible through leaderboard tap",
     "Players ranking displays correctly",
-    "Member list scrollable",
+    "Leaderboard is scrollable",
     "Members Count displays accurately",
-    "Online Member Count updates live",
+    "Online Member Count updates correctly",
     "Boosted Player Count displays",
     "Co-op Flag Count displays",
-    "Friendly battle count shows",
-    "Chase Target CTA functional",
-    "Search bar accepts input",
-    "Search CTA filters alliances",
-    "Community Search functional",
-    "WhatsApp community link works",
-    "Discord community link works",
-    "Recommended alliances visible",
-    "Chat send shows toast confirmation",
-    "Request CTA sends successfully",
-    "Battle CTA functional",
+  ],
+
+  "Alliance – Friendlies & Search": [
+    "Friendly battle count shows correctly",
+    "Chase Target CTA is functional",
+    "Search bar accepts alliance name input",
+    "Search CTA filters alliances correctly",
+    "Community Search via WhatsApp link works",
+    "Community Search via Discord link works",
+    "Recommended Alliances visible",
+    "User able to view alliance details from recommended list",
+  ],
+
+  "Alliance – Chat, Battle & Chibis": [
+    "Chat section loads and is scrollable",
     "Send message button sends message to alliance chat",
-    "Back CTA returns to Dashboard",
-    "Home CTA returns to Dashboard",
-  ],
-
-  "FTUE 17 – Friendly Battle & Chibi": [
-    "Challenge CTA starts friendly battle match",
-    "Close CTA dismisses challenge screen completely",
-    "Chibi avatar tap shows player profile",
-    "Chibi avatar tap shows Team OVR rating",
-    "Chibi avatar tap shows Challenge button",
-    "Chibi avatar tap shows Last Active time",
-  ],
-
-  "FTUE 17 – PvP Challenge (Alliance)": [
-    "Tapping PvP shows challenge confirmation message",
-    "Challenge appears in alliance chat after confirmation",
-    "Alliance chat shows challenge notification",
+    "Chat send shows toast confirmation",
+    "Request CTA sends join request successfully",
+    "Battle CTA — PvP challenge works",
+    "Battle CTA — Challenge confirmation message appears",
     "Close CTA cancels challenge and dismisses popup",
-    "Challenge screen dismisses after cancel",
+    "Tapping on chibi shows player profile",
+    "Tapping on chibi shows Team OVR",
+    "Tapping on chibi shows Challenge button",
+    "Tapping on chibi shows Title",
+    "Tapping on chibi shows Last Active time",
   ],
 
-  "FTUE 17 – Daily Co-op Rewards & Navigation": [
+  "Alliance – Daily Co-op": [
     "Daily Co-op rewards list scrollable vertically",
     "Daily Co-op rewards marked as claimable when available",
     "Daily Co-op 'i' button displays reward details",
     "Daily Co-op Play button redirects to Quest Screen",
     "Close CTA dismisses Daily Co-op screen",
+    "Attempts counter displays accurately",
+    "Play Co-op button interactable when attempts available",
+    "Play Co-op button disabled when no attempts remaining (HC option available)",
+    "Alliance Flags visible on Quest Screen",
+    "Milestone rewards claimable after completing",
+    "All achieved milestone rewards collectible",
+    "Reset timer visible below reward milestone",
   ],
 
-  "FTUE 17 – Player Management (Alliance)": [
-    "Player list scrollable vertically",
-    "Tapping any player opens Player Detail screen",
-    "Add Friend button functional for visible players",
-    "Invite button sends invitation successfully",
-  ],
-
-  "FTUE 17 – Leaderboard Integration": [
-    "Leaderboard accessible from Co-op Quest screen",
-    "Leaderboard displays Balanced technique category",
-    "Leaderboard displays Technical technique category",
-    "Leaderboard displays Freestyle technique category",
-    "Data/stats visible under each leaderboard section",
-    "Close CTA closes leaderboard popup",
-  ],
-
-  "FTUE 17 – Huddle & Invite System": [
-    "Tapping Huddle + icon opens 'Invite friend to play' popup",
+  "Alliance – Huddle & Invite / Automatch": [
+    "Huddle + icon opens 'Invite friend to play' popup",
     "Invite functionality sends invitation successfully",
     "Lobby code visible in invite popup",
     "Join Lobby using code works correctly",
     "Community CTA opens Discord link",
     "Share CTA copies lobby link",
-    "Share CTA allows WhatsApp/Message etc sharing",
-  ],
-
-  "FTUE 17 – Automatch & Co-op Match Flow": [
+    "Share CTA allows WhatsApp/Message sharing",
     "Automatch feature starts matchmaking",
     "Automatch shows 'Joining players' status",
-    "After players join via automatch, mic option visible",
-    "After players join via automatch, speaker option visible",
-    "Co-op match playable",
+    "Mic option visible after players join via automatch",
+    "Speaker option visible after players join via automatch",
+    "Co-op match playable end to end",
     "Close CTA exits lobby during matchmaking",
     "Close CTA exits during pre-match lobby",
-    "Rewards visible in milestone progression track",
-    "Chibi avatar visible on Quest Screen",
-    "Team name displayed below chibi avatar",
-    "Rewards claimable after completing milestone",
-    "User can collect rewards up to achieved milestone",
-    "Milestone rewards accessible immediately after unlock",
-    "All achieved milestone rewards collectible",
-    "Reset timer visible below reward milestone",
-    "View Alliance button opens daily co-op quest pop-up",
-    "View Alliance pop-up shows timer below milestones",
-    "Alliance Flags visible on Quest Screen",
-    "Attempts counter displays accurately",
-    "Play Co-op button interactable when attempts available",
-    "Play Co-op button disabled when no attempts remaining (Can use HC to play)",
+    "Back CTA returns to Dashboard",
+    "Home CTA returns to Dashboard",
   ],
 
-  "FTUE 19 – Training Nets": [
-    "Net 1 Start CTA deducts cash",
-    "Net 2 locked until MRP 18",
+  "Training Nets": [
+    "Net 2 locked until MRP 18 (or 400 HC to unlock)",
     "Net 2 unlockable with 400 HC",
-    "End Training using HC deducts correctly",
-    "RV ad reduces training timer",
-    "Close CTA exits nets screen",
-    "XP and TP Credited to account",
+    "Net 1 Start CTA deducts Cash correctly",
+    "Cash deduction amount correct for Net 1",
+    "End Training early using HC — HC deducted correctly",
+    "Reduce timer using RV (Reward Video / Ad) works",
+    "Close CTA exits Nets screen",
+    "XP credited to account after training",
+    "TP credited to account after training",
   ],
 
-  "FTUE 20 – Season Pass": [
+  "Season Pass": [
     "Rewards track loads correctly",
-    "Timer shows days remaining",
-    "Activate CTA shows purchase flow",
-    "Rewards marked as claimable",
-    "Rewards scrollable vertically",
-    "Season Store redirect works",
-    "'i' button shows reward details",
-    "Back CTA functional",
-    "Home CTA functional",
+    "Timer shows days/hours remaining for season",
+    "Activate CTA visible when Season Pass not purchased",
+    "Activate CTA opens purchase confirmation popup",
+    "Purchase confirmation shows correct price",
+    "Purchase success credits Season Pass instantly",
+    "Rewards marked as claimable when eligible",
+    "Claimable rewards highlighted with Claim button",
+    "Rewards list scrollable vertically through all tiers",
+    "Claim animation plays on reward collection",
+    "Claimed rewards show checkmark permanently",
+    "Rewards credit to user's account",
+    "Season Store CTA redirects to Store screen",
+    "'i' button shows reward details popup",
+    "Progress bar shows current tier advancement",
+    "Free tier rewards accessible without purchase",
+    "Premium tier rewards locked pre-purchase",
+    "Post-purchase premium rewards can be claimed",
+    "Back CTA returns to Dashboard",
+    "Home CTA redirects to Dashboard",
   ],
 
-  "FTUE 21 – Quests System": [
+  "Quests System": [
     "Daily Quest tab loads SP Screen successfully",
     "SP Screen displays correctly without crashes",
     "Daily quest displays with reset timer visible",
     "Season challenges list loads completely",
     "Tapping Daily quest redirects to respective challenge screen",
-    "Tapping Season challenge redirects to respective challenge screen",
-    "SP points visible and updating correctly",
+    "Tapping Season quest redirects to respective challenge screen",
+    "SP points visible on challenges",
     "SP points increment on challenge completion",
-    "Season Store CTA redirects to Store screen",
-    "Season Store shows SP items correctly",
-    "Home button redirects to Dashboard",
-    "Back CTA returns to Dashboard",
     "Reset timer countdown displays accurately",
     "Completed quests show checkmark status",
     "Active quests show progress bar",
     "Locked quests show requirement text",
-    "Quest descriptions readable and clear",
+    "Season Store CTA redirects to Store",
+    "Home button redirects to Dashboard",
+    "Back CTA returns to Dashboard",
   ],
 
-  "FTUE 22 – Season Pass Complete Flow": [
-    "Rewards tier displays all rewards",
-    "Rewards show locked/unlocked/claimed states correctly",
-    "Timer displays days/hours remaining for season",
-    "Activate CTA visible when Season Pass not purchased",
-    "Activate CTA opens purchase confirmation popup",
-    "Purchase confirmation shows correct price",
-    "Purchase success credits Season Pass instantly",
-    "Claimable rewards highlighted with Claim button",
-    "Rewards list scrollable vertically through all tiers",
-    "Claim animation plays on reward collection",
-    "Claimed rewards show checkmark permanently",
-    "Rewards Credit to user's account",
-    "Season Store CTA redirects to Store screen",
-    "Season Store displays SP exclusive items",
-    "Season Store shows correct pricing for SP items",
-    "'i' button displays reward details popup",
-    "Progress bar shows current tier advancement",
-    "Free tier rewards accessible without purchase",
-    "Premium tier rewards locked pre-purchase",
-    "Post-purchase premium rewards can be claimed",
-    "Back CTA returns to previous screen (Dashboard)",
-    "Home CTA redirects to Dashboard directly",
+  "Play Button – Game Modes": [
+    "Daily PvP Win chest icons visible on dashboard above Play",
+    "Play CTA functional on dashboard",
+    "Game Modes tiles screen loads",
+    "Classics section visible — League tile accessible",
+    "Classics section visible — PvP tile accessible",
+    "Events section visible — YC tile accessible",
+    "Events section visible — ABR tile accessible",
+    "Banner displays correct active game mode",
+    "Banner Game Mode Tiles — League tile works",
+    "Banner Game Mode Tiles — PvP tile works",
+    "Banner Events Tiles — YC works",
+    "Banner Events Tiles — ABR works",
   ],
 
-  "FTUE 22 – Game Modes – League": [
+  "League Mode": [
     "League mode tile accessible post league unlock",
     "League level displays correctly with trophy count on tile",
     "Tapping Play redirects to VS page",
@@ -1252,10 +1477,10 @@ const QA_CHECKLIST = {
     "Tapping Play on match history redirects to VS page",
     "Player visible on leaderboard with correct rank",
     "User rank highlighted with blue color",
-    "Tapping Refresh shows matches community data",
+    "Tapping Refresh shows updated community data",
   ],
 
-  "FTUE 22 – Game Modes – PvP": [
+  "PvP Mode": [
     "PvP mode accessible post-MRP 3 unlock",
     "Proper rep rank with rep points visible on PvP tile",
     "Tapping Play redirects to VS screen",
@@ -1266,26 +1491,21 @@ const QA_CHECKLIST = {
     "Career page shows match history with bowler/batsmen stats",
     "Close CTA closes PvP career popup",
     "PvP lineup redirects to Lineup screen",
-    "Bowling option functional",
-    "Save option persists lineup changes",
-    "Drag and replace player accessible",
+    "Bowling option functional in PvP lineup",
+    "Save option persists PvP lineup changes",
+    "Drag and replace player accessible in PvP lineup",
     "Filter for bowlers and batsmen accessible",
     "Back CTA redirects to PvP page",
     "Practice match option accessible",
     "Friendly match creates room with unique room ID",
     "Join room functional using room ID",
     "Discord option available to join room",
-    "Home CTA redirects to Dashboard",
-    "Easy mode selectable",
-    "Medium mode selectable",
-    "Hard mode selectable",
-    "Tapping Play with any mode redirects to Lineup",
+    "Easy / Medium / Hard mode selectable in Practice",
+    "Tapping Play with any difficulty redirects to Lineup",
     "Saving lineup redirects to VS page",
     "Match starts successfully after lineup save",
     "PvP Mania Leaderboard visible and scrollable",
     "End timer visible with mega reward preview",
-    "Play PvP starts match and redirects to VS page",
-    "Tapping Back CTA redirects to PvP page",
     "Rep points displayed next to Play button",
     "Win shows '+X rep points' message",
     "Loss shows rep points deduction message",
@@ -1297,51 +1517,75 @@ const QA_CHECKLIST = {
     "Events tiles visible and accessible (YC, ABR, etc.)",
   ],
 
-  "FTUE 23 – Hamburger Menu": [
+  "Hamburger – My Feed": [
     "My Feed tab loads matches",
-    "Career tab shows stats progression",
+    "Career section shows stats progression",
     "Stats tab displays correctly",
     "Challenges tab lists active challenges",
     "Chase Target CTA functional",
-    "Timer displays remaining time",
-    "List scrollable",
-    "Close CTA dismisses menu",
+    "Chase Target shows timer",
+    "Challenges list scrollable",
+    "Challenges show correct stats",
+    "Close CTA dismisses Hamburger menu",
+  ],
+
+  "Hamburger – Community": [
     "Community tab loads Spotlight",
     "All Content visible",
-    "Subscribe CTA credits HC",
+    "Subscribe CTA — HC added to user account",
     "YouTube link functional",
     "Discord link functional",
     "Instagram link functional",
     "Redeem Code CTA works",
-    "Inbox shows invites, Messages, Reward Claim, Refund",
-    "WhatsApp share, share link functional",
-    "Friend MRP 3 rewards credit",
   ],
 
-  "FTUE 24 – Leaderboards": [
+  "Inbox": [
+    "Inbox shows Invites",
+    "Inbox shows Messages",
+    "Inbox shows Reward Claims",
+    "Inbox shows Refund items",
+    "Reward from in-game mail credits correctly",
+    "Reward validation matches admin panel",
+  ],
+
+  "Invite System": [
+    "Shareable link copies to clipboard",
+    "Shareable link opens via WhatsApp",
+    "Reward credits when friend joins and reaches MRP 3",
+    "'i' button shows invite details",
+    "Close CTA dismisses invite screen",
+  ],
+
+  "Leaderboard": [
     "Trophies tab loads",
-    "Weekly tab loads",
-    "All Time tab loads",
-    "Rep Points, Team Overall tab scrollable via arrows",
-    "Teams scrollable via arrows",
+    "Trophies – Weekly tab loads",
+    "Trophies – All Time tab loads",
+    "Trophies – Scrollable using arrow CTAs",
+    "Reputation Points tab loads",
+    "Reputation Points – Scrollable using arrow CTAs",
+    "Team Overall tab loads",
+    "Team Overall – Scrollable using arrow CTAs",
   ],
 
-  "FTUE 24 – Daily Login": [
-    "Daily Login popup from Hamburger Menu",
-    "Claim a reward if available",
-    "Claim 'Architect' and check the player got added in the squad",
-    "Streak count displays",
-    "Close CTA dismisses",
-    "Reset occurs after Day 7",
+  "Daily Login": [
+    "Daily Login popup accessible from Hamburger Menu",
+    "Reward claimable when available",
+    "Claim 'Architect' and verify player added to squad",
+    "Streak count displays correctly",
+    "Close CTA dismisses popup",
+    "Reset occurs correctly after Day 7",
   ],
 
-  "FTUE 25 – Friends & Hitwicket TV": [
+  "Friends": [
     "Send Request CTA functional",
     "Add Friend CTA functional",
     "Invite CTA functional",
     "Received invitations visible",
     "Hitwicket ID displays correctly",
-    "Hitwicket TV Watch CTA works",
+  ],
+
+  "Hitwicket TV": [
+    "Watch CTA works",
     "'i' Button shows match details",
     "Live user count displays",
     "Back button functional",
@@ -1349,125 +1593,86 @@ const QA_CHECKLIST = {
     "Page scrollable",
     "YC matches filter works",
     "PvP matches filter works",
-    "Friendly matches filter works",
-    "Alliance matches filter works",
+    "Friendly Battle matches filter works",
+    "Alliance Members matches filter works",
   ],
 
-  "FTUE 26 – Settings": [
-    "Sound toggle persists",
-    "Music toggle persists",
-    "Vibration toggle persists",
-    "PvP Voice Chat toggle persists",
+  "Settings – Audio & Quality": [
+    "Sound toggle persists after toggle",
+    "Music toggle persists after toggle",
+    "Vibration toggle persists after toggle",
+    "PvP Voice Chat toggle persists after toggle",
     "Quality Low selectable",
     "Quality Medium selectable",
     "Quality High selectable",
     "60 FPS toggle functional",
+  ],
+
+  "Settings – Connect & Social HC": [
     "Google Play connect works",
     "Facebook connect works",
     "WhatsApp connect works",
-    "HC credited on social connect",
-    "FAQ sections expandable",
-    "Rate Us opens store review",
-    "Submit CTA functional",
-    "Close CTA functional",
+    "HC credited on Facebook social connect",
+    "HC credited on Instagram social connect",
+    "HC credited on Twitter social connect",
+    "HC credited on YouTube social connect",
+    "HC credited on Discord social connect",
     "Harsha popup appears on WhatsApp connect",
-    "Connect CTA completes linking",
+    "Connect CTA completes WhatsApp linking",
+    "Close CTA dismisses WhatsApp connect popup",
   ],
 
-  "FTUE 27 – Final Dashboard HUD": [
+  "Settings – Support & Rate Us": [
+    "FAQ sections expandable",
+    "Facing Issue — Help and Support opens",
+    "Help and Support — Payments section accessible",
+    "Help and Support — Other Issues section accessible",
+    "Rate Us opens store review page",
+    "Rate Us — Submit CTA functional",
+    "Rate Us — Close CTA functional",
+  ],
+
+  "HUD – Dashboard Elements": [
     "Energy balance displays correctly",
     "Energy refill with HC works",
-    "Get Elite Pass CTA functional",
+    "Get Elite Pass CTA functional from Energy HUD",
     "Training Points count accurate",
-    "Hitcoins balance updates on transactions",
-    "Player (Huddle) tap opens Detail screen",
-    "Trophy Road shows trophy count",
-    "Trophy Road shows next rewards",
-    "Trophy Road progression bar accurate",
-    "PvP Road shows rep points",
-    "PvP Road shows rep rank",
-    "PvP Road redirects to PvP page",
-    "Huddle functional/Visible on dashboard",
-    "Tapping Offers icon opens respective offer popup",
-    "SP player on dashboard and accessible after MRP 10",
-    "Tapping Unlock Now redirects to SP Page",
+    "Hitcoins balance updates on all transactions",
+    "Hitcoins tap redirects to Store",
+    "Huddle visible on dashboard",
+    "Tapping any player in Huddle opens their Player Detail screen",
+    "Player landing animation in Huddle triggers on game open",
+    "Huddle player scroll shows SP player or EPB player correctly",
   ],
 
-  "FTUE 27 – MRP Progression Unlocks": [
+  "Trophy Road": [
+    "Trophy Road visible on dashboard",
+    "Trophy count displays correctly",
+    "Next reward shown on Trophy Road",
+    "Progression bar accurate",
+    "Trophy Road redirect works correctly",
+    "Trophy Road rewards claimable",
+  ],
+
+  "PvP Road": [
+    "PvP Road visible on dashboard",
+    "Rep points display correctly",
+    "Rep rank displays correctly",
+    "Next reward shown on PvP Road",
+    "Total Rep Points visible",
+    "PvP Road redirects to PvP page correctly",
+  ],
+
+  "MRP Progression Unlocks": [
     "PvP unlocks at MRP 3",
-    "SP/Alliance/Co-op/WC Scout unlock at MRP 5",
-    "Auction/YC/Hitwicket TV unlock at MRP 6",
-    "League Arenas/PvP Mania unlock at MRP 7",
+    "SP / Alliance / Co-op / WC Scout unlock at MRP 5",
+    "Auction / YC / Hitwicket TV unlock at MRP 6",
+    "League Arenas / PvP Mania unlock at MRP 7",
     "Star-Up unlocks at MRP 9",
+    "SP player on dashboard accessible after MRP 10",
     "Training Nets 2 unlocks at MRP 18",
   ],
 
-  // ── DOC 2: App Launch Sheet ────────────────────────────────
-
-  "App Launch – App Icon & PLAY CTA": [
-    "App Icon is accurate and there is no spacing or sizing issues",
-    "PLAY CTA has the breathing & shine animation",
-    "PLAY CTA is clickable",
-    "Addressables/Assets are downloaded on loading screen (Post clicking on PLAY to login into an old user account)",
-  ],
-
-  "App Launch – Login Methods": [
-    "Login methods: Google play/Apple ID/Game center",
-    "Login methods: Facebook",
-    "Login methods: Hitwicket ID",
-    "Login methods: Whatsapp",
-    "Login methods: Recover Account through Recover account popup",
-    "Login methods: Recover Account through 'Recover account' CTA",
-    "Contact us - Redirection outside of Game",
-    "Install the Release build on top of the current PlayStore/Live build",
-  ],
-
-  "App Launch – Dashboard Elements": [
-    "Daily PvP wins tooltip on PLAY CTA",
-    "Inbox accessible",
-    "Reward from in-game mail and reward validation from admin panel",
-    "Energy Buy",
-    "TP tooltip",
-    "HC buy redirection to store",
-    "Huddle player scroll with SP player or EPB player check CTA",
-    "Clicking on any player in huddle redirects to player details page of that exact player",
-    "Player landing animation in huddle after game open triggers",
-    "Play CTA functional",
-    "Small event CTA available above event banners",
-  ],
-
-  "App Launch – Manager Profile": [
-    "Manager Profile is surfaced at the top left of the dashboard",
-    "Change Team/City/User Name functional",
-    "UI elements: Level UI, Badges, Trophies",
-    "Stats: Total Matches played, Win rate, Trophies, Player scouted",
-    "Badges: Check all the owned badges",
-    "Tooltips appearing after clicking on Badges",
-    "Trophies: Check all the owned Trophies",
-    "MRP LVL and XP values matching the same in admin panel",
-    "League: display current league, Alliance name, PVP Reputation rank (match their respective feature lobby)",
-    "Check values of team OVR, Batting and Bowling power match in dashboard",
-    "Lineup: player card rarity matches owned player, Lineup matches actual one",
-  ],
-
-  "App Launch – Global Feed": [
-    "All type of messages can be sent in Global Feed",
-    "Join Discord CTA functional in Global Feed",
-  ],
-
-  "App Launch – Offer Icon on Dashboard": [
-    "Offer Image, timer, price, Close all functional",
-  ],
-
-  "App Launch – Get Players": [
-    "Check All CTA (EPB, SPB, PB, Player scout) and images",
-    "Hitcoins HUD at top right section of the screen",
-    "'i' button shows respective player image and pity counters for EPB, SPB, PB and Player Scout",
-    "Medium card opening after tapping on the background for all EPB & SPB",
-    "Scout each one of the boxes and check counter & shards quantity matches Store",
-    "Ticker counter appearing at bottom part of screen (for EPB, SPB & PB but NOT for Player scout)",
-    "Scout players (Reliable, Brilliant and Worldclass) from Player Scout and check updated value matches Get Players and Store",
-  ],
 };
 
 // All checklist items flat
@@ -1482,27 +1687,6 @@ function populateChips() {
   container.innerHTML = sample.map(({ item }) => 
     `<span class="checklist-chip">${item.length > 45 ? item.substring(0, 43) + '…' : item}</span>`
   ).join('') + `<span class="checklist-chip" style="color: var(--accent2);">+${ALL_ITEMS.length - 80} more items</span>`;
-}
-
-populateChips();
-
-// Tag click
-function tagClick(el) {
-  document.querySelectorAll('.feature-tag').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  const current = document.getElementById('changeDesc').value;
-  if (!current.includes(el.dataset.val)) {
-    if (current) document.getElementById('changeDesc').value = current + '\n\nFeature area: ' + el.dataset.val;
-    else document.getElementById('changeDesc').value = 'Feature area: ' + el.dataset.val;
-  }
-}
-
-// Toggle API key visibility
-function toggleKey() {
-  const inp = document.getElementById('apiKey');
-  const btn = event.target;
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Hide'; }
-  else { inp.type = 'password'; btn.textContent = 'Show'; }
 }
 
 // Loading steps animation
@@ -1521,125 +1705,6 @@ function startLoadingSteps() {
 
 function stopLoadingSteps() {
   if (stepInterval) clearInterval(stepInterval);
-}
-
-// Main analyze function
-async function analyze() {
-  const apiKey = document.getElementById('apiKey').value.trim();
-  const changeDesc = document.getElementById('changeDesc').value.trim();
-  const changeType = document.getElementById('changeType').value;
-
-  if (!apiKey) { showError('Please enter your Anthropic API key first.'); return; }
-  if (!changeDesc) { showError('Please describe what was changed.'); return; }
-
-  // Show results panel in loading state
-  const resultsPanel = document.getElementById('resultsPanel');
-  resultsPanel.classList.add('visible');
-  document.getElementById('loadingState').classList.add('visible');
-  document.getElementById('errorState').classList.remove('visible');
-  document.getElementById('summaryBar').style.display = 'none';
-  document.getElementById('impactGrid').innerHTML = '';
-  document.getElementById('testCasesContainer').innerHTML = '';
-  document.getElementById('analyzeBtn').disabled = true;
-
-  startLoadingSteps();
-
-  // Scroll to results
-  setTimeout(() => resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-
-  // Build prompt
-  const checklistText = Object.entries(QA_CHECKLIST).map(([cat, items]) => 
-    `## ${cat}\n${items.map((item, i) => `${i+1}. ${item}`).join('\n')}`
-  ).join('\n\n');
-
-  const prompt = `You are a senior QA engineer and mobile game expert. A developer made a change to the game and you need to analyze what could break.
-
-## Change Information
-- Type: ${changeType}
-- Description: ${changeDesc}
-
-## Full QA Checklist (350+ items across all features)
-${checklistText}
-
-## Your Task
-Analyze this change and return a JSON object with EXACTLY this structure:
-
-{
-  "summary": "2-3 sentence executive summary of the risk",
-  "impact_areas": [
-    {
-      "title": "Area name",
-      "severity": "critical|high|medium|low",
-      "items": ["specific risk item 1", "specific risk item 2", "...up to 6 items"]
-    }
-  ],
-  "specific_test_cases": [
-    "Exact checklist item that must be re-tested: specific concern",
-    "...up to 15 items"
-  ],
-  "edge_cases": [
-    "Edge case scenario 1",
-    "Edge case scenario 2",
-    "...up to 8 items"
-  ],
-  "downstream_risks": [
-    "Feature that could be indirectly affected and why",
-    "...up to 5 items"
-  ],
-  "regression_priority": "HIGH|MEDIUM|LOW",
-  "recommendation": "1-2 sentence testing recommendation"
-}
-
-Rules:
-- Be SPECIFIC to the change described, not generic
-- Reference actual checklist items by name when possible
-- Consider FTUE flows, match flows, UI states, animation triggers, state persistence
-- Think about: offline/online transitions, currency deductions, animation triggers, dialogue sequences, button states, popup flows
-- severity "critical" = could block release, "high" = likely regression, "medium" = possible edge case, "low" = minor watch item
-- Return ONLY valid JSON, no markdown, no explanation`;
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    stopLoadingSteps();
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      showError(`API error ${response.status}: ${err.error?.message || 'Check your API key and try again.'}`);
-      return;
-    }
-
-    const data = await response.json();
-    const text = data.content?.map(c => c.text || '').join('') || '';
-
-    let result;
-    try {
-      const clean = text.replace(/```json|```/g, '').trim();
-      result = JSON.parse(clean);
-    } catch (e) {
-      showError('Could not parse AI response. Please try again.');
-      return;
-    }
-
-    renderResults(result);
-
-  } catch (e) {
-    stopLoadingSteps();
-    showError(`Network error: ${e.message}. Make sure you have a valid API key.`);
-  }
 }
 
 function showError(msg) {
@@ -1807,6 +1872,103 @@ function renderResults(result) {
   });
 
   resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── ANALYZE — calls proxy, never Anthropic directly ─────────
+async function analyze() {
+  if (!_sessionToken) { alert('Please unlock first.'); return; }
+
+  const changeDesc = document.getElementById('changeDesc').value.trim();
+  const changeType = document.getElementById('changeType').value;
+  if (!changeDesc) { showError('Please describe what was changed.'); return; }
+
+  const resultsPanel = document.getElementById('resultsPanel');
+  resultsPanel.classList.add('visible');
+  document.getElementById('loadingState').classList.add('visible');
+  document.getElementById('errorState').classList.remove('visible');
+  document.getElementById('summaryBar').style.display = 'none';
+  document.getElementById('impactGrid').innerHTML = '';
+  document.getElementById('testCasesContainer').innerHTML = '';
+  document.getElementById('analyzeBtn').disabled = true;
+  startLoadingSteps();
+  setTimeout(() => resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+  const checklistText = Object.entries(QA_CHECKLIST).map(([cat, items]) =>
+    `## ${cat}\n${items.map((item, i) => `${i+1}. ${item}`).join('\n')}`
+  ).join('\n\n');
+
+  const prompt = `You are a senior QA engineer and mobile game expert. A developer made a change to the game and you need to analyze what could break.
+
+## Change Information
+- Type: ${changeType}
+- Description: ${changeDesc}
+
+## Full QA Checklist (548 items across 54 feature sections)
+${checklistText}
+
+## Your Task
+Analyze this change and return a JSON object with EXACTLY this structure:
+
+{
+  "summary": "2-3 sentence executive summary of the risk",
+  "impact_areas": [
+    {
+      "title": "Area name",
+      "severity": "critical|high|medium|low",
+      "items": ["specific risk item 1", "specific risk item 2"]
+    }
+  ],
+  "specific_test_cases": ["Exact checklist item: specific concern"],
+  "edge_cases": ["Edge case scenario"],
+  "downstream_risks": ["Feature that could be indirectly affected and why"],
+  "regression_priority": "HIGH|MEDIUM|LOW",
+  "recommendation": "1-2 sentence testing recommendation"
+}
+
+Rules:
+- Be SPECIFIC to the change described, not generic
+- Reference actual checklist items by name when possible
+- Consider FTUE flows, match flows, UI states, animation triggers, state persistence, currency deductions, dialogue sequences, button states, popup flows
+- severity "critical" = could block release, "high" = likely regression, "medium" = possible edge case, "low" = minor watch item
+- Return ONLY valid JSON, no markdown, no explanation`;
+
+  try {
+    const res = await fetch(`${WORKER_URL}/api/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-token': _sessionToken
+      },
+      body: JSON.stringify({ prompt })
+    });
+
+    stopLoadingSteps();
+
+    if (res.status === 401) {
+      showError('Session expired. Please refresh and log in again.');
+      return;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      showError(`Error ${res.status}: ${err.error || 'Something went wrong'}`);
+      return;
+    }
+
+    const data = await res.json();
+    const text = (data.content || []).map(c => c.text || '').join('');
+    let result;
+    try {
+      result = JSON.parse(text.replace(/```json|```/g, '').trim());
+    } catch(e) {
+      showError('Could not parse AI response. Please try again.');
+      return;
+    }
+    renderResults(result);
+
+  } catch(e) {
+    stopLoadingSteps();
+    showError(`Network error: ${e.message}`);
+  }
 }
 </script>
 </body>
