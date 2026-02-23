@@ -896,7 +896,7 @@
 
 <script>
 // ── CONFIG — update this with your Cloudflare Worker URL ─────
-const WORKER_URL = 'https://YOUR-WORKER-NAME.YOUR-CF-USERNAME.workers.dev';
+const WORKER_URL = 'https://orange-waterfall-030e.kunal-249.workers.dev';
 // e.g.  'https://qa-blueprint-proxy.johndoe.workers.dev'
 // Get this from Cloudflare dashboard after deploying worker.js
 // ─────────────────────────────────────────────────────────────
@@ -1927,10 +1927,15 @@ Analyze this change and return a JSON object with EXACTLY this structure:
 
 Rules:
 - Be SPECIFIC to the change described, not generic
-- Reference actual checklist items by name when possible
-- Consider FTUE flows, match flows, UI states, animation triggers, state persistence, currency deductions, dialogue sequences, button states, popup flows
+- You MUST return AT LEAST 6 impact_areas — cover direct, indirect, and UI-related risks
+- You MUST return AT LEAST 15 specific_test_cases — copy EXACT wording from the checklist above, add a colon and specific concern after each
+- You MUST return AT LEAST 8 edge_cases — think about: first launch, state after crash, mid-flow interruption, offline mode, new vs returning user, low-end device
+- You MUST return AT LEAST 5 downstream_risks — think about what other features read from or depend on the changed area
+- Each impact_area must have AT LEAST 3 items in its items array
+- Reference EXACT checklist section names and item wording when listing specific_test_cases
+- Consider ALL of: FTUE flows, match flows, UI states, animation triggers, state persistence, currency deductions, dialogue sequences, button states, popup flows, HUD elements, reward claimability, navigation flows, lock/unlock states, back button behaviour
 - severity "critical" = could block release, "high" = likely regression, "medium" = possible edge case, "low" = minor watch item
-- Return ONLY valid JSON, no markdown, no explanation`;
+- Return ONLY valid JSON, no markdown, no preamble, no explanation outside the JSON`;
 
   try {
     const res = await fetch(`${WORKER_URL}/api/analyze`, {
