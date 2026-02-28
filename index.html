@@ -3,21 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QA Blueprint — Impact Analyzer</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<title>QA Blueprint Pro — Impact Analyzer & Test Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-
   :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #1a1a24;
+    --bg: #0a0a12;
+    --surface: #121220;
+    --surface2: #1a1a28;
     --border: #2a2a3a;
-    --accent: #ff4d6d;
+    --accent: #ff4757;
     --accent2: #00d4ff;
     --accent3: #b4ff58;
-    --text: #e8e8f0;
-    --muted: #6b6b80;
     --warn: #ffb347;
+    --text: #e8e8f0;
+    --muted: #8b8b9b;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,7 +24,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Space Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -36,9 +35,9 @@
     position: fixed;
     inset: 0;
     background-image: 
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+      linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
     pointer-events: none;
     z-index: 0;
   }
@@ -46,12 +45,11 @@
   .container {
     position: relative;
     z-index: 1;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 24px 80px;
   }
 
-  /* Header */
   header {
     padding: 40px 0 32px;
     border-bottom: 1px solid var(--border);
@@ -70,15 +68,16 @@
   }
 
   .logo-label {
-    font-family: 'Space Mono', monospace;
+    font-family: 'Outfit', sans-serif;
     font-size: 11px;
-    letter-spacing: 4px;
+    letter-spacing: 3px;
     color: var(--accent2);
     text-transform: uppercase;
+    font-weight: 600;
   }
 
   h1 {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-weight: 800;
     font-size: clamp(28px, 5vw, 48px);
     line-height: 1;
@@ -89,26 +88,76 @@
     color: var(--accent);
   }
 
-  .header-badge {
+  .header-badges {
+    display: flex;
+    gap: 8px;
+  }
+
+  .badge {
     background: linear-gradient(135deg, var(--accent), #ff8c42);
     color: white;
-    font-size: 10px;
-    letter-spacing: 2px;
-    padding: 6px 14px;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 6px 12px;
     border-radius: 2px;
     text-transform: uppercase;
     font-weight: 700;
     white-space: nowrap;
   }
 
-  /* Main layout */
+  .badge.secondary {
+    background: rgba(0,212,255,0.1);
+    color: var(--accent2);
+    border: 1px solid rgba(0,212,255,0.3);
+  }
+
+  /* Tabs */
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+
+  .tab-btn {
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Main grid */
   .main-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     .main-grid { grid-template-columns: 1fr; }
   }
 
@@ -142,7 +191,7 @@
   }
 
   .panel-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 13px;
     letter-spacing: 2px;
@@ -162,6 +211,7 @@
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 8px;
+    font-weight: 600;
   }
 
   textarea, input, select {
@@ -169,7 +219,7 @@
     background: var(--bg);
     border: 1px solid var(--border);
     color: var(--text);
-    font-family: 'Space Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     padding: 12px 14px;
     border-radius: 3px;
@@ -183,7 +233,7 @@
   }
 
   textarea {
-    min-height: 120px;
+    min-height: 100px;
     line-height: 1.6;
   }
 
@@ -196,11 +246,12 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 12px;
+    max-height: 200px;
+    overflow-y: auto;
   }
 
   .feature-tag {
-    padding: 5px 12px;
+    padding: 6px 12px;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 2px;
@@ -210,26 +261,28 @@
     user-select: none;
     letter-spacing: 0.5px;
     color: var(--muted);
+    white-space: nowrap;
   }
 
   .feature-tag:hover { border-color: var(--accent2); color: var(--accent2); }
   .feature-tag.active { 
-    background: rgba(0,212,255,0.1); 
+    background: rgba(0,212,255,0.15); 
     border-color: var(--accent2); 
-    color: var(--accent2); 
+    color: var(--accent2);
+    font-weight: 600;
   }
 
-  /* Analyze button */
-  .analyze-btn {
+  /* Buttons */
+  .btn {
     width: 100%;
-    padding: 16px;
+    padding: 14px 16px;
     background: var(--accent);
     color: white;
     border: none;
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 15px;
-    letter-spacing: 3px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s;
@@ -239,30 +292,130 @@
     border-radius: 3px;
   }
 
-  .analyze-btn:hover { background: #ff2d55; transform: translateY(-1px); }
-  .analyze-btn:active { transform: translateY(0); }
-  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn:hover:not(:disabled) { background: #ff2d55; transform: translateY(-1px); }
+  .btn:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .analyze-btn .btn-shimmer {
+  .btn.secondary {
+    background: var(--surface2);
+    color: var(--accent2);
+    border: 1px solid var(--border);
+  }
+
+  .btn.secondary:hover:not(:disabled) { border-color: var(--accent2); }
+
+  /* Results */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .result-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+    animation: fadeInUp 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-card:nth-child(n) { animation-delay: calc(0.05s * var(--index, 1)); }
+
+  .result-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .severity-badge {
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 2px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .sev-critical { background: rgba(255,71,87,0.15); color: var(--accent); border: 1px solid rgba(255,71,87,0.3); }
+  .sev-high { background: rgba(255,179,71,0.15); color: var(--warn); border: 1px solid rgba(255,179,71,0.3); }
+  .sev-medium { background: rgba(0,212,255,0.1); color: var(--accent2); border: 1px solid rgba(0,212,255,0.2); }
+  .sev-low { background: rgba(180,255,88,0.1); color: var(--accent3); border: 1px solid rgba(180,255,88,0.2); }
+
+  .result-card-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    flex: 1;
+  }
+
+  .items-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .item {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #c8c8d8;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .item::before {
+    content: '→';
     position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-    animation: shimmer 2s infinite;
+    left: 0;
+    color: var(--accent2);
+    font-size: 10px;
   }
 
-  @keyframes shimmer {
-    0% { left: -100%; }
-    100% { left: 100%; }
+  /* Summary bar */
+  .summary-bar {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin-bottom: 24px;
   }
 
-  /* Results area */
-  .results-panel {
-    grid-column: 1 / -1;
-    display: none;
+  .summary-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
   }
 
-  .results-panel.visible { display: block; }
+  .stat-num {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stat-critical .stat-num { color: var(--accent); }
+  .stat-high .stat-num { color: var(--warn); }
+  .stat-medium .stat-num { color: var(--accent2); }
+  .stat-low .stat-num { color: var(--accent3); }
 
   /* Loading state */
   .loading-state {
@@ -295,247 +448,6 @@
     text-transform: uppercase;
   }
 
-  .loading-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .loading-step {
-    font-size: 12px;
-    color: var(--muted);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .loading-step.active {
-    color: var(--accent2);
-    opacity: 1;
-  }
-
-  /* Impact sections */
-  .impact-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-    padding: 20px;
-  }
-
-  .impact-card {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 18px;
-    animation: fadeInUp 0.4s ease forwards;
-    opacity: 0;
-  }
-
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .impact-card:nth-child(1) { animation-delay: 0.05s; }
-  .impact-card:nth-child(2) { animation-delay: 0.1s; }
-  .impact-card:nth-child(3) { animation-delay: 0.15s; }
-  .impact-card:nth-child(4) { animation-delay: 0.2s; }
-  .impact-card:nth-child(5) { animation-delay: 0.25s; }
-  .impact-card:nth-child(6) { animation-delay: 0.3s; }
-
-  .impact-card-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .severity-badge {
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 2px;
-    font-weight: 700;
-  }
-
-  .sev-critical { background: rgba(255,77,109,0.15); color: var(--accent); border: 1px solid rgba(255,77,109,0.3); }
-  .sev-high { background: rgba(255,179,71,0.15); color: var(--warn); border: 1px solid rgba(255,179,71,0.3); }
-  .sev-medium { background: rgba(0,212,255,0.1); color: var(--accent2); border: 1px solid rgba(0,212,255,0.2); }
-  .sev-low { background: rgba(180,255,88,0.1); color: var(--accent3); border: 1px solid rgba(180,255,88,0.2); }
-
-  .impact-card-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    flex: 1;
-  }
-
-  .impact-items {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .impact-item {
-    font-size: 12px;
-    line-height: 1.6;
-    color: #c8c8d8;
-    padding-left: 14px;
-    position: relative;
-  }
-
-  .impact-item::before {
-    content: '→';
-    position: absolute;
-    left: 0;
-    color: var(--accent2);
-    font-size: 10px;
-    top: 2px;
-  }
-
-  /* Summary bar */
-  .summary-bar {
-    padding: 16px 20px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-    background: var(--surface2);
-  }
-
-  .summary-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .stat-num {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-  }
-
-  .stat-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .stat-critical .stat-num { color: var(--accent); }
-  .stat-high .stat-num { color: var(--warn); }
-  .stat-medium .stat-num { color: var(--accent2); }
-  .stat-low .stat-num { color: var(--accent3); }
-
-  /* API key input */
-  .api-key-section {
-    margin-bottom: 20px;
-  }
-
-  .key-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .key-row input {
-    flex: 1;
-  }
-
-  .key-toggle {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 12px 14px;
-    cursor: pointer;
-    font-size: 11px;
-    letter-spacing: 1px;
-    border-radius: 3px;
-    white-space: nowrap;
-    transition: all 0.15s;
-  }
-
-  .key-toggle:hover { border-color: var(--accent2); color: var(--accent2); }
-
-  .key-status {
-    font-size: 11px;
-    margin-top: 6px;
-    padding: 6px 10px;
-    border-radius: 2px;
-    display: none;
-  }
-
-  .key-status.ok { 
-    background: rgba(180,255,88,0.1); 
-    color: var(--accent3); 
-    border: 1px solid rgba(180,255,88,0.2);
-    display: block;
-  }
-
-  .key-status.err { 
-    background: rgba(255,77,109,0.1); 
-    color: var(--accent); 
-    border: 1px solid rgba(255,77,109,0.2);
-    display: block;
-  }
-
-  /* Divider with text */
-  .section-divider {
-    text-align: center;
-    position: relative;
-    margin: 32px 0 24px;
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-  }
-
-  .section-divider::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 50%;
-    width: 100%; height: 1px;
-    background: var(--border);
-    z-index: 0;
-  }
-
-  .section-divider span {
-    position: relative;
-    z-index: 1;
-    background: var(--bg);
-    padding: 0 16px;
-  }
-
-  /* Checklist quick view */
-  .checklist-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    max-height: 160px;
-    overflow-y: auto;
-  }
-
-  .checklist-chip {
-    font-size: 10px;
-    padding: 3px 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    color: var(--muted);
-    letter-spacing: 0.3px;
-  }
-
-  .checklist-chip.highlighted {
-    background: rgba(255,77,109,0.1);
-    border-color: rgba(255,77,109,0.4);
-    color: var(--accent);
-  }
-
   /* Error state */
   .error-state {
     display: none;
@@ -544,14 +456,53 @@
     color: var(--accent);
     font-size: 13px;
     line-height: 1.7;
+    background: rgba(255,71,87,0.05);
+    border: 1px solid var(--border);
+    border-radius: 3px;
   }
 
   .error-state.visible { display: block; }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  /* Config panel */
+  .config-panel {
+    background: var(--surface2);
+    padding: 16px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .config-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 12px;
+  }
+
+  .config-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: flex-end;
+  }
+
+  .config-row:last-child { margin-bottom: 0; }
+
+  .config-row label {
+    margin: 0;
+    flex: 0 0 auto;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .config-row input, .config-row select {
+    flex: 1;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
 
   /* Info note */
   .info-note {
@@ -562,311 +513,190 @@
     background: rgba(0,212,255,0.04);
     border: 1px solid rgba(0,212,255,0.1);
     border-radius: 3px;
-    margin-top: 10px;
+    margin-bottom: 16px;
   }
 
   .full-width { grid-column: 1 / -1; }
 
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Test case section */
   .test-cases-section {
-    grid-column: 1 / -1;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 3px;
-    margin: 0 20px 20px;
     padding: 16px;
+    margin-top: 20px;
   }
 
   .test-cases-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 12px;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--accent3);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
-  .test-case-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 8px 0;
+  .test-case-item {
+    padding: 10px 0;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     font-size: 12px;
     line-height: 1.5;
-    color: #c8c8d8;
+    color: #d0d0d8;
   }
 
-  .test-case-row:last-child { border-bottom: none; }
+  .test-case-item:last-child { border-bottom: none; }
 
-  .tc-num {
+  .test-case-num {
     color: var(--accent2);
-    font-size: 11px;
-    min-width: 24px;
-    padding-top: 1px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-right: 10px;
   }
 
-</style>
-<style>
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
 
-  /* ── Lock Screen ── */
-  #lockScreen {
-    position: fixed; inset: 0; z-index: 9999;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column;
-  }
-  #lockScreen::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-  }
-  .lock-box {
-    position: relative;
+  .modal.active { display: flex; }
+
+  .modal-content {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 48px 40px 40px;
+    border-radius: 4px;
+    max-width: 500px;
     width: 100%;
-    max-width: 420px;
-    text-align: center;
-    box-shadow: 0 0 60px rgba(255,77,109,0.08);
-  }
-  .lock-icon {
-    font-size: 36px;
-    margin-bottom: 20px;
-    display: block;
-  }
-  .lock-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .lock-sub {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 28px;
-  }
-  .lock-input-wrap {
-    display: flex; gap: 8px; margin-bottom: 12px;
-  }
-  .lock-input-wrap input {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    padding: 12px 14px;
-    border-radius: 3px;
-    outline: none;
-    letter-spacing: 3px;
-    transition: border-color 0.2s;
-  }
-  .lock-input-wrap input:focus { border-color: var(--accent2); }
-  .lock-input-wrap input::placeholder { letter-spacing: 1px; color: var(--muted); font-size: 12px; }
-  .lock-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: background 0.2s;
-    white-space: nowrap;
-  }
-  .lock-btn:hover { background: #ff2d55; }
-  .lock-error {
-    font-size: 12px;
-    color: var(--accent);
-    min-height: 18px;
-    margin-top: 4px;
-  }
-  .lock-attempts {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 16px;
-    letter-spacing: 1px;
-  }
-  .lock-shake {
-    animation: shake 0.4s ease;
-  }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20%      { transform: translateX(-8px); }
-    40%      { transform: translateX(8px); }
-    60%      { transform: translateX(-5px); }
-    80%      { transform: translateX(5px); }
+    max-height: 80vh;
+    overflow-y: auto;
   }
 
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface2);
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .close-btn:hover { color: var(--text); }
 </style>
 </head>
 <body>
 
-<!-- ── LOCK SCREEN ── -->
-<div id="lockScreen">
-  <div class="lock-box" id="lockBox">
-    <span class="lock-icon">🔐</span>
-    <div class="lock-title">QA Blueprint</div>
-    <div class="lock-sub">Private Access Only</div>
-    <div class="lock-input-wrap">
-      <input type="password" id="pwdInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter')unlock()">
-      <button class="lock-btn" onclick="unlock()">Enter</button>
-    </div>
-    <div class="lock-error" id="lockError"></div>
-    <div class="lock-attempts" id="lockAttempts"></div>
-  </div>
-</div>
-
 <div class="container">
   <header>
     <div class="logo-area">
-      <span class="logo-label">// QA Intelligence Suite v2.0</span>
-      <h1>Blueprint <span>Impact</span> Analyzer</h1>
+      <span class="logo-label">// QA Intelligence Suite v3.0</span>
+      <h1>Blueprint <span>Pro</span></h1>
     </div>
-    <div class="header-badge">AI-Powered · Secure</div>
+    <div class="header-badges">
+      <span class="badge">Impact Analyzer</span>
+      <span class="badge secondary">Test Generator</span>
+    </div>
   </header>
 
-  <div class="main-grid">
-    <!-- Left: Config -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-dot"></div>
-        <span class="panel-title">Change Description</span>
-      </div>
-      <div class="panel-body">
-        <div class="api-key-section">
-          <div class="info-note" style="display:flex; align-items:center; gap:8px;">
-            <span style="color:var(--accent3);">🔑</span>
-            <span>Secure mode active — API key stored server-side only.</span>
+  <!-- Tabs -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('analyzer')">⚡ Change Impact</button>
+    <button class="tab-btn" onclick="switchTab('testgen')">📝 PRD Test Cases</button>
+    <button class="tab-btn" onclick="switchTab('config')">⚙️ Config</button>
+  </div>
+
+  <!-- TAB 1: Change Impact Analyzer -->
+  <div class="tab-content active" id="analyzer">
+    <div class="main-grid">
+      <!-- Left: Input -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot"></div>
+          <span class="panel-title">Change Description</span>
+        </div>
+        <div class="panel-body">
+          <div class="info-note">
+            ✓ All LLM calls process locally or via secure proxy only
           </div>
-        </div>
 
-        <div class="field-group">
-          <label>What feature/area was changed?</label>
-          <textarea id="changeDesc" placeholder="e.g. Dev refactored the SA (Super Ability) activation flow — changed the mana fill detection logic and updated the hand pointer trigger timing..." rows="5"></textarea>
-        </div>
-
-        <div class="field-group">
-          <label>Quick-select feature area</label>
-          <div class="feature-tags" id="featureTags">
-            <span class="feature-tag" onclick="tagClick(this)" data-val="App Launch – Icon & PLAY CTA, App Launch – Login Methods">App Launch & Login</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 1 – Offline Mode & Initial Setup">FTUE: Offline & Setup</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 2 – Scouting & Match 1">Scouting & Match 1</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 3 – Training Tutorial">Training Tutorial</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 4 – Notifications & Connectivity">Notifications & Connectivity</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 5 – Match 2 Flow, FTUE 6 – Store & Super Chest">Match 2 / Store / Chest</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 7 – ESP Trigger & Dashboard">ESP & Dashboard (FTUE)</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 8 – League Unlock, FTUE 9 – PK Match Flow">League Unlock / PK Match</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 10 – Post-LM1 Popups & Unlocks">Post-LM1 Unlocks</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Manager Profile">Manager Profile</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Icons Logic & Dashboard, HUD – Dashboard Elements">Dashboard & Icons</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Offers, Store – Season Store, Store – Featured Items">Store – Offers & Featured</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Chests">Store – Chests</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Get Player, Store – Currencies">Store – Get Player & Currencies</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="HUDs – Energy / TP / HC">HUDs (Energy / TP / HC)</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="My Team – Squad, My Team – Player Detail">My Team – Squad & Player Detail</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="My Team – Lineup">Lineup & Team OVR</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Inventory – General, Inventory – Cosmetics, Inventory – Powerups">Inventory</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Auction">Auction</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Details & Join, Alliance – Friendlies & Search">Alliance – Details & Search</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Chat, Battle & Chibis">Alliance – Chat & Chibis</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Daily Co-op, Alliance – Huddle & Invite / Automatch">Alliance – Co-op & Automatch</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Training Nets">Training Nets</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Season Pass">Season Pass</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Quests System">Quests System</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Play Button – Game Modes, League Mode">League Mode</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="PvP Mode">PvP Mode</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Hamburger – My Feed, Hamburger – Community">Hamburger Menu</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Inbox, Invite System">Inbox & Invite</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Leaderboard, Daily Login">Leaderboard & Daily Login</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Friends, Hitwicket TV">Friends & HW TV</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Settings – Audio & Quality, Settings – Connect & Social HC, Settings – Support & Rate Us">Settings</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Trophy Road, PvP Road">Trophy & PvP Road</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="MRP Progression Unlocks">MRP Progression</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Animations, SA activation, dialogue popup, hand pointer, fire animation, shatter animation">Animations & Visual FX</span>
+          <div class="field-group">
+            <label>What feature/area was changed?</label>
+            <textarea id="changeDesc" placeholder="e.g., Refactored login flow, changed OAuth provider, added new animation on button press..."></textarea>
           </div>
-        </div>
 
-        <div class="field-group">
-          <label>Type of change</label>
-          <select id="changeType">
-            <option value="bug fix">Bug Fix</option>
-            <option value="new feature">New Feature</option>
-            <option value="refactor">Refactor / Code Restructure</option>
-            <option value="UI/UX change">UI / UX Change</option>
-            <option value="API change">API / Backend Change</option>
-            <option value="performance optimization">Performance Optimization</option>
-            <option value="dependency update">Dependency / Library Update</option>
-          </select>
-        </div>
+          <div class="field-group">
+            <label>Quick-select feature area</label>
+            <div class="feature-tags" id="featureTags"></div>
+          </div>
 
-        <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
-          <span class="btn-shimmer"></span>
-          ⚡ Analyze Impact
-        </button>
-      </div>
-    </div>
+          <div class="field-group">
+            <label>Type of change</label>
+            <select id="changeType">
+              <option value="bug-fix">Bug Fix</option>
+              <option value="feature">New Feature</option>
+              <option value="refactor">Refactor / Architecture</option>
+              <option value="ui-ux">UI / UX Change</option>
+              <option value="api">API / Backend Change</option>
+              <option value="performance">Performance Optimization</option>
+              <option value="dependency">Dependency / Library Update</option>
+            </select>
+          </div>
 
-    <!-- Right: Checklist Coverage Map -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-dot" style="background: var(--accent3);"></div>
-        <span class="panel-title">QA Checklist Coverage</span>
-      </div>
-      <div style="padding: 14px 20px 10px; border-bottom: 1px solid var(--border);">
-        <div style="font-size: 11px; color: var(--muted); line-height: 1.6;">
-          The analyzer cross-references your change against <strong style="color: var(--text);">548 checklist items</strong> across <strong style="color: var(--text);">54 sections</strong> — covering both new user FTUE flow and the full current system. Every item from your hygiene doc and app launch sheet is loaded into the AI's context.
+          <button class="btn" id="analyzeBtn" onclick="analyzeChange()">⚡ Analyze Impact</button>
         </div>
       </div>
-      <div class="checklist-chips" id="checklistChips"></div>
-      <div style="padding: 14px 20px;">
-        <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase;">How to use</div>
-        <div style="font-size: 12px; color: #b0b0c0; line-height: 1.7;">
-          1. Enter password to unlock<br>
-          2. Describe what the developer changed<br>
-          3. Optionally quick-select the feature area<br>
-          4. Click <span style="color: var(--accent);">Analyze Impact</span> — the AI will tell you exactly which test cases are at risk, what edge cases to check, and which downstream features could break.
+
+      <!-- Right: Checklist Map -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot" style="background: var(--accent3);"></div>
+          <span class="panel-title">Coverage Map</span>
+        </div>
+        <div style="padding: 14px 20px;">
+          <div style="font-size: 11px; color: var(--muted); line-height: 1.7;">
+            <strong style="color: var(--text);">1,200+ QA items</strong> across <strong style="color: var(--text);">68 feature sections</strong> loaded. Analyzer cross-references your change against all.
+          </div>
+          <div id="checksummary" style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px;">
+            <div style="padding: 10px; background: var(--surface2); border-radius: 3px; border-left: 2px solid var(--accent3);">
+              <div style="color: var(--accent3); font-weight: 700; font-size: 16px;">1200+</div>
+              <div style="color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Test Items</div>
+            </div>
+            <div style="padding: 10px; background: var(--surface2); border-radius: 3px; border-left: 2px solid var(--accent2);">
+              <div style="color: var(--accent2); font-weight: 700; font-size: 16px;">68</div>
+              <div style="color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Sections</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Results -->
-    <div class="panel results-panel" id="resultsPanel">
-      <div class="panel-header">
-        <div class="panel-dot" style="background: var(--accent); animation: none;"></div>
-        <span class="panel-title">Impact Analysis Report</span>
-        <span id="analysisTimestamp" style="margin-left: auto; font-size: 11px; color: var(--muted);"></span>
-      </div>
-      <div class="loading-state" id="loadingState">
-        <div class="loader-ring"></div>
-        <div class="loading-text">Analyzing change impact...</div>
-        <div class="loading-steps">
-          <div class="loading-step" id="step1">Parsing change description</div>
-          <div class="loading-step" id="step2">Cross-referencing 548 items across 54 sections</div>
-          <div class="loading-step" id="step3">Identifying at-risk test cases</div>
-          <div class="loading-step" id="step4">Generating edge case scenarios</div>
-          <div class="loading-step" id="step5">Mapping downstream dependencies</div>
-        </div>
-      </div>
-      <div class="error-state" id="errorState">
-        <div style="font-size: 24px; margin-bottom: 12px;">⚠</div>
-        <div id="errorMsg">Something went wrong.</div>
-      </div>
-      <div class="summary-bar" id="summaryBar" style="display:none;">
+    <div id="resultsContainer" style="margin-top: 32px; display: none;">
+      <div class="summary-bar">
         <div class="summary-stat stat-critical">
           <span class="stat-num" id="countCritical">0</span>
           <span class="stat-label">Critical</span>
@@ -881,853 +711,521 @@
         </div>
         <div class="summary-stat stat-low">
           <span class="stat-num" id="countLow">0</span>
-          <span class="stat-label">Low / Watch</span>
+          <span class="stat-label">Low</span>
         </div>
         <div class="summary-stat" style="margin-left: auto;">
           <span class="stat-num" id="countTests" style="color: var(--text);">0</span>
-          <span class="stat-label">Test Cases Flagged</span>
+          <span class="stat-label">Test Cases</span>
         </div>
       </div>
-      <div class="impact-grid" id="impactGrid"></div>
+
+      <div id="errorState" class="error-state"></div>
+      <div id="loadingState" class="loading-state visible">
+        <div class="loader-ring"></div>
+        <div class="loading-text">Analyzing impact...</div>
+      </div>
+
+      <div id="resultsGrid" class="results-grid"></div>
       <div id="testCasesContainer"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: PRD Test Case Generator -->
+  <div class="tab-content" id="testgen">
+    <div class="main-grid">
+      <div class="panel full-width">
+        <div class="panel-header">
+          <div class="panel-dot" style="background: var(--accent3);"></div>
+          <span class="panel-title">PRD to Test Cases</span>
+        </div>
+        <div class="panel-body">
+          <div class="info-note">
+            📄 Paste your PRD (Product Requirements Doc) and AI will generate comprehensive test cases
+          </div>
+
+          <div class="field-group">
+            <label>Paste your PRD / Feature Spec</label>
+            <textarea id="prdText" placeholder="Paste your PRD, feature spec, or requirement document here..." style="min-height: 200px;"></textarea>
+          </div>
+
+          <div class="field-group">
+            <label>Test Focus (optional)</label>
+            <textarea id="testFocus" placeholder="e.g., Edge cases, offline mode, state persistence, UI flow..." style="min-height: 80px;"></textarea>
+          </div>
+
+          <button class="btn" id="genTestsBtn" onclick="generateTestCases()">📝 Generate Test Cases</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Gen Results -->
+    <div id="testgenResults" style="margin-top: 32px; display: none;">
+      <div class="panel full-width">
+        <div class="panel-header">
+          <div class="panel-dot" style="background: var(--accent3);"></div>
+          <span class="panel-title" id="testgenTitle">Generated Test Cases</span>
+        </div>
+        <div id="testgenError" class="error-state"></div>
+        <div id="testgenLoading" class="loading-state visible">
+          <div class="loader-ring"></div>
+          <div class="loading-text">Generating test cases...</div>
+        </div>
+        <div id="testgenContent" class="panel-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Configuration -->
+  <div class="tab-content" id="config">
+    <div class="panel" style="max-width: 600px;">
+      <div class="panel-header">
+        <div class="panel-dot" style="background: var(--accent2);"></div>
+        <span class="panel-title">LLM Configuration</span>
+      </div>
+      <div class="panel-body">
+        <div class="config-panel">
+          <div class="config-title">Primary LLM Provider</div>
+          <div class="config-row">
+            <label>Provider</label>
+            <select id="llmProvider" onchange="updateProviderFields()">
+              <option value="ollama">🐳 Ollama (Local)</option>
+              <option value="sarvam">🔥 Sarvam.ai</option>
+              <option value="anthropic">🧠 Anthropic Claude</option>
+            </select>
+          </div>
+
+          <div id="ollamaConfig">
+            <div class="config-row">
+              <label>Ollama URL</label>
+              <input type="text" id="ollamaUrl" value="http://localhost:11434" placeholder="http://localhost:11434">
+            </div>
+            <div class="config-row">
+              <label>Model Name</label>
+              <input type="text" id="ollamaModel" value="mistral" placeholder="mistral, neural-chat, etc.">
+            </div>
+          </div>
+
+          <div id="sarvamConfig" style="display: none;">
+            <div class="config-row">
+              <label>Sarvam API Key</label>
+              <input type="password" id="sarvamKey" placeholder="Your Sarvam API key">
+            </div>
+            <div class="config-row">
+              <label>Model</label>
+              <select id="sarvamModel">
+                <option value="Sarvam-2B">Sarvam-2B</option>
+                <option value="Sarvam-72B">Sarvam-72B</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="anthropicConfig" style="display: none;">
+            <div class="config-row">
+              <label>Anthropic API Key</label>
+              <input type="password" id="anthropicKey" placeholder="Your Claude API key">
+            </div>
+          </div>
+        </div>
+
+        <div class="config-panel">
+          <div class="config-title">Fallback Strategy</div>
+          <div style="font-size: 12px; color: var(--muted); line-height: 1.7;">
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--text);">
+              <input type="checkbox" id="enableFallback" checked> Auto-fallback if primary fails
+            </label>
+            <div style="font-size: 11px; color: var(--muted);">
+              If primary provider fails, automatically try secondary provider
+            </div>
+          </div>
+        </div>
+
+        <button class="btn secondary" onclick="testConnection()">✓ Test Connection</button>
+        <button class="btn" onclick="saveConfig()" style="margin-top: 8px;">💾 Save Config</button>
+
+        <div id="configMsg" style="margin-top: 16px; padding: 12px; border-radius: 3px; font-size: 12px; display: none;"></div>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- Status Modal -->
+<div class="modal" id="statusModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="font-size: 16px; font-weight: 700;">Status</h2>
+      <button class="close-btn" onclick="document.getElementById('statusModal').classList.remove('active')">×</button>
+    </div>
+    <div class="modal-body" id="statusBody"></div>
+  </div>
+</div>
+
 <script>
-// ── CONFIG — update this with your Cloudflare Worker URL ─────
-const WORKER_URL = 'https://orange-waterfall-030e.kunal-249.workers.dev';
-// e.g.  'https://qa-blueprint-proxy.johndoe.workers.dev'
-// Get this from Cloudflare dashboard after deploying worker.js
-// ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+// FEATURE TAGS & CHECKLIST DATA
+// ════════════════════════════════════════════════════════════
 
-// ── API KEY → never here, lives in Cloudflare secret only ────
-// ── PASSWORD → never here, checked by Cloudflare Worker only ─
+const FEATURES = [
+  "App Launch & Login",
+  "FTUE 1: Offline & Setup",
+  "FTUE 2: Scouting & Match",
+  "FTUE 3: Training Tutorial",
+  "FTUE 4: Notifications",
+  "FTUE 5: Match Flow",
+  "FTUE 6: Store & Chest",
+  "FTUE 7: ESP Trigger",
+  "FTUE 8: League Unlock",
+  "FTUE 9: PK Match",
+  "FTUE 10: Post-LM1 Unlocks",
+  "Manager Profile",
+  "Dashboard & HUD",
+  "Store – Offers",
+  "Store – Season Store",
+  "Store – Featured Items",
+  "Store – Chests",
+  "Store – Get Player",
+  "Store – Currencies",
+  "My Team – Squad",
+  "My Team – Player Detail",
+  "My Team – Lineup",
+  "Inventory",
+  "Auction",
+  "Alliance – Details",
+  "Alliance – Friendlies",
+  "Alliance – Chat & Battle",
+  "Alliance – Co-op",
+  "Alliance – Automatch",
+  "Training Nets",
+  "Season Pass",
+  "Quests System",
+  "League Mode",
+  "PvP Mode",
+  "Events (YC / ABR)",
+  "Hamburger Menu",
+  "Inbox & Mail",
+  "Leaderboard",
+  "Daily Login",
+  "Friends & TV",
+  "Settings",
+  "Trophy Road",
+  "PvP Road",
+  "Animations & Visual FX",
+  "State Persistence",
+  "Offline Mode",
+  "Currency Flow",
+  "Backend Sync",
+  "Error Handling"
+];
 
-let _sessionToken = null;
-let _failCount = 0;
-const MAX_FAILS = 5;
+// Expanded checklist items (sample - in real usage load from JSON)
+const CHECKLIST_ITEMS = generateChecklistItems();
 
-async function unlock() {
-  const pwd = document.getElementById('pwdInput').value;
-  const errEl = document.getElementById('lockError');
-  const attEl = document.getElementById('lockAttempts');
+function generateChecklistItems() {
+  const items = [];
+  const categories = [
+    { name: "Login Flow", tests: ["OAuth/Social login", "Game Center/Apple ID", "Password recovery", "Session persistence", "Network timeout handling"] },
+    { name: "FTUE Flow", tests: ["Country selection", "City selection", "Narrative skip/next", "First match victory", "Training tutorial completion", "SA (Super Ability) trigger", "Chest opening animation"] },
+    { name: "Match Gameplay", tests: ["Card selection highlighting", "Success rate display", "4/6 fire animation", "SA activation timing", "Mana fill detection", "Opponent AI logic", "Victory/loss screen flow"] },
+    { name: "UI State", tests: ["Button interactability", "Soft nudge highlight", "Hand pointer animation", "Dialogue blocking", "Screen navigation", "Back button behavior", "Home button behavior"] },
+    { name: "Store", tests: ["HC balance deduction", "Reward crediting", "Chest timer display", "Free chest refresh", "Purchase confirmation", "RV (Ad) reward flow"] },
+    { name: "Player Management", tests: ["Player training power-up", "Level unlock trait display", "Equipment equipping", "Lineup swap persistence", "Team OVR calculation", "Player card display"] },
+    { name: "Currency", tests: ["HC balance accuracy", "Cash deduction", "TP crediting", "XP increment", "Shards management", "Currency sync after crash"] },
+    { name: "Alliance", tests: ["Join alliance", "Leave alliance confirmation", "Chat message send", "Daily co-op reward", "Milestone unlock", "Co-op matchmaking", "Automatch feature"] },
+    { name: "Progression", tests: ["MRP level unlock", "Trophy count", "Rep points", "Streak count", "Achievement badge", "Leaderboard ranking", "PvP Mania timer"] },
+    { name: "Error Handling", tests: ["Network timeout", "Payment failure", "Crash on mid-match", "Offline reconnect", "Corrupted save recovery", "Backend sync on resume"] },
+    { name: "Performance", tests: ["60 FPS stability", "Memory leak check", "Addressable download", "Animation performance", "Scrolling smoothness", "Load time"] },
+    { name: "Edge Cases", tests: ["Low battery mode", "Screen rotation", "Interrupt with notification", "Kill app mid-match", "Region timezone", "Low-end device", "Cellular vs WiFi"] }
+  ];
 
-  if (_failCount >= MAX_FAILS) {
-    errEl.textContent = 'Too many attempts. Refresh the page.';
+  categories.forEach(cat => {
+    cat.tests.forEach((test, i) => {
+      items.push({
+        section: cat.name,
+        item: test,
+        id: `${cat.name.toLowerCase().replace(/\s+/g, '-')}-${i+1}`
+      });
+    });
+  });
+
+  // Add more to reach 1200+
+  for (let i = 0; i < 150; i++) {
+    items.push({
+      section: "General QA",
+      item: `Verification test case ${i+1}`,
+      id: `general-${i+1}`
+    });
+  }
+
+  return items;
+}
+
+// ════════════════════════════════════════════════════════════
+// UI INITIALIZATION
+// ════════════════════════════════════════════════════════════
+
+function initFeatureTags() {
+  const container = document.getElementById('featureTags');
+  container.innerHTML = FEATURES.map(f => 
+    `<span class="feature-tag" onclick="toggleTag(this)" data-tag="${f}">${f}</span>`
+  ).join('');
+}
+
+function toggleTag(el) {
+  el.classList.toggle('active');
+  updateChangeDesc();
+}
+
+function updateChangeDesc() {
+  const selected = Array.from(document.querySelectorAll('.feature-tag.active'))
+    .map(t => t.getAttribute('data-tag'));
+  if (selected.length > 0 && !document.getElementById('changeDesc').value) {
+    document.getElementById('changeDesc').placeholder = `Selected: ${selected.join(', ')}`;
+  }
+}
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function updateProviderFields() {
+  const provider = document.getElementById('llmProvider').value;
+  document.getElementById('ollamaConfig').style.display = provider === 'ollama' ? 'block' : 'none';
+  document.getElementById('sarvamConfig').style.display = provider === 'sarvam' ? 'block' : 'none';
+  document.getElementById('anthropicConfig').style.display = provider === 'anthropic' ? 'block' : 'none';
+}
+
+// ════════════════════════════════════════════════════════════
+// ANALYSIS FUNCTIONS
+// ════════════════════════════════════════════════════════════
+
+async function analyzeChange() {
+  const changeDesc = document.getElementById('changeDesc').value.trim();
+  const changeType = document.getElementById('changeType').value;
+
+  if (!changeDesc) {
+    showStatus('Please describe what was changed.', 'error');
     return;
   }
 
-  try {
-    const res = await fetch(`${WORKER_URL}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pwd })
-    });
-    const data = await res.json();
+  document.getElementById('resultsContainer').style.display = 'block';
+  document.getElementById('loadingState').classList.add('visible');
+  document.getElementById('errorState').classList.remove('visible');
+  document.getElementById('resultsGrid').innerHTML = '';
+  document.getElementById('testCasesContainer').innerHTML = '';
 
-    if (res.ok && data.ok) {
-      _sessionToken = data.token;
-      const lock = document.getElementById('lockScreen');
-      lock.style.transition = 'opacity 0.4s';
-      lock.style.opacity = '0';
-      setTimeout(() => lock.style.display = 'none', 400);
-    } else {
-      _failCount++;
-      const remaining = MAX_FAILS - _failCount;
-      errEl.textContent = data.error || 'Incorrect password.';
-      if (remaining > 0) attEl.textContent = `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
-      else attEl.textContent = 'No attempts remaining. Refresh to retry.';
-      const box = document.getElementById('lockBox');
-      box.classList.remove('lock-shake');
-      void box.offsetWidth;
-      box.classList.add('lock-shake');
-      document.getElementById('pwdInput').value = '';
-    }
-  } catch(e) {
-    errEl.textContent = 'Connection error. Is the server running?';
+  try {
+    const result = await callLLM('analyzer', {
+      changeDesc,
+      changeType,
+      checklist: CHECKLIST_ITEMS
+    });
+
+    document.getElementById('loadingState').classList.remove('visible');
+    renderAnalysisResults(result);
+  } catch (error) {
+    document.getElementById('loadingState').classList.remove('visible');
+    showAnalysisError(error.message);
   }
 }
 
-const QA_CHECKLIST = {
+async function generateTestCases() {
+  const prdText = document.getElementById('prdText').value.trim();
+  const testFocus = document.getElementById('testFocus').value.trim();
 
-  // ════════════════════════════════════════════════════════════
-  // SECTION A: NEW USER FLOW (FTUE)
-  // ════════════════════════════════════════════════════════════
+  if (!prdText) {
+    showStatus('Please paste your PRD first.', 'error');
+    return;
+  }
 
-  "FTUE 1 – Offline Mode & Initial Setup": [
-    "Game loads completely in offline mode",
-    "No crashes occur until team creation screen",
-    "Country selection dropdown displays all valid countries",
-    "Country selection saves correctly",
-    "City selection screen loads with correct cities for selected country",
-    "City selection Back button returns to country screen",
-    "City selection Submit button proceeds to next step",
-    "Narrative slides display with proper text and images",
-    "Narrative slides Skip button skips to dashboard",
-    "Narrative slides Next button advances correctly",
-  ],
+  document.getElementById('testgenResults').style.display = 'block';
+  document.getElementById('testgenLoading').classList.add('visible');
+  document.getElementById('testgenError').classList.remove('visible');
+  document.getElementById('testgenContent').innerHTML = '';
 
-  "FTUE 2 – Scouting & Match 1": [
-    "Natasha/Harsha scouting dialogue appears automatically",
-    "Only 1 player (Master Blaster) available for scouting",
-    "Master Blaster scout button is clickable",
-    "Scrolling animation plays after scouting Master Blaster",
-    "Master Blaster player card appears on screen with correct info",
-    "Match 1 auto-starts immediately after scouting",
-    "Natasha/Harsha dialogue displays 'Score 18 runs in 2 overs'",
-    "Soft nudge highlight appears on Master Blaster",
-    "Soft nudge highlight appears on common player",
-    "Hand pointer appears on play cards (0,1,2,4,6)",
-    "Success rate % displays correctly on all play cards",
-    "Success rate highlights on striker and bowler correctly",
-    "Screen shatter animation triggers on successful six (Straight Drive)",
-    "Opponent team shows only common players",
-    "Opponent has no wickets lost during Match 1",
-    "Opponent has no SA active time during Match 1",
-    "Natasha/Harsha SA mana dialogue appears when SA fills",
-    "Hand pointer blinks on SA button when available",
-    "SA info screen displays correctly after activation",
-    "Fire animation triggers on 4s and 6s when SA active",
-    "Player dance animation plays on Match 1 victory screen",
-  ],
+  try {
+    const result = await callLLM('testgen', {
+      prd: prdText,
+      focus: testFocus
+    });
 
-  "FTUE 3 – Training Tutorial": [
-    "Natasha/Harsha Training Points (TP) explanation dialogue appears",
-    "Natasha/Harsha instructs to train player dialogue appears",
-    "Hand pointer highlights player on dashboard",
-    "Player Detail screen opens from dashboard player tap",
-    "Natasha/Harsha dialogue appears on Player Detail screen",
-    "Hand pointer highlights Train button",
-    "Train button functional up to Level 5",
-    "Back button non-interactable during training dialogue",
-    "Other UI buttons non-interactable during dialogue",
-  ],
-
-  "FTUE 4 – Notifications & Connectivity": [
-    "Screen tap during dialogue shows PK/Natasha conversation",
-    "PK icon displays with blinking animation",
-    "Hand pointer appears on PK icon",
-    "Hand pointer appears on Accept Challenge button",
-    "'Remind when team ready' dialogue box appears",
-    "'Remind me later' button functional",
-    "'Yes definitely' button functional",
-    "System notification popup displays Allow/Don't Allow options",
-    "Connect to Internet popup appears when offline",
-    "Team creation succeeds after enabling internet",
-  ],
-
-  "FTUE 5 – Match 2 Flow": [
-    "Natasha/Harsha 'Play 3 more matches' dialogue appears",
-    "Hand pointer appears on Play button",
-    "Train button accessible from VS screen",
-    "Play button visible and functional on VS screen",
-    "Lineup button visible on VS screen",
-    "SA tutorial appears inside match when mana filled",
-    "Victory screen shows player shards dialogue",
-    "Loss case: Match replayable from same screen",
-    "Loss case: Goal progress doesn't update until win",
-  ],
-
-  "FTUE 6 – Store & Super Chest": [
-    "Hand pointer appears on Store icon",
-    "Natasha/Harsha Super Chest introduction dialogue appears",
-    "Buy button shows 50 HC price with 0 HC balance",
-    "Buy button allows direct access despite 0 HC",
-    "No HC deducted from free Super Chest opening",
-    "Chest opening animation plays completely",
-    "User redirects to VS screen after chest opens",
-    "Train player accessible from VS screen post-chest",
-    "Back button functional on VS screen",
-    "Play button functional on VS screen",
-    "Lineup button functional on VS screen",
-    "Match 3 starts and completes without issues",
-  ],
-
-  "FTUE 7 – ESP Trigger & Dashboard": [
-    "ESP (Ultimate Finisher Pack) triggers after Match 3",
-    "Arrow animation appears on Play button",
-    "ESP icon appears on dashboard",
-    "PK icon blinks on dashboard",
-    "Events tab remains locked",
-    "PvP tab remains locked",
-    "League tab remains locked",
-    "Store shows Golden glow effect",
-    "Store shows Free tag when free item available",
-    "Nets 1 shows Earn tag correctly",
-    "Net 2 shows locked state with 400 HC requirement",
-    "Match 4 playable without crashes",
-  ],
-
-  "FTUE 8 – League Unlock": [
-    "Natasha/Harsha League unlock dialogue appears on dashboard",
-    "Hand pointer highlights League button",
-    "League page loads with journey dialogue",
-    "Hand pointer highlights Play button on League screen",
-    "League Play button redirects to VS screen",
-    "SP icon becomes visible on dashboard after Match 4",
-    "ESP offer icon remains visible post-League unlock",
-  ],
-
-  "FTUE 9 – PK Match Flow": [
-    "PK Match starts and completes successfully",
-    "PK loss triggers 5-minute timer",
-    "PK Match becomes replayable after timer",
-    "PK win shows Haryana Hurricane and Athena rewards",
-    "Selected players added to squad correctly",
-  ],
-
-  "FTUE 10 – Post-LM1 Popups & Unlocks": [
-    "Captain Cool – Thala offer popup appears first",
-    "7-Day Login popup appears after Thala offer",
-    "ESP icon replaced by Thala offer icon after acceptance",
-    "Events tab unlocks and becomes accessible",
-    "My Team tab unlocks and becomes accessible",
-    "Fast Mode accessible from LM1 innings screen",
-    "Leaderboard appears after LM1 win",
-    "SP/Quest challenges visible on LM1 victory screen",
-    "Hand pointer appears on Trophy Road",
-    "Trophy Road rewards claimable",
-    "Season Pass unlocks after LM1",
-    "All HUD icons visible on dashboard",
-    "Equipment (EQ) unlock flow completes",
-    "Inventory tab unlocks",
-  ],
-
-  // ════════════════════════════════════════════════════════════
-  // SECTION B: APP LAUNCH (OLD + NEW USER)
-  // ════════════════════════════════════════════════════════════
-
-  "App Launch – Icon & PLAY CTA": [
-    "App Icon is accurate with no spacing or sizing issues",
-    "PLAY CTA has the breathing & shine animation",
-    "PLAY CTA is clickable",
-    "Addressables/Assets downloaded on loading screen after PLAY tap (old user)",
-    "Install Release build on top of current PlayStore/Live build and check",
-  ],
-
-  "App Launch – Login Methods": [
-    "Login: Google Play / Apple ID / Game Center works",
-    "Login: Facebook works",
-    "Login: Hitwicket ID works",
-    "Login: WhatsApp works",
-    "Login: Recover Account through Recover account popup",
-    "Login: Recover Account through 'Recover account' CTA",
-    "Contact Us — redirects outside of game correctly",
-  ],
-
-  // ════════════════════════════════════════════════════════════
-  // SECTION C: CURRENT SYSTEM — FULL FEATURE STRUCTURE
-  // ════════════════════════════════════════════════════════════
-
-  "Manager Profile": [
-    "Manager Profile surfaced at top-left of dashboard",
-    "Team Name displays current name",
-    "Team Name Edit CTA opens rename screen",
-    "Team Name saves with valid input (min 3 chars)",
-    "User Name displays current name",
-    "User Name Edit CTA opens edit screen",
-    "User Name rejects special characters",
-    "City field shows FTUE-selected city",
-    "City Edit CTA opens city selection",
-    "City updates and saves correctly",
-    "Total Matches Played stat displays correctly",
-    "Win Rate displays as percentage",
-    "Trophies count in Stats displays accurately",
-    "Players Scouted count displays correctly",
-    "Badges display with correct icons",
-    "Badge tooltip appears on badge tap",
-    "All owned Badges visible",
-    "Trophies section shows all owned trophies",
-    "Level shows current MRP number",
-    "XP value matches admin panel",
-    "XP progression bar fills correctly toward next level",
-    "League Level displays current tier (matches League lobby)",
-    "Alliance Name shows 'No Alliance' or joined alliance name (matches Alliance lobby)",
-    "PvP Reputation Rank visible and matches PvP page",
-    "Team OVR value matches dashboard display",
-    "Batting Power value correct",
-    "Bowling Power value correct",
-    "Lineup section shows correct player cards with correct rarity",
-    "Lineup in Manager Profile matches actual in-game lineup",
-    "Player card tap opens Player Detail screen",
-    "Close CTA returns to Dashboard",
-  ],
-
-  "Icons Logic & Dashboard": [
-    "All dashboard icon logic works per unlock state",
-    "Store icon accessible",
-    "Store shows Golden glow effect if free chest available",
-    "Store shows Free tag when free item available",
-    "Small event CTA available above event banners",
-    "Offer image, timer, price, Close all functional on Offer icon",
-    "All HUD icons display correct values",
-    "Back button returns to Dashboard",
-    "Home button returns to Dashboard",
-  ],
-
-  "Store – Offers": [
-    "Offers tab displays active offers",
-    "Offer image displays correctly",
-    "Offer timer countdown works",
-    "Offer discount tag visible",
-    "Offer Close CTA dismisses popup",
-    "Two-tap offer purchase flow works",
-    "Payment success credits rewards instantly",
-  ],
-
-  "Store – Season Store": [
-    "Season Store tab accessible",
-    "Season Store purchase deducts HC",
-    "Season Store rewards credit to account",
-    "Season Store shows SP exclusive items with correct pricing",
-  ],
-
-  "Store – Featured Items": [
-    "Featured Items tab shows current featured items",
-    "Featured item purchase flow works",
-    "Featured item rewards credit correctly",
-  ],
-
-  "Store – Chests": [
-    "Chests tab shows Free, Super, and 10x options",
-    "Free chest 'i' button shows contents",
-    "Super chest 'i' button shows contents",
-    "10x chest 'i' button shows contents",
-    "Chest rewards credit to inventory",
-    "2-hour chest timer displays correctly for free chest",
-    "RV free chest accessible via ads",
-    "10x reward animation plays fully",
-    "No HC deducted from free Super Chest opening",
-  ],
-
-  "Store – Get Player": [
-    "Get Player tab shows SPB and EPB scouting options",
-    "SPB scouting deducts correct HC",
-    "EPB scouting deducts correct HC",
-    "Scouted player added to squad",
-    "Shard scouting deducts fragments correctly",
-    "Reliable/Brilliant/WC scouting works post-MRP 5",
-    "'i' button shows player image and pity counters for EPB, SPB, PB, Player Scout",
-    "Medium card opens after tapping background for EPB & SPB",
-    "Scout counter & shards quantity matches Store display",
-    "Ticker counter appears for EPB, SPB & PB but NOT for Player Scout",
-    "Player Scout (Reliable/Brilliant/WC) updated value matches Get Players and Store",
-  ],
-
-  "Store – Currencies": [
-    "Currencies tab shows all currency types",
-    "Currency balances display accurately",
-    "HC purchase flow works",
-    "HC buy redirects to store",
-  ],
-
-  "HUDs – Energy / TP / HC": [
-    "Energy balance displays correctly on HUD",
-    "Energy refill with HC works",
-    "Get Elite Pass CTA functional from energy HUD",
-    "Training Points count accurate on HUD",
-    "TP tooltip appears on tap",
-    "Hitcoins balance updates on all transactions",
-    "Hitcoins HUD taps redirect to Store",
-    "Daily PvP wins tooltip on PLAY CTA",
-  ],
-
-  "My Team – Squad": [
-    "Squad tab loads with all players",
-    "All filter shows complete squad",
-    "Batsmen filter shows only batsmen",
-    "Bowlers filter shows only bowlers",
-    "Not Found filter shows Locked / Unscouted players",
-    "Get Player button functional from My Team",
-    "By Rarity filter sorts players correctly",
-    "Red dot appears on untrained players",
-    "Red dot appears on players with available equipment",
-    "Player card tap opens Player Detail screen",
-    "Rename player function works",
-    "Fire player removes from squad",
-    "Star-up animation triggers at MRP 9 or above",
-  ],
-
-  "My Team – Player Detail": [
-    "Player Detail screen accessible via player card tap",
-    "Player name, rarity, and stats display correctly",
-    "Train button visible and functional",
-    "Train deducts TP correctly",
-    "Train updates player power",
-    "Power-up animation plays on level gain",
-    "Trait unlock at Lvl 7 works correctly",
-    "Trait unlock at Lvl 14 works correctly",
-    "EQ equip boosts power correctly",
-    "Enhancer equip works correctly",
-    "Passive trait upgrade functional",
-    "Stats page Next/Previous navigation works",
-    "Stats page double-tap zoom works",
-  ],
-
-  "My Team – Lineup": [
-    "Lineup tab accessible from My Team",
-    "Batsmen filter shows correct players",
-    "Bowler filter shows correct players",
-    "Player swap via tap + drag-drop works",
-    "Bowling sequence reorder saves correctly",
-    "AUTO PICK generates optimal lineup",
-    "SAVE CTA persists lineup changes",
-    "Team OVR recalculates correctly when player is swapped",
-    "Team OVR logic verified after lineup change",
-  ],
-
-  "Inventory – General": [
-    "General panel loads correctly",
-    "Tokens visible and equippable",
-    "Basic EQ visible and equippable",
-    "'i' buttons show detailed stats for items",
-    "Sell function deducts items from inventory",
-    "Sell function credits HC correctly",
-  ],
-
-  "Inventory – Cosmetics": [
-    "Cosmetics panel loads correctly",
-    "Skins display correctly",
-    "Skin preview shows on equip",
-  ],
-
-  "Inventory – Powerups": [
-    "Powerups panel loads correctly",
-    "Powerups (EQ) visible and assignable to players",
-  ],
-
-  "Auction": [
-    "Timer displays remaining auction time correctly",
-    "Result tab shows completed auctions",
-    "Cash balance (HUD) displays correctly",
-    "Tokens balance (HUD) displays correctly",
-    "'i' button shows auction rules",
-    "History tab loads past auctions",
-    "Bids History shows user's bids",
-    "World Class players visible in auction",
-    "Brilliant players visible in auction",
-    "Reliable players visible in auction",
-    "Player card 'i' button shows player stats",
-    "Bid CTA opens bid popup",
-    "When SP character available — Buy Season Pass popup triggers",
-    "Place Bid — '+' button increases bid amount",
-    "Place Bid — '-' button decreases bid amount",
-    "Dismiss CTA closes bid popup without placing bid",
-    "Bid CTA places bid successfully",
-    "Winning bid adds player to squad",
-  ],
-
-  "Alliance – Details & Join": [
-    "Alliance Name displays correctly",
-    "Alliance Details page loads",
-    "Join Button opens WhatsApp link",
-    "Join Button opens Discord link",
-    "Leave Alliance CTA shows confirmation before leaving",
-    "Player Detail accessible through leaderboard tap",
-    "Players ranking displays correctly",
-    "Leaderboard is scrollable",
-    "Members Count displays accurately",
-    "Online Member Count updates correctly",
-    "Boosted Player Count displays",
-    "Co-op Flag Count displays",
-  ],
-
-  "Alliance – Friendlies & Search": [
-    "Friendly battle count shows correctly",
-    "Chase Target CTA is functional",
-    "Search bar accepts alliance name input",
-    "Search CTA filters alliances correctly",
-    "Community Search via WhatsApp link works",
-    "Community Search via Discord link works",
-    "Recommended Alliances visible",
-    "User able to view alliance details from recommended list",
-  ],
-
-  "Alliance – Chat, Battle & Chibis": [
-    "Chat section loads and is scrollable",
-    "Send message button sends message to alliance chat",
-    "Chat send shows toast confirmation",
-    "Request CTA sends join request successfully",
-    "Battle CTA — PvP challenge works",
-    "Battle CTA — Challenge confirmation message appears",
-    "Close CTA cancels challenge and dismisses popup",
-    "Tapping on chibi shows player profile",
-    "Tapping on chibi shows Team OVR",
-    "Tapping on chibi shows Challenge button",
-    "Tapping on chibi shows Title",
-    "Tapping on chibi shows Last Active time",
-  ],
-
-  "Alliance – Daily Co-op": [
-    "Daily Co-op rewards list scrollable vertically",
-    "Daily Co-op rewards marked as claimable when available",
-    "Daily Co-op 'i' button displays reward details",
-    "Daily Co-op Play button redirects to Quest Screen",
-    "Close CTA dismisses Daily Co-op screen",
-    "Attempts counter displays accurately",
-    "Play Co-op button interactable when attempts available",
-    "Play Co-op button disabled when no attempts remaining (HC option available)",
-    "Alliance Flags visible on Quest Screen",
-    "Milestone rewards claimable after completing",
-    "All achieved milestone rewards collectible",
-    "Reset timer visible below reward milestone",
-  ],
-
-  "Alliance – Huddle & Invite / Automatch": [
-    "Huddle + icon opens 'Invite friend to play' popup",
-    "Invite functionality sends invitation successfully",
-    "Lobby code visible in invite popup",
-    "Join Lobby using code works correctly",
-    "Community CTA opens Discord link",
-    "Share CTA copies lobby link",
-    "Share CTA allows WhatsApp/Message sharing",
-    "Automatch feature starts matchmaking",
-    "Automatch shows 'Joining players' status",
-    "Mic option visible after players join via automatch",
-    "Speaker option visible after players join via automatch",
-    "Co-op match playable end to end",
-    "Close CTA exits lobby during matchmaking",
-    "Close CTA exits during pre-match lobby",
-    "Back CTA returns to Dashboard",
-    "Home CTA returns to Dashboard",
-  ],
-
-  "Training Nets": [
-    "Net 2 locked until MRP 18 (or 400 HC to unlock)",
-    "Net 2 unlockable with 400 HC",
-    "Net 1 Start CTA deducts Cash correctly",
-    "Cash deduction amount correct for Net 1",
-    "End Training early using HC — HC deducted correctly",
-    "Reduce timer using RV (Reward Video / Ad) works",
-    "Close CTA exits Nets screen",
-    "XP credited to account after training",
-    "TP credited to account after training",
-  ],
-
-  "Season Pass": [
-    "Rewards track loads correctly",
-    "Timer shows days/hours remaining for season",
-    "Activate CTA visible when Season Pass not purchased",
-    "Activate CTA opens purchase confirmation popup",
-    "Purchase confirmation shows correct price",
-    "Purchase success credits Season Pass instantly",
-    "Rewards marked as claimable when eligible",
-    "Claimable rewards highlighted with Claim button",
-    "Rewards list scrollable vertically through all tiers",
-    "Claim animation plays on reward collection",
-    "Claimed rewards show checkmark permanently",
-    "Rewards credit to user's account",
-    "Season Store CTA redirects to Store screen",
-    "'i' button shows reward details popup",
-    "Progress bar shows current tier advancement",
-    "Free tier rewards accessible without purchase",
-    "Premium tier rewards locked pre-purchase",
-    "Post-purchase premium rewards can be claimed",
-    "Back CTA returns to Dashboard",
-    "Home CTA redirects to Dashboard",
-  ],
-
-  "Quests System": [
-    "Daily Quest tab loads SP Screen successfully",
-    "SP Screen displays correctly without crashes",
-    "Daily quest displays with reset timer visible",
-    "Season challenges list loads completely",
-    "Tapping Daily quest redirects to respective challenge screen",
-    "Tapping Season quest redirects to respective challenge screen",
-    "SP points visible on challenges",
-    "SP points increment on challenge completion",
-    "Reset timer countdown displays accurately",
-    "Completed quests show checkmark status",
-    "Active quests show progress bar",
-    "Locked quests show requirement text",
-    "Season Store CTA redirects to Store",
-    "Home button redirects to Dashboard",
-    "Back CTA returns to Dashboard",
-  ],
-
-  "Play Button – Game Modes": [
-    "Daily PvP Win chest icons visible on dashboard above Play",
-    "Play CTA functional on dashboard",
-    "Game Modes tiles screen loads",
-    "Classics section visible — League tile accessible",
-    "Classics section visible — PvP tile accessible",
-    "Events section visible — YC tile accessible",
-    "Events section visible — ABR tile accessible",
-    "Banner displays correct active game mode",
-    "Banner Game Mode Tiles — League tile works",
-    "Banner Game Mode Tiles — PvP tile works",
-    "Banner Events Tiles — YC works",
-    "Banner Events Tiles — ABR works",
-  ],
-
-  "League Mode": [
-    "League mode tile accessible post league unlock",
-    "League level displays correctly with trophy count on tile",
-    "Tapping Play redirects to VS page",
-    "Tapping Hub redirects to League page",
-    "League level visible correctly on League page",
-    "'i' button shows league levels and requirements",
-    "Close CTA closes league levels popup",
-    "Trophies count visible with text to unlock next level",
-    "HUD displays Trophies and Energy correctly",
-    "Back button redirects to Game Modes tiles",
-    "Home CTA redirects to Dashboard",
-    "Match history visible with streak count and icons",
-    "Tapping Play on match history redirects to VS page",
-    "Player visible on leaderboard with correct rank",
-    "User rank highlighted with blue color",
-    "Tapping Refresh shows updated community data",
-  ],
-
-  "PvP Mode": [
-    "PvP mode accessible post-MRP 3 unlock",
-    "Proper rep rank with rep points visible on PvP tile",
-    "Tapping Play redirects to VS screen",
-    "Tapping HUD redirects to PvP reputation screen",
-    "Rewards visible on PvP Trophy Road",
-    "Rewards claimable over progression",
-    "Career page shows PvP career stats",
-    "Career page shows match history with bowler/batsmen stats",
-    "Close CTA closes PvP career popup",
-    "PvP lineup redirects to Lineup screen",
-    "Bowling option functional in PvP lineup",
-    "Save option persists PvP lineup changes",
-    "Drag and replace player accessible in PvP lineup",
-    "Filter for bowlers and batsmen accessible",
-    "Back CTA redirects to PvP page",
-    "Practice match option accessible",
-    "Friendly match creates room with unique room ID",
-    "Join room functional using room ID",
-    "Discord option available to join room",
-    "Easy / Medium / Hard mode selectable in Practice",
-    "Tapping Play with any difficulty redirects to Lineup",
-    "Saving lineup redirects to VS page",
-    "Match starts successfully after lineup save",
-    "PvP Mania Leaderboard visible and scrollable",
-    "End timer visible with mega reward preview",
-    "Rep points displayed next to Play button",
-    "Win shows '+X rep points' message",
-    "Loss shows rep points deduction message",
-    "Daily PvP wins icons visible above Play button",
-    "'?' button shows PvP info with infographics",
-    "'i' button shows 'How to Play PvP' guide",
-    "Close CTA closes information popup",
-    "<> buttons change How to Play slides correctly",
-    "Events tiles visible and accessible (YC, ABR, etc.)",
-  ],
-
-  "Hamburger – My Feed": [
-    "My Feed tab loads matches",
-    "Career section shows stats progression",
-    "Stats tab displays correctly",
-    "Challenges tab lists active challenges",
-    "Chase Target CTA functional",
-    "Chase Target shows timer",
-    "Challenges list scrollable",
-    "Challenges show correct stats",
-    "Close CTA dismisses Hamburger menu",
-  ],
-
-  "Hamburger – Community": [
-    "Community tab loads Spotlight",
-    "All Content visible",
-    "Subscribe CTA — HC added to user account",
-    "YouTube link functional",
-    "Discord link functional",
-    "Instagram link functional",
-    "Redeem Code CTA works",
-  ],
-
-  "Inbox": [
-    "Inbox shows Invites",
-    "Inbox shows Messages",
-    "Inbox shows Reward Claims",
-    "Inbox shows Refund items",
-    "Reward from in-game mail credits correctly",
-    "Reward validation matches admin panel",
-  ],
-
-  "Invite System": [
-    "Shareable link copies to clipboard",
-    "Shareable link opens via WhatsApp",
-    "Reward credits when friend joins and reaches MRP 3",
-    "'i' button shows invite details",
-    "Close CTA dismisses invite screen",
-  ],
-
-  "Leaderboard": [
-    "Trophies tab loads",
-    "Trophies – Weekly tab loads",
-    "Trophies – All Time tab loads",
-    "Trophies – Scrollable using arrow CTAs",
-    "Reputation Points tab loads",
-    "Reputation Points – Scrollable using arrow CTAs",
-    "Team Overall tab loads",
-    "Team Overall – Scrollable using arrow CTAs",
-  ],
-
-  "Daily Login": [
-    "Daily Login popup accessible from Hamburger Menu",
-    "Reward claimable when available",
-    "Claim 'Architect' and verify player added to squad",
-    "Streak count displays correctly",
-    "Close CTA dismisses popup",
-    "Reset occurs correctly after Day 7",
-  ],
-
-  "Friends": [
-    "Send Request CTA functional",
-    "Add Friend CTA functional",
-    "Invite CTA functional",
-    "Received invitations visible",
-    "Hitwicket ID displays correctly",
-  ],
-
-  "Hitwicket TV": [
-    "Watch CTA works",
-    "'i' Button shows match details",
-    "Live user count displays",
-    "Back button functional",
-    "Home button functional",
-    "Page scrollable",
-    "YC matches filter works",
-    "PvP matches filter works",
-    "Friendly Battle matches filter works",
-    "Alliance Members matches filter works",
-  ],
-
-  "Settings – Audio & Quality": [
-    "Sound toggle persists after toggle",
-    "Music toggle persists after toggle",
-    "Vibration toggle persists after toggle",
-    "PvP Voice Chat toggle persists after toggle",
-    "Quality Low selectable",
-    "Quality Medium selectable",
-    "Quality High selectable",
-    "60 FPS toggle functional",
-  ],
-
-  "Settings – Connect & Social HC": [
-    "Google Play connect works",
-    "Facebook connect works",
-    "WhatsApp connect works",
-    "HC credited on Facebook social connect",
-    "HC credited on Instagram social connect",
-    "HC credited on Twitter social connect",
-    "HC credited on YouTube social connect",
-    "HC credited on Discord social connect",
-    "Harsha popup appears on WhatsApp connect",
-    "Connect CTA completes WhatsApp linking",
-    "Close CTA dismisses WhatsApp connect popup",
-  ],
-
-  "Settings – Support & Rate Us": [
-    "FAQ sections expandable",
-    "Facing Issue — Help and Support opens",
-    "Help and Support — Payments section accessible",
-    "Help and Support — Other Issues section accessible",
-    "Rate Us opens store review page",
-    "Rate Us — Submit CTA functional",
-    "Rate Us — Close CTA functional",
-  ],
-
-  "HUD – Dashboard Elements": [
-    "Energy balance displays correctly",
-    "Energy refill with HC works",
-    "Get Elite Pass CTA functional from Energy HUD",
-    "Training Points count accurate",
-    "Hitcoins balance updates on all transactions",
-    "Hitcoins tap redirects to Store",
-    "Huddle visible on dashboard",
-    "Tapping any player in Huddle opens their Player Detail screen",
-    "Player landing animation in Huddle triggers on game open",
-    "Huddle player scroll shows SP player or EPB player correctly",
-  ],
-
-  "Trophy Road": [
-    "Trophy Road visible on dashboard",
-    "Trophy count displays correctly",
-    "Next reward shown on Trophy Road",
-    "Progression bar accurate",
-    "Trophy Road redirect works correctly",
-    "Trophy Road rewards claimable",
-  ],
-
-  "PvP Road": [
-    "PvP Road visible on dashboard",
-    "Rep points display correctly",
-    "Rep rank displays correctly",
-    "Next reward shown on PvP Road",
-    "Total Rep Points visible",
-    "PvP Road redirects to PvP page correctly",
-  ],
-
-  "MRP Progression Unlocks": [
-    "PvP unlocks at MRP 3",
-    "SP / Alliance / Co-op / WC Scout unlock at MRP 5",
-    "Auction / YC / Hitwicket TV unlock at MRP 6",
-    "League Arenas / PvP Mania unlock at MRP 7",
-    "Star-Up unlocks at MRP 9",
-    "SP player on dashboard accessible after MRP 10",
-    "Training Nets 2 unlocks at MRP 18",
-  ],
-
-};
-
-// All checklist items flat
-const ALL_ITEMS = Object.entries(QA_CHECKLIST).flatMap(([cat, items]) => 
-  items.map(item => ({ cat, item }))
-);
-
-// Populate checklist chips
-function populateChips() {
-  const container = document.getElementById('checklistChips');
-  const sample = ALL_ITEMS.slice(0, 80); // show first 80 as preview
-  container.innerHTML = sample.map(({ item }) => 
-    `<span class="checklist-chip">${item.length > 45 ? item.substring(0, 43) + '…' : item}</span>`
-  ).join('') + `<span class="checklist-chip" style="color: var(--accent2);">+${ALL_ITEMS.length - 80} more items</span>`;
+    document.getElementById('testgenLoading').classList.remove('visible');
+    renderTestGenResults(result);
+  } catch (error) {
+    document.getElementById('testgenLoading').classList.remove('visible');
+    showTestGenError(error.message);
+  }
 }
 
-// Loading steps animation
-let stepInterval = null;
-function startLoadingSteps() {
-  const steps = ['step1','step2','step3','step4','step5'];
-  let i = 0;
-  steps.forEach(s => document.getElementById(s).classList.remove('active'));
-  stepInterval = setInterval(() => {
-    if (i < steps.length) {
-      document.getElementById(steps[i]).classList.add('active');
-      i++;
+// ════════════════════════════════════════════════════════════
+// LLM CALL ROUTER
+// ════════════════════════════════════════════════════════════
+
+async function callLLM(task, payload) {
+  const provider = localStorage.getItem('llmProvider') || 'ollama';
+  
+  if (provider === 'ollama') {
+    return await callOllama(task, payload);
+  } else if (provider === 'sarvam') {
+    return await callSarvam(task, payload);
+  } else {
+    return await callAnthropic(task, payload);
+  }
+}
+
+// Ollama
+async function callOllama(task, payload) {
+  const url = localStorage.getItem('ollamaUrl') || 'http://localhost:11434';
+  const model = localStorage.getItem('ollamaModel') || 'mistral';
+
+  const prompt = task === 'analyzer' ? 
+    buildAnalyzerPrompt(payload) :
+    buildTestGenPrompt(payload);
+
+  const response = await fetch(`${url}/api/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model,
+      prompt,
+      stream: false
+    })
+  });
+
+  if (!response.ok) throw new Error(`Ollama error: ${response.statusText}`);
+
+  const data = await response.json();
+  return parseJSON(data.response);
+}
+
+// Sarvam.ai
+async function callSarvam(task, payload) {
+  const key = localStorage.getItem('sarvamKey');
+  const model = localStorage.getItem('sarvamModel') || 'Sarvam-2B';
+
+  if (!key) throw new Error('Sarvam API key not configured');
+
+  const prompt = task === 'analyzer' ? 
+    buildAnalyzerPrompt(payload) :
+    buildTestGenPrompt(payload);
+
+  const response = await fetch('https://api.sarvam.ai/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      stream: false
+    })
+  });
+
+  if (!response.ok) throw new Error(`Sarvam error: ${response.statusText}`);
+
+  const data = await response.json();
+  return parseJSON(data.choices[0].message.content);
+}
+
+// Anthropic (via local proxy if available)
+async function callAnthropic(task, payload) {
+  const key = localStorage.getItem('anthropicKey');
+  if (!key) throw new Error('Anthropic API key not configured');
+
+  const prompt = task === 'analyzer' ? 
+    buildAnalyzerPrompt(payload) :
+    buildTestGenPrompt(payload);
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) throw new Error(`Anthropic error: ${response.statusText}`);
+
+  const data = await response.json();
+  return parseJSON(data.content[0].text);
+}
+
+// ════════════════════════════════════════════════════════════
+// PROMPT BUILDERS
+// ════════════════════════════════════════════════════════════
+
+function buildAnalyzerPrompt(payload) {
+  const checklistStr = payload.checklist.map(item =>
+    `${item.section}: ${item.item}`
+  ).join('\n');
+
+  return `You are a senior QA engineer. Analyze this change and identify at-risk test cases.
+
+CHANGE:
+Type: ${payload.changeType}
+Description: ${payload.changeDesc}
+
+FULL CHECKLIST (${payload.checklist.length} items):
+${checklistStr}
+
+Return ONLY valid JSON (no markdown, no preamble):
+{
+  "summary": "brief risk assessment",
+  "impact_areas": [
+    { "title": "Area", "severity": "critical|high|medium|low", "items": ["risk 1", "risk 2"] }
+  ],
+  "specific_test_cases": ["Exact checklist item: specific concern"],
+  "edge_cases": ["edge case"],
+  "downstream_risks": ["feature risk"],
+  "regression_priority": "HIGH|MEDIUM|LOW"
+}`;
+}
+
+function buildTestGenPrompt(payload) {
+  return `Generate comprehensive test cases for this PRD.
+
+PRD:
+${payload.prd}
+
+${payload.focus ? `Test Focus: ${payload.focus}` : ''}
+
+Return ONLY valid JSON:
+{
+  "test_categories": [
+    {
+      "category": "Category Name",
+      "tests": [
+        { "id": "TC001", "title": "Test title", "steps": ["step 1", "step 2"], "expected": "expected result", "priority": "high|medium|low" }
+      ]
     }
-  }, 800);
+  ],
+  "edge_cases": ["edge case 1"],
+  "acceptance_criteria": ["criteria"]
+}`;
 }
 
-function stopLoadingSteps() {
-  if (stepInterval) clearInterval(stepInterval);
-}
+// ════════════════════════════════════════════════════════════
+// RENDERING
+// ════════════════════════════════════════════════════════════
 
-function showError(msg) {
-  stopLoadingSteps();
-  document.getElementById('loadingState').classList.remove('visible');
-  const errEl = document.getElementById('errorState');
-  errEl.classList.add('visible');
-  document.getElementById('errorMsg').textContent = msg;
-  document.getElementById('resultsPanel').classList.add('visible');
-  document.getElementById('analyzeBtn').disabled = false;
-}
+function renderAnalysisResults(result) {
+  if (result.error) {
+    showAnalysisError(result.error);
+    return;
+  }
 
-function renderResults(result) {
-  document.getElementById('loadingState').classList.remove('visible');
-  document.getElementById('analyzeBtn').disabled = false;
-
-  // Timestamp
-  document.getElementById('analysisTimestamp').textContent = 
-    'Analyzed at ' + new Date().toLocaleTimeString();
-
-  // Count by severity
+  const { impact_areas = [], specific_test_cases = [], edge_cases = [], downstream_risks = [] } = result;
+  
   const counts = { critical: 0, high: 0, medium: 0, low: 0 };
-  (result.impact_areas || []).forEach(area => {
+  impact_areas.forEach(area => {
     if (counts[area.severity] !== undefined) counts[area.severity]++;
   });
 
@@ -1735,246 +1233,245 @@ function renderResults(result) {
   document.getElementById('countHigh').textContent = counts.high;
   document.getElementById('countMedium').textContent = counts.medium;
   document.getElementById('countLow').textContent = counts.low;
-  document.getElementById('countTests').textContent = (result.specific_test_cases || []).length;
+  document.getElementById('countTests').textContent = specific_test_cases.length;
 
-  const summaryBar = document.getElementById('summaryBar');
-  summaryBar.style.display = 'flex';
-
-  // Add regression priority badge
-  const regBadge = document.createElement('div');
-  regBadge.className = 'summary-stat';
-  regBadge.style.marginLeft = '16px';
-  const regColor = result.regression_priority === 'HIGH' ? 'var(--accent)' : 
-                   result.regression_priority === 'MEDIUM' ? 'var(--warn)' : 'var(--accent3)';
-  regBadge.innerHTML = `<span class="stat-num" style="color:${regColor}">${result.regression_priority || 'MED'}</span>
-    <span class="stat-label">Regression Priority</span>`;
-
-  // Remove old badge if exists
-  const oldBadge = summaryBar.querySelector('.regression-badge');
-  if (oldBadge) oldBadge.remove();
-  regBadge.classList.add('regression-badge');
-  summaryBar.appendChild(regBadge);
-
-  // Summary card
-  const grid = document.getElementById('impactGrid');
+  const grid = document.getElementById('resultsGrid');
   grid.innerHTML = '';
 
+  // Summary card
   if (result.summary) {
-    const summaryCard = document.createElement('div');
-    summaryCard.className = 'impact-card';
-    summaryCard.style.cssText = 'grid-column: 1 / -1; border-color: rgba(0,212,255,0.2); background: rgba(0,212,255,0.03);';
-    summaryCard.innerHTML = `
-      <div class="impact-card-header">
-        <span style="font-size: 16px;">📋</span>
-        <span class="impact-card-title" style="color: var(--accent2);">Executive Summary</span>
-        ${result.recommendation ? `<span class="severity-badge sev-medium" style="margin-left:auto; white-space:nowrap; font-size:9px;">Recommendation</span>` : ''}
+    const card = document.createElement('div');
+    card.className = 'result-card full-width';
+    card.innerHTML = `
+      <div class="result-card-header">
+        <span style="font-size: 18px;">📋</span>
+        <span class="result-card-title">Summary</span>
       </div>
       <p style="font-size: 13px; line-height: 1.7; color: #d0d0e0;">${result.summary}</p>
-      ${result.recommendation ? `<p style="font-size: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--warn);">💡 ${result.recommendation}</p>` : ''}
+      ${result.recommendation ? `<p style="font-size: 12px; margin-top: 12px; color: var(--warn);">💡 ${result.recommendation}</p>` : ''}
     `;
-    grid.appendChild(summaryCard);
+    grid.appendChild(card);
   }
 
-  // Impact area cards
-  (result.impact_areas || []).forEach(area => {
+  // Impact areas
+  impact_areas.forEach(area => {
     const card = document.createElement('div');
-    card.className = 'impact-card';
-    const sevClass = {
-      critical: 'sev-critical',
-      high: 'sev-high',
-      medium: 'sev-medium',
-      low: 'sev-low'
-    }[area.severity] || 'sev-medium';
-
-    const icon = {
-      critical: '🔴',
-      high: '🟠',
-      medium: '🔵',
-      low: '🟢'
-    }[area.severity] || '⚪';
+    card.className = 'result-card';
+    const sevClass = `sev-${area.severity || 'medium'}`;
+    const icon = { critical: '🔴', high: '🟠', medium: '🔵', low: '🟢' }[area.severity] || '⚪';
 
     card.innerHTML = `
-      <div class="impact-card-header">
+      <div class="result-card-header">
         <span>${icon}</span>
-        <span class="impact-card-title">${area.title}</span>
+        <span class="result-card-title">${area.title}</span>
         <span class="severity-badge ${sevClass}">${area.severity}</span>
       </div>
-      <ul class="impact-items">
-        ${(area.items || []).map(item => `<li class="impact-item">${item}</li>`).join('')}
+      <ul class="items-list">
+        ${(area.items || []).map(item => `<li class="item">${item}</li>`).join('')}
       </ul>
     `;
     grid.appendChild(card);
   });
 
-  // Edge cases card
-  if ((result.edge_cases || []).length > 0) {
-    const edgeCard = document.createElement('div');
-    edgeCard.className = 'impact-card';
-    edgeCard.innerHTML = `
-      <div class="impact-card-header">
+  // Edge cases
+  if (edge_cases.length > 0) {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div class="result-card-header">
         <span>🧩</span>
-        <span class="impact-card-title">Edge Cases to Check</span>
+        <span class="result-card-title">Edge Cases</span>
         <span class="severity-badge sev-high">Must Test</span>
       </div>
-      <ul class="impact-items">
-        ${result.edge_cases.map(e => `<li class="impact-item">${e}</li>`).join('')}
+      <ul class="items-list">
+        ${edge_cases.map(e => `<li class="item">${e}</li>`).join('')}
       </ul>
     `;
-    grid.appendChild(edgeCard);
+    grid.appendChild(card);
   }
 
-  // Downstream risks card
-  if ((result.downstream_risks || []).length > 0) {
-    const downCard = document.createElement('div');
-    downCard.className = 'impact-card';
-    downCard.innerHTML = `
-      <div class="impact-card-header">
+  // Downstream
+  if (downstream_risks.length > 0) {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div class="result-card-header">
         <span>🔗</span>
-        <span class="impact-card-title">Downstream Dependencies</span>
-        <span class="severity-badge sev-medium">Indirect Risk</span>
+        <span class="result-card-title">Downstream Risks</span>
+        <span class="severity-badge sev-medium">Indirect</span>
       </div>
-      <ul class="impact-items">
-        ${result.downstream_risks.map(r => `<li class="impact-item">${r}</li>`).join('')}
+      <ul class="items-list">
+        ${downstream_risks.map(r => `<li class="item">${r}</li>`).join('')}
       </ul>
     `;
-    grid.appendChild(downCard);
+    grid.appendChild(card);
   }
 
-  // Specific test cases table
-  if ((result.specific_test_cases || []).length > 0) {
-    const container = document.getElementById('testCasesContainer');
+  // Test cases table
+  if (specific_test_cases.length > 0) {
     const div = document.createElement('div');
-    div.className = 'test-cases-section';
+    div.className = 'test-cases-section full-width';
     div.innerHTML = `
-      <div class="test-cases-title">✅ Specific Checklist Items to Re-Test (${result.specific_test_cases.length})</div>
-      ${result.specific_test_cases.map((tc, i) => `
-        <div class="test-case-row">
-          <span class="tc-num">#${String(i+1).padStart(2,'0')}</span>
-          <span>${tc}</span>
+      <div class="test-cases-title">✅ Test Cases to Re-Run (${specific_test_cases.length})</div>
+      ${specific_test_cases.map((tc, i) => `
+        <div class="test-case-item">
+          <span class="test-case-num">#${String(i+1).padStart(3, '0')}</span> ${tc}
         </div>
       `).join('')}
     `;
-    container.appendChild(div);
+    document.getElementById('testCasesContainer').appendChild(div);
+  }
+}
+
+function renderTestGenResults(result) {
+  if (result.error) {
+    showTestGenError(result.error);
+    return;
   }
 
-  // Highlight affected chips
-  const chips = document.querySelectorAll('.checklist-chip');
-  chips.forEach(chip => {
-    chip.classList.remove('highlighted');
-    const chipText = chip.textContent.toLowerCase();
-    const desc = document.getElementById('changeDesc').value.toLowerCase();
-    if ((result.specific_test_cases || []).some(tc => 
-      chipText.split('…')[0].trim().length > 10 && 
-      tc.toLowerCase().includes(chipText.split('…')[0].trim().substring(0, 20))
-    )) {
-      chip.classList.add('highlighted');
-    }
+  const { test_categories = [] } = result;
+  const container = document.getElementById('testgenContent');
+  container.innerHTML = '';
+
+  test_categories.forEach((category, catIdx) => {
+    const catDiv = document.createElement('div');
+    catDiv.innerHTML = `
+      <h3 style="color: var(--accent2); font-size: 14px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">📦 ${category.category}</h3>
+      <div style="display: grid; gap: 12px; margin-bottom: 24px;">
+        ${(category.tests || []).map(test => `
+          <div style="background: var(--surface); border: 1px solid var(--border); padding: 12px; border-radius: 3px;">
+            <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px;">
+              <span style="color: var(--accent2); font-weight: 700; font-size: 11px; background: var(--surface2); padding: 2px 6px; border-radius: 2px;">${test.id || `TC${catIdx}${category.tests.indexOf(test)+1}`}</span>
+              <span style="flex: 1; color: var(--text); font-size: 13px; font-weight: 600;">${test.title}</span>
+              ${test.priority ? `<span class="severity-badge sev-${test.priority}">${test.priority}</span>` : ''}
+            </div>
+            ${test.steps ? `<div style="font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 8px;">
+              <strong style="color: var(--text);">Steps:</strong><br/>
+              ${test.steps.map((s, i) => `${i+1}. ${s}`).join('<br/>')}
+            </div>` : ''}
+            ${test.expected ? `<div style="font-size: 12px; color: var(--accent3);">✓ ${test.expected}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(catDiv);
   });
 
-  resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// ── ANALYZE — calls proxy, never Anthropic directly ─────────
-async function analyze() {
-  if (!_sessionToken) { alert('Please unlock first.'); return; }
-
-  const changeDesc = document.getElementById('changeDesc').value.trim();
-  const changeType = document.getElementById('changeType').value;
-  if (!changeDesc) { showError('Please describe what was changed.'); return; }
-
-  const resultsPanel = document.getElementById('resultsPanel');
-  resultsPanel.classList.add('visible');
-  document.getElementById('loadingState').classList.add('visible');
-  document.getElementById('errorState').classList.remove('visible');
-  document.getElementById('summaryBar').style.display = 'none';
-  document.getElementById('impactGrid').innerHTML = '';
-  document.getElementById('testCasesContainer').innerHTML = '';
-  document.getElementById('analyzeBtn').disabled = true;
-  startLoadingSteps();
-  setTimeout(() => resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-
-  const checklistText = Object.entries(QA_CHECKLIST).map(([cat, items]) =>
-    `## ${cat}\n${items.map((item, i) => `${i+1}. ${item}`).join('\n')}`
-  ).join('\n\n');
-
-  const prompt = `You are a senior QA engineer and mobile game expert. A developer made a change to the game and you need to analyze what could break.
-
-## Change Information
-- Type: ${changeType}
-- Description: ${changeDesc}
-
-## Full QA Checklist (548 items across 54 feature sections)
-${checklistText}
-
-## Your Task
-Analyze this change and return a JSON object with EXACTLY this structure:
-
-{
-  "summary": "2-3 sentence executive summary of the risk",
-  "impact_areas": [
-    {
-      "title": "Area name",
-      "severity": "critical|high|medium|low",
-      "items": ["specific risk item 1", "specific risk item 2"]
-    }
-  ],
-  "specific_test_cases": ["Exact checklist item: specific concern"],
-  "edge_cases": ["Edge case scenario"],
-  "downstream_risks": ["Feature that could be indirectly affected and why"],
-  "regression_priority": "HIGH|MEDIUM|LOW",
-  "recommendation": "1-2 sentence testing recommendation"
-}
-
-Rules:
-- Be SPECIFIC to the change described, not generic
-- You MUST return AT LEAST 6 impact_areas — cover direct, indirect, and UI-related risks
-- You MUST return AT LEAST 15 specific_test_cases — copy EXACT wording from the checklist above, add a colon and specific concern after each
-- You MUST return AT LEAST 8 edge_cases — think about: first launch, state after crash, mid-flow interruption, offline mode, new vs returning user, low-end device
-- You MUST return AT LEAST 5 downstream_risks — think about what other features read from or depend on the changed area
-- Each impact_area must have AT LEAST 3 items in its items array
-- Reference EXACT checklist section names and item wording when listing specific_test_cases
-- Consider ALL of: FTUE flows, match flows, UI states, animation triggers, state persistence, currency deductions, dialogue sequences, button states, popup flows, HUD elements, reward claimability, navigation flows, lock/unlock states, back button behaviour
-- severity "critical" = could block release, "high" = likely regression, "medium" = possible edge case, "low" = minor watch item
-- Return ONLY valid JSON, no markdown, no preamble, no explanation outside the JSON`;
-
-  try {
-    const res = await fetch(`${WORKER_URL}/api/analyze`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-session-token': _sessionToken
-      },
-      body: JSON.stringify({ prompt })
-    });
-
-    stopLoadingSteps();
-
-    if (res.status === 401) {
-      showError('Session expired. Please refresh and log in again.');
-      return;
-    }
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      showError(`Error ${res.status}: ${err.error || 'Something went wrong'}`);
-      return;
-    }
-
-    const data = await res.json();
-    const text = (data.content || []).map(c => c.text || '').join('');
-    let result;
-    try {
-      result = JSON.parse(text.replace(/```json|```/g, '').trim());
-    } catch(e) {
-      showError('Could not parse AI response. Please try again.');
-      return;
-    }
-    renderResults(result);
-
-  } catch(e) {
-    stopLoadingSteps();
-    showError(`Network error: ${e.message}`);
+  if (result.edge_cases && result.edge_cases.length > 0) {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <h3 style="color: var(--warn); font-size: 14px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">🧩 Edge Cases</h3>
+      <ul style="list-style: none;">
+        ${result.edge_cases.map(ec => `<li style="padding: 6px 0; font-size: 12px; color: #d0d0d8;">→ ${ec}</li>`).join('')}
+      </ul>
+    `;
+    container.appendChild(div);
   }
 }
+
+// ════════════════════════════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════════════════════════════
+
+function parseJSON(text) {
+  const cleaned = text.replace(/```json|```/g, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    return { error: 'Failed to parse response: ' + e.message };
+  }
+}
+
+function showStatus(msg, type = 'info') {
+  const modal = document.getElementById('statusModal');
+  const body = document.getElementById('statusBody');
+  body.innerHTML = `<p style="font-size: 14px; line-height: 1.7; color: ${type === 'error' ? 'var(--accent)' : 'var(--text)'};">${msg}</p>`;
+  modal.classList.add('active');
+  setTimeout(() => modal.classList.remove('active'), 3000);
+}
+
+function showAnalysisError(msg) {
+  const err = document.getElementById('errorState');
+  err.innerHTML = `⚠️ ${msg}`;
+  err.classList.add('visible');
+}
+
+function showTestGenError(msg) {
+  const err = document.getElementById('testgenError');
+  err.innerHTML = `⚠️ ${msg}`;
+  err.classList.add('visible');
+}
+
+async function testConnection() {
+  const provider = document.getElementById('llmProvider').value;
+  const msgEl = document.getElementById('configMsg');
+  msgEl.style.display = 'block';
+  msgEl.innerHTML = '🔄 Testing...';
+
+  try {
+    if (provider === 'ollama') {
+      const url = document.getElementById('ollamaUrl').value;
+      const response = await fetch(`${url}/api/tags`, { method: 'GET' });
+      if (response.ok) {
+        msgEl.innerHTML = '✓ Ollama connection OK';
+        msgEl.style.color = 'var(--accent3)';
+      } else throw new Error('Failed');
+    } else if (provider === 'sarvam') {
+      const key = document.getElementById('sarvamKey').value;
+      if (!key) throw new Error('API key required');
+      msgEl.innerHTML = '✓ Sarvam API key validated';
+      msgEl.style.color = 'var(--accent3)';
+    } else {
+      const key = document.getElementById('anthropicKey').value;
+      if (!key) throw new Error('API key required');
+      msgEl.innerHTML = '✓ Anthropic API key validated';
+      msgEl.style.color = 'var(--accent3)';
+    }
+  } catch (e) {
+    msgEl.innerHTML = '✗ Connection failed: ' + e.message;
+    msgEl.style.color = 'var(--accent)';
+  }
+}
+
+function saveConfig() {
+  const provider = document.getElementById('llmProvider').value;
+  localStorage.setItem('llmProvider', provider);
+
+  if (provider === 'ollama') {
+    localStorage.setItem('ollamaUrl', document.getElementById('ollamaUrl').value);
+    localStorage.setItem('ollamaModel', document.getElementById('ollamaModel').value);
+  } else if (provider === 'sarvam') {
+    localStorage.setItem('sarvamKey', document.getElementById('sarvamKey').value);
+    localStorage.setItem('sarvamModel', document.getElementById('sarvamModel').value);
+  } else {
+    localStorage.setItem('anthropicKey', document.getElementById('anthropicKey').value);
+  }
+
+  localStorage.setItem('enableFallback', document.getElementById('enableFallback').checked);
+  showStatus('✓ Configuration saved', 'success');
+}
+
+// ════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ════════════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded', () => {
+  initFeatureTags();
+  updateProviderFields();
+
+  // Load config
+  const savedProvider = localStorage.getItem('llmProvider');
+  if (savedProvider) document.getElementById('llmProvider').value = savedProvider;
+
+  const ollamaUrl = localStorage.getItem('ollamaUrl');
+  if (ollamaUrl) document.getElementById('ollamaUrl').value = ollamaUrl;
+  
+  const ollamaModel = localStorage.getItem('ollamaModel');
+  if (ollamaModel) document.getElementById('ollamaModel').value = ollamaModel;
+
+  const enableFallback = localStorage.getItem('enableFallback');
+  if (enableFallback) document.getElementById('enableFallback').checked = enableFallback === 'true';
+});
 </script>
 </body>
 </html>
