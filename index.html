@@ -3,1973 +3,1939 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QA Blueprint — Impact Analyzer</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<title>QA Blueprint · Hitwicket</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #1a1a24;
-    --border: #2a2a3a;
-    --accent: #ff4d6d;
-    --accent2: #00d4ff;
-    --accent3: #b4ff58;
-    --text: #e8e8f0;
-    --muted: #6b6b80;
-    --warn: #ffb347;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: 
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px 80px;
-  }
-
-  /* Header */
-  header {
-    padding: 40px 0 32px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 40px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-
-  .logo-area {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .logo-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 4px;
-    color: var(--accent2);
-    text-transform: uppercase;
-  }
-
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: clamp(28px, 5vw, 48px);
-    line-height: 1;
-    color: var(--text);
-  }
-
-  h1 span {
-    color: var(--accent);
-  }
-
-  .header-badge {
-    background: linear-gradient(135deg, var(--accent), #ff8c42);
-    color: white;
-    font-size: 10px;
-    letter-spacing: 2px;
-    padding: 6px 14px;
-    border-radius: 2px;
-    text-transform: uppercase;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  /* Main layout */
-  .main-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-
-  @media (max-width: 768px) {
-    .main-grid { grid-template-columns: 1fr; }
-  }
-
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .panel-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface2);
-  }
-
-  .panel-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent2);
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  .panel-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text);
-  }
-
-  .panel-body {
-    padding: 20px;
-  }
-
-  /* Form elements */
-  label {
-    display: block;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-
-  textarea, input, select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    padding: 12px 14px;
-    border-radius: 3px;
-    outline: none;
-    transition: border-color 0.2s;
-    resize: vertical;
-  }
-
-  textarea:focus, input:focus, select:focus {
-    border-color: var(--accent2);
-  }
-
-  textarea {
-    min-height: 120px;
-    line-height: 1.6;
-  }
-
-  .field-group {
-    margin-bottom: 18px;
-  }
-
-  /* Feature tags */
-  .feature-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 12px;
-  }
-
-  .feature-tag {
-    padding: 5px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-  }
-
-  .feature-tag:hover { border-color: var(--accent2); color: var(--accent2); }
-  .feature-tag.active { 
-    background: rgba(0,212,255,0.1); 
-    border-color: var(--accent2); 
-    color: var(--accent2); 
-  }
-
-  /* Analyze button */
-  .analyze-btn {
-    width: 100%;
-    padding: 16px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 15px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-    margin-top: 8px;
-    border-radius: 3px;
-  }
-
-  .analyze-btn:hover { background: #ff2d55; transform: translateY(-1px); }
-  .analyze-btn:active { transform: translateY(0); }
-  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-  .analyze-btn .btn-shimmer {
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-    animation: shimmer 2s infinite;
-  }
-
-  @keyframes shimmer {
-    0% { left: -100%; }
-    100% { left: 100%; }
-  }
-
-  /* Results area */
-  .results-panel {
-    grid-column: 1 / -1;
-    display: none;
-  }
-
-  .results-panel.visible { display: block; }
-
-  /* Loading state */
-  .loading-state {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .loading-state.visible { display: flex; }
-
-  .loader-ring {
-    width: 48px;
-    height: 48px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .loading-text {
-    color: var(--muted);
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .loading-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .loading-step {
-    font-size: 12px;
-    color: var(--muted);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .loading-step.active {
-    color: var(--accent2);
-    opacity: 1;
-  }
-
-  /* Impact sections */
-  .impact-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-    padding: 20px;
-  }
-
-  .impact-card {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 18px;
-    animation: fadeInUp 0.4s ease forwards;
-    opacity: 0;
-  }
-
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .impact-card:nth-child(1) { animation-delay: 0.05s; }
-  .impact-card:nth-child(2) { animation-delay: 0.1s; }
-  .impact-card:nth-child(3) { animation-delay: 0.15s; }
-  .impact-card:nth-child(4) { animation-delay: 0.2s; }
-  .impact-card:nth-child(5) { animation-delay: 0.25s; }
-  .impact-card:nth-child(6) { animation-delay: 0.3s; }
-
-  .impact-card-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .severity-badge {
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 2px;
-    font-weight: 700;
-  }
-
-  .sev-critical { background: rgba(255,77,109,0.15); color: var(--accent); border: 1px solid rgba(255,77,109,0.3); }
-  .sev-high { background: rgba(255,179,71,0.15); color: var(--warn); border: 1px solid rgba(255,179,71,0.3); }
-  .sev-medium { background: rgba(0,212,255,0.1); color: var(--accent2); border: 1px solid rgba(0,212,255,0.2); }
-  .sev-low { background: rgba(180,255,88,0.1); color: var(--accent3); border: 1px solid rgba(180,255,88,0.2); }
-
-  .impact-card-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    flex: 1;
-  }
-
-  .impact-items {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .impact-item {
-    font-size: 12px;
-    line-height: 1.6;
-    color: #c8c8d8;
-    padding-left: 14px;
-    position: relative;
-  }
-
-  .impact-item::before {
-    content: '→';
-    position: absolute;
-    left: 0;
-    color: var(--accent2);
-    font-size: 10px;
-    top: 2px;
-  }
-
-  /* Summary bar */
-  .summary-bar {
-    padding: 16px 20px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-    background: var(--surface2);
-  }
-
-  .summary-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .stat-num {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-  }
-
-  .stat-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .stat-critical .stat-num { color: var(--accent); }
-  .stat-high .stat-num { color: var(--warn); }
-  .stat-medium .stat-num { color: var(--accent2); }
-  .stat-low .stat-num { color: var(--accent3); }
-
-  /* API key input */
-  .api-key-section {
-    margin-bottom: 20px;
-  }
-
-  .key-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .key-row input {
-    flex: 1;
-  }
-
-  .key-toggle {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 12px 14px;
-    cursor: pointer;
-    font-size: 11px;
-    letter-spacing: 1px;
-    border-radius: 3px;
-    white-space: nowrap;
-    transition: all 0.15s;
-  }
-
-  .key-toggle:hover { border-color: var(--accent2); color: var(--accent2); }
-
-  .key-status {
-    font-size: 11px;
-    margin-top: 6px;
-    padding: 6px 10px;
-    border-radius: 2px;
-    display: none;
-  }
-
-  .key-status.ok { 
-    background: rgba(180,255,88,0.1); 
-    color: var(--accent3); 
-    border: 1px solid rgba(180,255,88,0.2);
-    display: block;
-  }
-
-  .key-status.err { 
-    background: rgba(255,77,109,0.1); 
-    color: var(--accent); 
-    border: 1px solid rgba(255,77,109,0.2);
-    display: block;
-  }
-
-  /* Divider with text */
-  .section-divider {
-    text-align: center;
-    position: relative;
-    margin: 32px 0 24px;
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-  }
-
-  .section-divider::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 50%;
-    width: 100%; height: 1px;
-    background: var(--border);
-    z-index: 0;
-  }
-
-  .section-divider span {
-    position: relative;
-    z-index: 1;
-    background: var(--bg);
-    padding: 0 16px;
-  }
-
-  /* Checklist quick view */
-  .checklist-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    max-height: 160px;
-    overflow-y: auto;
-  }
-
-  .checklist-chip {
-    font-size: 10px;
-    padding: 3px 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    color: var(--muted);
-    letter-spacing: 0.3px;
-  }
-
-  .checklist-chip.highlighted {
-    background: rgba(255,77,109,0.1);
-    border-color: rgba(255,77,109,0.4);
-    color: var(--accent);
-  }
-
-  /* Error state */
-  .error-state {
-    display: none;
-    padding: 30px 20px;
-    text-align: center;
-    color: var(--accent);
-    font-size: 13px;
-    line-height: 1.7;
-  }
-
-  .error-state.visible { display: block; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* Info note */
-  .info-note {
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.6;
-    padding: 10px 14px;
-    background: rgba(0,212,255,0.04);
-    border: 1px solid rgba(0,212,255,0.1);
-    border-radius: 3px;
-    margin-top: 10px;
-  }
-
-  .full-width { grid-column: 1 / -1; }
-
-  .test-cases-section {
-    grid-column: 1 / -1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    margin: 0 20px 20px;
-    padding: 16px;
-  }
-
-  .test-cases-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent3);
-    margin-bottom: 12px;
-  }
-
-  .test-case-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    font-size: 12px;
-    line-height: 1.5;
-    color: #c8c8d8;
-  }
-
-  .test-case-row:last-child { border-bottom: none; }
-
-  .tc-num {
-    color: var(--accent2);
-    font-size: 11px;
-    min-width: 24px;
-    padding-top: 1px;
-  }
-
-</style>
-<style>
-
-  /* ── Lock Screen ── */
-  #lockScreen {
-    position: fixed; inset: 0; z-index: 9999;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column;
-  }
-  #lockScreen::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-  }
-  .lock-box {
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 48px 40px 40px;
-    width: 100%;
-    max-width: 420px;
-    text-align: center;
-    box-shadow: 0 0 60px rgba(255,77,109,0.08);
-  }
-  .lock-icon {
-    font-size: 36px;
-    margin-bottom: 20px;
-    display: block;
-  }
-  .lock-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .lock-sub {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 28px;
-  }
-  .lock-input-wrap {
-    display: flex; gap: 8px; margin-bottom: 12px;
-  }
-  .lock-input-wrap input {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    padding: 12px 14px;
-    border-radius: 3px;
-    outline: none;
-    letter-spacing: 3px;
-    transition: border-color 0.2s;
-  }
-  .lock-input-wrap input:focus { border-color: var(--accent2); }
-  .lock-input-wrap input::placeholder { letter-spacing: 1px; color: var(--muted); font-size: 12px; }
-  .lock-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: background 0.2s;
-    white-space: nowrap;
-  }
-  .lock-btn:hover { background: #ff2d55; }
-  .lock-error {
-    font-size: 12px;
-    color: var(--accent);
-    min-height: 18px;
-    margin-top: 4px;
-  }
-  .lock-attempts {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 16px;
-    letter-spacing: 1px;
-  }
-  .lock-shake {
-    animation: shake 0.4s ease;
-  }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20%      { transform: translateX(-8px); }
-    40%      { transform: translateX(8px); }
-    60%      { transform: translateX(-5px); }
-    80%      { transform: translateX(5px); }
-  }
-
+:root {
+  --bg:   #06060e;
+  --s1:   #0b0b16;
+  --s2:   #10101e;
+  --s3:   #161628;
+  --s4:   #1c1c32;
+  --bd:   #1e1e38;
+  --bd2:  #272748;
+  --bd3:  #323260;
+  --dim:  #3a3a5c;
+  --mute: #545478;
+  --fog:  #7070a0;
+  --mist: #9898c0;
+  --ghost:#c0c0e0;
+  --text: #e8e8f8;
+  --red:    #ff2d55;
+  --red2:   #ff607a;
+  --jade:   #00d4a0;
+  --jade2:  #00ffbf;
+  --blue:   #3d8eff;
+  --blue2:  #7ab4ff;
+  --gold:   #ffcc00;
+  --gold2:  #ffe066;
+  --purple: #b87fff;
+  --orange: #ff9f43;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --disp: 'Bebas Neue', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(61,142,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,142,255,.018) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 700px 450px at 10% 0%, rgba(61,142,255,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 350px at 90% 100%, rgba(184,127,255,.05) 0%, transparent 60%);
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+#loginScreen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+#loginScreen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 65% 55% at 50% 38%, rgba(61,142,255,.07), transparent 70%);
+}
+.login-card {
+  position: relative;
+  background: var(--s1); border: 1px solid var(--bd2); border-radius: 12px;
+  padding: 52px 44px 44px; width: 100%; max-width: 400px; text-align: center;
+  box-shadow: 0 0 80px rgba(61,142,255,.07), 0 0 0 1px rgba(255,255,255,.03) inset;
+}
+.login-emblem {
+  width: 60px; height: 60px; margin: 0 auto 24px;
+  background: linear-gradient(145deg, var(--red) 0%, var(--purple) 100%);
+  border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; box-shadow: 0 8px 28px rgba(255,45,85,.25);
+}
+.login-title { font-family: var(--disp); font-size: 32px; letter-spacing: 5px; color: var(--text); margin-bottom: 4px; }
+.login-sub { font-family: var(--mono); font-size: 10px; letter-spacing: 3px; color: var(--mute); text-transform: uppercase; margin-bottom: 36px; }
+.google-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 13px 16px; background: #fff; border: none; border-radius: 8px;
+  font-family: var(--sans); font-size: 14px; font-weight: 500; color: #333;
+  cursor: pointer; transition: all .2s;
+}
+.google-btn:hover { opacity: .92; transform: translateY(-1px); }
+.google-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.login-note { margin-top: 16px; font-family: var(--mono); font-size: 10px; color: var(--mute); line-height: 1.8; }
+.login-note b { color: var(--blue2); }
+.login-err {
+  margin-top: 12px; padding: 9px 12px;
+  background: rgba(255,45,85,.08); border: 1px solid rgba(255,45,85,.2);
+  border-radius: 6px; font-family: var(--mono); font-size: 11px;
+  color: var(--red2); display: none; text-align: left;
+}
+.login-err.on { display: block; }
+.login-spinner { margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--mute); text-transform: uppercase; display: none; }
+
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(6,6,14,.94); border-bottom: 1px solid var(--bd);
+  backdrop-filter: blur(20px);
+  display: flex; align-items: stretch; padding: 0 20px; height: 52px;
+}
+.nav-brand {
+  font-family: var(--disp); font-size: 20px; letter-spacing: 4px; color: var(--text);
+  display: flex; align-items: center; padding: 0 20px 0 0; margin-right: 8px;
+  flex-shrink: 0; border-right: 1px solid var(--bd);
+}
+.nav-brand .acc { color: var(--red); }
+.nav-tabs { display: flex; flex: 1; overflow-x: auto; }
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab {
+  display: flex; align-items: center; gap: 6px; padding: 0 16px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--mute);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all .18s; user-select: none; white-space: nowrap;
+}
+.nav-tab:hover { color: var(--ghost); }
+.nav-tab.on { color: var(--blue); border-bottom-color: var(--blue); }
+.nav-tab.admin-tab { display: none; }
+.nav-badge {
+  background: var(--red); color: #fff;
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  padding: 1px 5px; border-radius: 20px; min-width: 16px; text-align: center;
+}
+.nav-end {
+  margin-left: auto; display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0; padding-left: 16px; border-left: 1px solid var(--bd);
+}
+.cloud-row { display: flex; align-items: center; gap: 6px; }
+.cloud-pip {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--mute);
+  flex-shrink: 0; transition: background .3s;
+}
+.cloud-pip.ok   { background: var(--jade); animation: pipblink 2.8s ease-in-out infinite; }
+.cloud-pip.err  { background: var(--red); }
+.cloud-pip.busy { background: var(--gold); }
+@keyframes pipblink { 0%,100%{opacity:1}50%{opacity:.3} }
+.cloud-lbl { font-family: var(--mono); font-size: 9px; color: var(--mute); }
+
+.provider-badge {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+  padding: 2px 7px; border-radius: 20px; text-transform: uppercase;
+  border: 1px solid; opacity: 0; transition: opacity .3s;
+}
+.provider-badge.on { opacity: 1; }
+.pb-anthropic { color: var(--orange); border-color: rgba(255,159,67,.3); background: rgba(255,159,67,.08); }
+.pb-openrouter{ color: var(--purple); border-color: rgba(184,127,255,.3); background: rgba(184,127,255,.08); }
+.pb-groq      { color: var(--jade);   border-color: rgba(0,212,160,.3);   background: rgba(0,212,160,.08); }
+
+.user-chip {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--s2); border: 1px solid var(--bd);
+  border-radius: 20px; padding: 4px 11px 4px 4px;
+  cursor: pointer; transition: border-color .18s;
+}
+.user-chip:hover { border-color: var(--bd2); }
+.user-av {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 9px; font-weight: 700; color: #fff;
+  overflow: hidden; flex-shrink: 0;
+}
+.user-av img { width: 100%; height: 100%; object-fit: cover; }
+.user-nm  { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--mist); }
+.role-tag { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 1px 5px; border-radius: 3px; }
+.role-admin  { background: rgba(255,204,0,.1);  color: var(--gold);  border: 1px solid rgba(255,204,0,.2); }
+.role-viewer { background: rgba(61,142,255,.1); color: var(--blue2); border: 1px solid rgba(61,142,255,.2); }
+
+/* ══ LAYOUT ══ */
+.wrap { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; padding: 28px 20px 100px; }
+.tab-pane { display: none; }
+.tab-pane.on { display: block; animation: fadein .22s ease; }
+@keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.page-hd { margin-bottom: 24px; }
+.page-hd h2 { font-family: var(--disp); font-size: 30px; letter-spacing: 4px; color: var(--text); }
+.page-hd h2 span { color: var(--red); }
+.page-hd p { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.7; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:840px) { .g2 { grid-template-columns: 1fr; } }
+
+.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; }
+.panel-hd {
+  padding: 11px 16px; border-bottom: 1px solid var(--bd); background: var(--s2);
+  display: flex; align-items: center; gap: 8px;
+}
+.pdot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+.pdot.r { background: var(--red); }
+.pdot.g { background: var(--jade); }
+.pdot.y { background: var(--gold); }
+.panel-title { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--mist); }
+.panel-acts { margin-left: auto; display: flex; gap: 6px; }
+.panel-body { padding: 16px; }
+
+.fg { margin-bottom: 14px; }
+.fg:last-child { margin-bottom: 0; }
+.fl { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mute); margin-bottom: 6px; }
+textarea, input[type=text], select {
+  width: 100%; background: rgba(0,0,0,.3); border: 1px solid var(--bd2);
+  color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 9px 12px; border-radius: 6px; outline: none;
+  transition: border-color .18s, box-shadow .18s;
+}
+textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
+textarea:focus, input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(61,142,255,.1); }
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23545478'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
+}
+select option { background: var(--s2); }
+.g2-f { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:540px) { .g2-f { grid-template-columns: 1fr; } }
+
+.tag-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+.tag {
+  padding: 3px 9px; background: var(--s3); border: 1px solid var(--bd2);
+  border-radius: 20px; font-family: var(--mono); font-size: 10px;
+  cursor: pointer; transition: all .15s; color: var(--mute); user-select: none;
+}
+.tag:hover { border-color: var(--blue); color: var(--blue2); }
+.tag.on { background: rgba(61,142,255,.1); border-color: var(--blue); color: var(--blue2); font-weight: 700; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 16px; font-family: var(--disp); letter-spacing: 2px;
+  font-size: 13px; border: none; border-radius: 6px;
+  cursor: pointer; transition: all .18s; text-transform: uppercase; white-space: nowrap;
+}
+.btn:disabled { opacity: .35; cursor: not-allowed; transform: none !important; }
+.btn-red  { background: var(--red); color: #fff; width: 100%; box-shadow: 0 4px 16px rgba(255,45,85,.2); }
+.btn-red:hover:not(:disabled)  { opacity: .9; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(255,45,85,.3); }
+.btn-jade { background: var(--jade); color: #000; font-weight: 700; width: 100%; box-shadow: 0 4px 16px rgba(0,212,160,.15); }
+.btn-jade:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+.btn-ghost { background: var(--s3); color: var(--mist); border: 1px solid var(--bd2); font-size: 11px; }
+.btn-ghost:hover { border-color: var(--blue); color: var(--blue2); background: rgba(61,142,255,.06); }
+.btn-excel { background: rgba(0,212,160,.1); color: var(--jade); border: 1px solid rgba(0,212,160,.25); font-size: 11px; }
+.btn-excel:hover { background: rgba(0,212,160,.2); }
+.btn-copy  { background: rgba(61,142,255,.1); color: var(--blue2); border: 1px solid rgba(61,142,255,.2); font-size: 11px; }
+.btn-copy:hover  { background: rgba(61,142,255,.2); }
+.btn-sm { padding: 6px 12px; font-size: 11px; letter-spacing: 1.5px; }
+.btn-xs { padding: 4px 9px; font-size: 10px; letter-spacing: 1px; }
+
+.drop-zone {
+  border: 2px dashed var(--bd2); border-radius: 8px;
+  padding: 24px 16px; text-align: center; cursor: pointer;
+  transition: all .18s; position: relative;
+}
+.drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.drop-zone:hover, .drop-zone.drag { border-color: var(--blue); background: rgba(61,142,255,.03); }
+.drop-zone.loaded { border-color: var(--jade); border-style: solid; }
+.drop-icon { font-size: 24px; display: block; margin-bottom: 8px; }
+.drop-text { font-family: var(--mono); font-size: 11px; color: var(--mute); line-height: 1.8; }
+.drop-text b { color: var(--ghost); }
+.file-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(0,212,160,.08); border: 1px solid rgba(0,212,160,.2);
+  border-radius: 20px; padding: 4px 11px;
+  font-family: var(--mono); font-size: 11px; color: var(--jade); margin-top: 8px;
+}
+.file-chip-rm { cursor: pointer; color: var(--red2); font-size: 14px; line-height: 1; }
+
+.stats-bar { display: flex; gap: 0; flex-wrap: wrap; background: var(--s2); border-bottom: 1px solid var(--bd); }
+.stat-cell { display: flex; flex-direction: column; gap: 3px; padding: 12px 20px; border-right: 1px solid var(--bd); }
+.stat-num { font-family: var(--disp); font-size: 24px; line-height: 1; }
+.stat-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mute); }
+.c-red    { color: var(--red); }
+.c-orange { color: var(--orange); }
+.c-blue   { color: var(--blue2); }
+.c-jade   { color: var(--jade); }
+.c-gold   { color: var(--gold2); }
+.c-ghost  { color: var(--ghost); }
+.c-purple { color: var(--purple); }
+
+.impact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 10px; }
+.icard { background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; padding: 13px; }
+.icard-hd { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--bd); }
+.icard-title { font-size: 12px; font-weight: 600; flex: 1; color: var(--text); }
+.sev { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 20px; font-weight: 700; }
+.sev-critical { background: rgba(255,45,85,.12); color: var(--red);    border: 1px solid rgba(255,45,85,.25); }
+.sev-high     { background: rgba(255,159,67,.1);  color: var(--orange); border: 1px solid rgba(255,159,67,.22); }
+.sev-medium   { background: rgba(61,142,255,.1);  color: var(--blue2);  border: 1px solid rgba(61,142,255,.2); }
+.sev-low      { background: rgba(0,212,160,.08);  color: var(--jade);   border: 1px solid rgba(0,212,160,.18); }
+.icard ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.icard li { font-size: 11px; line-height: 1.65; color: var(--mist); padding-left: 14px; position: relative; }
+.icard li::before { content: '›'; position: absolute; left: 0; color: var(--blue); font-size: 13px; line-height: 1.4; }
+
+.tc-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.tc-table th {
+  background: var(--s3); padding: 7px 9px; text-align: left;
+  font-family: var(--mono); font-size: 8px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--mute); border-bottom: 1px solid var(--bd);
+  white-space: nowrap; position: sticky; top: 0; z-index: 1;
+}
+.tc-table td { padding: 7px 9px; border-bottom: 1px solid rgba(255,255,255,.03); color: var(--mist); vertical-align: top; line-height: 1.55; }
+.tc-table tr:hover td { background: rgba(61,142,255,.025); }
+.tc-id { font-family: var(--mono); font-size: 9px; color: var(--blue2); white-space: nowrap; font-weight: 700; }
+.prio { font-family: var(--mono); font-size: 8px; letter-spacing: .5px; text-transform: uppercase; padding: 2px 6px; border-radius: 20px; white-space: nowrap; font-weight: 700; }
+.p0 { background: rgba(255,45,85,.12);  color: var(--red); }
+.p1 { background: rgba(255,159,67,.1);  color: var(--orange); }
+.p2 { background: rgba(61,142,255,.1);  color: var(--blue2); }
+.p3 { background: rgba(0,212,160,.08);  color: var(--jade); }
+.tbl-scroll { overflow-x: auto; max-height: 520px; overflow-y: auto; }
+.tbl-scroll::-webkit-scrollbar { height: 3px; width: 3px; }
+
+.import-preview { background: var(--bg); border: 1px solid var(--bd); border-radius: 8px; overflow: hidden; }
+.import-preview-hd {
+  padding: 9px 13px; background: var(--s2); border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.import-stat { font-family: var(--mono); font-size: 11px; color: var(--mute); }
+.import-stat b { color: var(--text); }
+.chunk-item { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.03); display: flex; align-items: flex-start; gap: 10px; }
+.chunk-item:last-child { border-bottom: none; }
+.chunk-check { width: 14px; height: 14px; accent-color: var(--blue); cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+.chunk-body { flex: 1; }
+.chunk-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 3px; }
+.chunk-title { font-size: 12px; font-weight: 500; color: var(--text); }
+.chunk-meta { font-family: var(--mono); font-size: 10px; color: var(--mute); margin-bottom: 4px; }
+.chunk-preview { font-family: var(--mono); font-size: 10px; color: var(--dim); line-height: 1.5; }
+.chunk-edit { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+.chunk-edit input, .chunk-edit select { padding: 3px 8px; font-size: 10px; background: var(--s3); border: 1px solid var(--bd2); color: var(--text); border-radius: 4px; outline: none; }
+.chunk-edit input { flex: 1; min-width: 100px; }
+.chunk-edit select { width: auto; }
+.type-badge { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 7px; border-radius: 20px; }
+.tb-tc   { background: rgba(61,142,255,.1);  color: var(--blue2);  border: 1px solid rgba(61,142,255,.2); }
+.tb-prd  { background: rgba(0,212,160,.08);  color: var(--jade);   border: 1px solid rgba(0,212,160,.18); }
+.tb-code { background: rgba(184,127,255,.08);color: var(--purple); border: 1px solid rgba(184,127,255,.18); }
+.tb-note { background: rgba(255,204,0,.07);  color: var(--gold2);  border: 1px solid rgba(255,204,0,.18); }
+.tb-feat { background: rgba(255,45,85,.08);  color: var(--red2);   border: 1px solid rgba(255,45,85,.18); }
+.prog-track { background: var(--s3); border-radius: 2px; height: 4px; overflow: hidden; margin-top: 10px; }
+.prog-bar   { background: var(--jade); height: 100%; border-radius: 2px; width: 0%; transition: width .25s; }
+.prog-lbl   { font-family: var(--mono); font-size: 10px; color: var(--mute); text-align: center; margin-top: 5px; }
+.prog-log   { font-family: var(--mono); font-size: 10px; color: var(--mute); line-height: 1.6; max-height: 100px; overflow-y: auto; margin-top: 7px; }
+
+.loader { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 48px 16px; text-align: center; }
+.loader.on { display: flex; }
+.spin { width: 32px; height: 32px; border: 2px solid var(--bd); border-top-color: var(--red); border-right-color: var(--purple); border-radius: 50%; animation: spin .65s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-track { width: 160px; height: 2px; background: var(--bd); border-radius: 1px; overflow: hidden; }
+.load-bar { height: 100%; background: linear-gradient(90deg, var(--red), var(--purple), var(--blue)); animation: loadslide 1.8s ease-in-out infinite; border-radius: 1px; }
+@keyframes loadslide { 0%{width:0%;margin-left:0} 50%{width:60%;margin-left:20%} 100%{width:0%;margin-left:100%} }
+.load-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--mute); text-transform: uppercase; }
+
+.load-provider {
+  font-family: var(--mono); font-size: 9px; color: var(--mute);
+  letter-spacing: 1px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 5px;
+}
+.load-provider-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--mute); }
+
+#toast {
+  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  background: var(--s2); border: 1px solid var(--bd2); border-radius: 8px; padding: 10px 16px;
+  font-family: var(--mono); font-size: 11px; color: var(--text);
+  opacity: 0; transform: translateY(50px);
+  transition: all .28s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none; max-width: 360px; box-shadow: 0 8px 28px rgba(0,0,0,.5);
+}
+#toast.on { opacity: 1; transform: translateY(0); }
+#toast.ok  { border-left: 3px solid var(--jade); }
+#toast.err { border-left: 3px solid var(--red); }
+#toast.info{ border-left: 3px solid var(--blue); }
+
+.dl-bar {
+  display: flex; gap: 7px; flex-wrap: wrap;
+  padding: 10px 14px; background: var(--s2); border-top: 1px solid var(--bd); align-items: center;
+}
+.dl-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--mute); }
+.empty-state { padding: 40px 14px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--mute); line-height: 1.9; }
+.empty-icon  { font-size: 30px; display: block; margin-bottom: 12px; opacity: .3; }
+.info-row { display: flex; gap: 8px; align-items: flex-start; font-family: var(--mono); font-size: 11px; color: var(--mist); padding: 6px 0; border-bottom: 1px solid var(--bd); line-height: 1.6; }
+.info-row:last-child { border-bottom: none; }
+.info-dot { color: var(--jade); flex-shrink: 0; }
+
+.hist-btn {
+  display: flex; align-items: center; gap: 6px; padding: 0 14px; height: 100%;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--mute); background: none; border: none; cursor: pointer;
+  border-left: 1px solid var(--bd); transition: color .18s; white-space: nowrap; flex-shrink: 0;
+}
+.hist-btn:hover { color: var(--ghost); }
+.hist-btn .hb-cnt { background: var(--blue); color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 20px; min-width: 16px; text-align: center; }
+.hist-drawer {
+  position: fixed; top: 52px; right: 0; bottom: 0; width: 380px; z-index: 200;
+  background: var(--s1); border-left: 1px solid var(--bd);
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform .25s cubic-bezier(.4,0,.2,1);
+  box-shadow: -8px 0 32px rgba(0,0,0,.4);
+}
+.hist-drawer.open { transform: translateX(0); }
+.hist-drawer-hd { padding: 14px 16px; border-bottom: 1px solid var(--bd); background: var(--s2); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.hist-drawer-title { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--mist); }
+.hist-drawer-close { background: none; border: none; color: var(--mute); font-size: 18px; cursor: pointer; line-height: 1; transition: color .15s; padding: 0 2px; }
+.hist-drawer-close:hover { color: var(--text); }
+.hist-filters { display: flex; border-bottom: 1px solid var(--bd); flex-shrink: 0; }
+.hist-filter-btn { flex: 1; padding: 8px 0; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--mute); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all .15s; }
+.hist-filter-btn:hover { color: var(--ghost); }
+.hist-filter-btn.on { color: var(--blue2); border-bottom-color: var(--blue); }
+.hist-list { flex: 1; overflow-y: auto; padding: 8px; }
+.hist-list::-webkit-scrollbar { width: 3px; }
+.hist-item { background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; padding: 11px 13px; margin-bottom: 7px; cursor: pointer; transition: all .15s; position: relative; }
+.hist-item:hover { border-color: var(--blue); background: rgba(61,142,255,.04); }
+.hist-item-top { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+.hist-item-type { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 7px; border-radius: 20px; }
+.ht-impact { background: rgba(255,45,85,.1);  color: var(--red2);  border: 1px solid rgba(255,45,85,.2); }
+.ht-prd    { background: rgba(61,142,255,.1); color: var(--blue2); border: 1px solid rgba(61,142,255,.2); }
+.hist-item-title { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-item-meta  { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-bottom: 4px; }
+.hist-item-preview { font-family: var(--mono); font-size: 10px; color: var(--smoke, #444466); line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.hist-item-del { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--dim); font-size: 13px; cursor: pointer; padding: 2px; border-radius: 3px; transition: color .15s; display: none; }
+.hist-item:hover .hist-item-del { display: block; }
+.hist-item-del:hover { color: var(--red2); }
+.hist-empty { padding: 40px 16px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--mute); line-height: 2; }
+.hist-overlay { position: fixed; inset: 0; z-index: 199; background: rgba(0,0,0,.3); display: none; }
+.hist-overlay.on { display: block; }
+.restored-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(61,142,255,.1); border: 1px solid rgba(61,142,255,.2);
+  border-radius: 20px; padding: 2px 9px;
+  font-family: var(--mono); font-size: 9px; color: var(--blue2); margin-left: 8px;
+}
 </style>
 </head>
 <body>
 
-<!-- ── LOCK SCREEN ── -->
-<div id="lockScreen">
-  <div class="lock-box" id="lockBox">
-    <span class="lock-icon">🔐</span>
-    <div class="lock-title">QA Blueprint</div>
-    <div class="lock-sub">Private Access Only</div>
-    <div class="lock-input-wrap">
-      <input type="password" id="pwdInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter')unlock()">
-      <button class="lock-btn" onclick="unlock()">Enter</button>
-    </div>
-    <div class="lock-error" id="lockError"></div>
-    <div class="lock-attempts" id="lockAttempts"></div>
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-emblem">🏏</div>
+    <div class="login-title">QA BLUEPRINT</div>
+    <div class="login-sub">Hitwicket Internal · v6</div>
+    <button class="google-btn" onclick="doGoogleSignIn()">
+      <svg viewBox="0 0 48 48">
+        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.2 6.6 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.2 6.6 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.7-3.3-11.3-8H6.1C9.5 36.2 16.2 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.6l6.2 5.2C41.1 35.3 44 30 44 24c0-1.3-.1-2.6-.4-3.9z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    <div class="login-note">Restricted to <b>@hitwicket.com</b> accounts only</div>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-spinner" id="loginSpinner">Verifying…</div>
   </div>
 </div>
 
-<div class="container">
-  <header>
-    <div class="logo-area">
-      <span class="logo-label">// Game Blueprint by Kunal Jade</span>
-      <h1><span> Hitwicket </span> Blueprint <span>Impact</span> Analyzer</h1>
+<div id="toast"></div>
+
+<nav class="nav">
+  <div class="nav-brand">QA <span class="acc">Automation Tool</span></div>
+  <div class="nav-tabs">
+    <div class="nav-tab on" id="t-impact" onclick="goTab('impact')">⚡ Analyzer</div>
+    <div class="nav-tab"    id="t-prd"    onclick="goTab('prd')">📋 PRD → TCs</div>
+    <div class="nav-tab admin-tab" id="t-import" onclick="goTab('import')">📥 Bulk Import</div>
+    <div class="nav-tab admin-tab" id="t-kb"     onclick="goTab('kb')">☁️ KB <span class="nav-badge" id="kbCnt">0</span></div>
+  </div>
+  <div class="nav-end">
+   
+    <span class="provider-badge" id="providerBadge"></span>
+    <div class="cloud-row">
+      <div class="cloud-pip" id="cpip"></div>
+      <span class="cloud-lbl" id="clbl">connecting…</span>
     </div>
-    <div class="header-badge">AI-Powered · Secure and Safe</div>
-  </header>
-
-  <div class="main-grid">
-    <!-- Left: Config -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-dot"></div>
-        <span class="panel-title">Change Description</span>
-      </div>
-      <div class="panel-body">
-        <div class="api-key-section">
-          <div class="info-note" style="display:flex; align-items:center; gap:8px;">
-            <span style="color:var(--accent3);">🔑</span>
-            <span>Secure mode active — API key stored server-side only.</span>
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label>What feature/area was changed?</label>
-          <textarea id="changeDesc" placeholder="e.g. Dev refactored the SA (Super Ability) activation flow — changed the mana fill detection logic and updated the hand pointer trigger timing..." rows="5"></textarea>
-        </div>
-
-        <div class="field-group">
-          <label>Quick-select feature area</label>
-          <div class="feature-tags" id="featureTags">
-            <span class="feature-tag" onclick="tagClick(this)" data-val="App Launch – Icon & PLAY CTA, App Launch – Login Methods">App Launch & Login</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 1 – Offline Mode & Initial Setup">FTUE: Offline & Setup</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 2 – Scouting & Match 1">Scouting & Match 1</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 3 – Training Tutorial">Training Tutorial</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 4 – Notifications & Connectivity">Notifications & Connectivity</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 5 – Match 2 Flow, FTUE 6 – Store & Super Chest">Match 2 / Store / Chest</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 7 – ESP Trigger & Dashboard">ESP & Dashboard (FTUE)</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 8 – League Unlock, FTUE 9 – PK Match Flow">League Unlock / PK Match</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="FTUE 10 – Post-LM1 Popups & Unlocks">Post-LM1 Unlocks</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Manager Profile">Manager Profile</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Icons Logic & Dashboard, HUD – Dashboard Elements">Dashboard & Icons</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Offers, Store – Season Store, Store – Featured Items">Store – Offers & Featured</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Chests">Store – Chests</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Store – Get Player, Store – Currencies">Store – Get Player & Currencies</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="HUDs – Energy / TP / HC">HUDs (Energy / TP / HC)</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="My Team – Squad, My Team – Player Detail">My Team – Squad & Player Detail</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="My Team – Lineup">Lineup & Team OVR</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Inventory – General, Inventory – Cosmetics, Inventory – Powerups">Inventory</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Auction">Auction</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Details & Join, Alliance – Friendlies & Search">Alliance – Details & Search</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Chat, Battle & Chibis">Alliance – Chat & Chibis</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Alliance – Daily Co-op, Alliance – Huddle & Invite / Automatch">Alliance – Co-op & Automatch</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Training Nets">Training Nets</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Season Pass">Season Pass</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Quests System">Quests System</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Play Button – Game Modes, League Mode">League Mode</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="PvP Mode">PvP Mode</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Hamburger – My Feed, Hamburger – Community">Hamburger Menu</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Inbox, Invite System">Inbox & Invite</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Leaderboard, Daily Login">Leaderboard & Daily Login</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Friends, Hitwicket TV">Friends & HW TV</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Settings – Audio & Quality, Settings – Connect & Social HC, Settings – Support & Rate Us">Settings</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Trophy Road, PvP Road">Trophy & PvP Road</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="MRP Progression Unlocks">MRP Progression</span>
-            <span class="feature-tag" onclick="tagClick(this)" data-val="Animations, SA activation, dialogue popup, hand pointer, fire animation, shatter animation">Animations & Visual FX</span>
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label>Type of change</label>
-          <select id="changeType">
-            <option value="bug fix">Bug Fix</option>
-            <option value="new feature">New Feature</option>
-            <option value="refactor">Refactor / Code Restructure</option>
-            <option value="UI/UX change">UI / UX Change</option>
-            <option value="API change">API / Backend Change</option>
-            <option value="performance optimization">Performance Optimization</option>
-            <option value="dependency update">Dependency / Library Update</option>
-          </select>
-        </div>
-
-        <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
-          <span class="btn-shimmer"></span>
-          ⚡ Hey let's Analyze Impact
-        </button>
-      </div>
-    </div>
-
-    <!-- Right: Checklist Coverage Map -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-dot" style="background: var(--accent3);"></div>
-        <span class="panel-title">QA Checklist Coverage</span>
-      </div>
-      <div style="padding: 14px 20px 10px; border-bottom: 1px solid var(--border);">
-        <div style="font-size: 11px; color: var(--muted); line-height: 1.6;">
-          The analyzer cross-references your change against <strong style="color: var(--text);">548 checklist items</strong> across <strong style="color: var(--text);">54 sections</strong> — covering both new user FTUE flow and the full current system. Every item from your hygiene doc and app launch sheet is loaded into the AI's context.
-        </div>
-      </div>
-      <div class="checklist-chips" id="checklistChips"></div>
-      <div style="padding: 14px 20px;">
-        <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase;">How to use</div>
-        <div style="font-size: 12px; color: #b0b0c0; line-height: 1.7;">
-          1. Enter password to unlock<br>
-          2. Describe what the developer changed<br>
-          3. Optionally quick-select the feature area<br>
-          4. Click <span style="color: var(--accent);">Analyze Impact</span> — the AI will tell you exactly which test cases are at risk, what edge cases to check, and which downstream features could break.
-        </div>
-      </div>
-    </div>
-
-    <!-- Results -->
-    <div class="panel results-panel" id="resultsPanel">
-      <div class="panel-header">
-        <div class="panel-dot" style="background: var(--accent); animation: none;"></div>
-        <span class="panel-title">Impact Analysis Report</span>
-        <span id="analysisTimestamp" style="margin-left: auto; font-size: 11px; color: var(--muted);"></span>
-      </div>
-      <div class="loading-state" id="loadingState">
-        <div class="loader-ring"></div>
-        <div class="loading-text">Analyzing change impact...</div>
-        <div class="loading-steps">
-          <div class="loading-step" id="step1">Parsing change description</div>
-          <div class="loading-step" id="step2">Cross-referencing 548 items across 54 sections</div>
-          <div class="loading-step" id="step3">Identifying at-risk test cases</div>
-          <div class="loading-step" id="step4">Generating edge case scenarios</div>
-          <div class="loading-step" id="step5">Mapping downstream dependencies</div>
-        </div>
-      </div>
-      <div class="error-state" id="errorState">
-        <div style="font-size: 24px; margin-bottom: 12px;">⚠</div>
-        <div id="errorMsg">Something went wrong.</div>
-      </div>
-      <div class="summary-bar" id="summaryBar" style="display:none;">
-        <div class="summary-stat stat-critical">
-          <span class="stat-num" id="countCritical">0</span>
-          <span class="stat-label">Critical</span>
-        </div>
-        <div class="summary-stat stat-high">
-          <span class="stat-num" id="countHigh">0</span>
-          <span class="stat-label">High Risk</span>
-        </div>
-        <div class="summary-stat stat-medium">
-          <span class="stat-num" id="countMedium">0</span>
-          <span class="stat-label">Medium</span>
-        </div>
-        <div class="summary-stat stat-low">
-          <span class="stat-num" id="countLow">0</span>
-          <span class="stat-label">Low / Watch</span>
-        </div>
-        <div class="summary-stat" style="margin-left: auto;">
-          <span class="stat-num" id="countTests" style="color: var(--text);">0</span>
-          <span class="stat-label">Test Cases Flagged</span>
-        </div>
-      </div>
-      <div class="impact-grid" id="impactGrid"></div>
-      <div id="testCasesContainer"></div>
+    <div class="user-chip" id="userChip" style="display:none;" onclick="doSignOut()">
+      <div class="user-av" id="uAv">?</div>
+      <span class="user-nm" id="uNm">—</span>
+      <span class="role-tag" id="uRole">viewer</span>
     </div>
   </div>
+  <button class="hist-btn" onclick="toggleHistory()" id="histBtn">
+    🕐 History <span class="hb-cnt" id="histCnt">0</span>
+  </button>
+</nav>
+
+<div class="hist-overlay" id="histOverlay" onclick="closeHistory()"></div>
+<div class="hist-drawer" id="histDrawer">
+  <div class="hist-drawer-hd">
+    <span class="hist-drawer-title">Analysis History</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--mute);" id="histUserLabel"></span>
+      <button class="hist-drawer-close" onclick="closeHistory()">✕</button>
+    </div>
+  </div>
+  <div class="hist-filters">
+    <button class="hist-filter-btn on" id="hf-all"    onclick="setHistFilter('all')">All</button>
+    <button class="hist-filter-btn"    id="hf-impact" onclick="setHistFilter('impact')">⚡ Impact</button>
+    <button class="hist-filter-btn"    id="hf-prd"    onclick="setHistFilter('prd')">📋 PRD</button>
+  </div>
+  <div class="hist-list" id="histList">
+    <div class="hist-empty">No history yet.<br>Run an analysis to see it here.</div>
+  </div>
+  <div style="padding:10px 12px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;">
+    <button class="btn btn-ghost btn-xs" onclick="clearHistory()" style="color:var(--red2);border-color:rgba(255,45,85,.25);">🗑 Clear History</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<div class="tab-pane on" id="p-impact">
+  <div class="page-hd">
+    <h2>Impact <span>Analyzer</span></h2>
+    <p>Input any dev change, feature update, bug fix, or requirement → AI analyzes using full KB context → generates detailed impact analysis and comprehensive QA test cases including edge cases and cross-feature validations.</p>
+  </div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="panel">
+        <div class="panel-hd"><div class="pdot r"></div><span class="panel-title">Change Input</span></div>
+        <div class="panel-body">
+          <div class="fg">
+            <label class="fl">What was changed? (be specific)</label>
+            <textarea id="iDesc" rows="5" placeholder="e.g. SA mana calculation moved from GameplayController.cs to SAManager.cs. Threshold changed from fixed 100 to configurable per-player. Animation trigger changed from direct call to event-based..."></textarea>
+          </div>
+          <div class="fg">
+            <label class="fl">Feature area tags</label>
+            <div class="tag-wrap" id="iTags"></div>
+          </div>
+          <div class="g2-f">
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Change type</label>
+              <select id="iType">
+                <option value="Refactor / Code Restructure">Refactor / Code Restructure</option>
+                <option value="Bug Fix">Bug Fix</option>
+                <option value="New Feature">New Feature</option>
+                <option value="UI / UX Change">UI / UX Change</option>
+                <option value="API / Backend Change">API / Backend Change</option>
+                <option value="Performance Optimization">Performance Optimization</option>
+                <option value="Dependency Update">Dependency Update</option>
+              </select>
+            </div>
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Platform</label>
+              <select id="iPlatform">
+                <option value="Android + iOS">Android + iOS</option>
+                <option value="Android only">Android only</option>
+                <option value="iOS only">iOS only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-body" id="kbCtxPanel">
+          <div class="info-row"><span class="info-dot">○</span> Loading KB context…</div>
+        </div>
+      </div>
+      <button class="btn btn-red" id="iBtn" onclick="runImpact()">⚡ Run Deep Analysis</button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="panel" id="iResultPanel" style="display:none;">
+        <div class="panel-hd">
+          <div class="pdot r"></div><span class="panel-title">Report</span>
+          <span id="iProviderTag" style="margin-left:8px;"></span>
+          <span id="iTime" style="margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--mute);"></span>
+        </div>
+        <div class="loader" id="iLoader">
+          <div class="spin"></div>
+          <div class="load-track"><div class="load-bar"></div></div>
+          <div class="load-lbl" id="iLbl">Analyzing…</div>
+          <div class="load-provider" id="iProviderStatus"></div>
+        </div>
+        <div id="iOut" style="display:none;">
+          <div class="stats-bar" id="iStats"></div>
+          <div style="padding:16px;">
+            <div class="impact-grid" id="iCards"></div>
+            <div id="iTCWrap" style="margin-top:16px;"></div>
+          </div>
+          <div class="dl-bar">
+            <span class="dl-lbl">Export:</span>
+            <button class="btn btn-excel btn-sm" onclick="dlExcel('impact')">⬇ Excel</button>
+            <button class="btn btn-copy  btn-sm" onclick="copyToClipboard('impact')">📋 Copy to Excel</button>
+            <button class="btn btn-ghost btn-sm admin-only" onclick="saveImpactKB()">☁ Save to KB</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-pane" id="p-prd">
+  <div class="page-hd">
+    <h2>PRD <span>→ Test Cases</span></h2>
+    <p>Upload or paste a feature spec → AI generates full 14-column test suite using KB context</p>
+  </div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="panel">
+        <div class="panel-hd"><div class="pdot"></div><span class="panel-title">PRD Input</span></div>
+        <div class="panel-body">
+          <div class="fg">
+            <label class="fl">Upload file (PDF, TXT, MD, DOCX, XLSX)</label>
+            <div class="drop-zone" id="prdDrop" ondragover="dOver(event,'prdDrop')" ondragleave="dLeave('prdDrop')" ondrop="dDrop(event,'prd')">
+              <input type="file" accept=".pdf,.txt,.md,.doc,.docx,.xlsx,.xls,.csv" onchange="fPick(event,'prd')">
+              <span class="drop-icon">📂</span>
+              <div class="drop-text"><b>Click or drag & drop</b><br>PDF, TXT, MD, DOCX, XLSX, CSV</div>
+            </div>
+            <div id="prdFileBadge" style="display:none;margin-top:7px;">
+              <div class="file-chip">
+                <span>📄</span><span id="prdFN">—</span>
+                <span class="file-chip-rm" onclick="rmFile('prd')">✕</span>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;font-family:var(--mono);font-size:9px;color:var(--mute);letter-spacing:2px;text-transform:uppercase;margin:8px 0;">— or paste —</div>
+          <div class="fg">
+            <label class="fl">Paste PRD / spec text</label>
+            <textarea id="prdTxt" style="min-height:120px;" placeholder="Paste PRD, feature spec, acceptance criteria, user stories…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><div class="pdot y"></div><span class="panel-title">Options</span></div>
+        <div class="panel-body">
+          <div class="g2-f">
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Priority system</label>
+              <select id="prdPrio">
+                <option value="P0-P3">P0 / P1 / P2 / P3</option>
+                <option value="Critical-Low">Critical / High / Medium / Low</option>
+              </select>
+            </div>
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Platform focus</label>
+              <select id="prdPlatform">
+                <option value="both">Android + iOS</option>
+                <option value="android">Android only</option>
+                <option value="ios">iOS only</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg" style="margin-top:12px;margin-bottom:0">
+            <label class="fl">Special focus (optional)</label>
+            <textarea id="prdFocus" style="min-height:54px;" placeholder="e.g. Focus on edge cases, negative tests, Android 12+ specific…"></textarea>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-red" id="prdBtn" onclick="runPRD()">📋 Generate Test Suite</button>
+    </div>
+
+    <div class="panel" style="display:flex;flex-direction:column;">
+      <div class="panel-hd">
+        <div class="pdot g"></div><span class="panel-title">Generated Test Cases</span>
+        <span id="prdProviderTag" style="margin-left:8px;"></span>
+        <div class="panel-acts" id="prdActs" style="display:none;">
+          <button class="btn btn-excel btn-xs" onclick="dlExcel('prd')">⬇ Excel</button>
+          <button class="btn btn-copy  btn-xs" onclick="copyToClipboard('prd')">📋 Copy</button>
+          <button class="btn btn-ghost btn-xs admin-only" onclick="savePRDKB()">☁ KB</button>
+        </div>
+      </div>
+      <div class="loader" id="prdLoader">
+        <div class="spin"></div>
+        <div class="load-track"><div class="load-bar"></div></div>
+        <div class="load-lbl" id="prdLbl">Reading document…</div>
+        <div class="load-provider" id="prdProviderStatus"></div>
+      </div>
+      <div id="prdOut" style="display:none;flex:1;">
+        <div style="padding:10px 14px 0;font-family:var(--mono);font-size:11px;color:var(--mute);" id="prdStats"></div>
+        <div class="tbl-scroll" style="padding:10px 0 0;">
+          <table class="tc-table">
+            <thead><tr>
+              <th>TC ID</th><th>Feature</th><th>Test Title</th><th>Category</th>
+              <th>Preconditions</th><th>Steps</th><th>Expected Result</th>
+              <th>Break Point</th><th>Systems</th><th>Edge Case</th>
+              <th>Priority</th><th>Status</th><th>Dev Result</th><th>QA Result</th>
+            </tr></thead>
+            <tbody id="prdBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="empty-state" id="prdEmpty">
+        <span class="empty-icon">📋</span>
+        Upload or paste a PRD, then click Generate
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-pane" id="p-import">
+  <div class="page-hd">
+    <h2>Bulk <span>Import</span></h2>
+    <p>Admin only · Upload any file type → preview chunks → save to cloud KB</p>
+  </div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="panel">
+        <div class="panel-hd"><div class="pdot" style="background:var(--purple)"></div><span class="panel-title">Upload Files</span></div>
+        <div class="panel-body">
+          <div class="drop-zone" id="importDrop"
+            ondragover="dOver(event,'importDrop')" ondragleave="dLeave('importDrop')" ondrop="dDrop(event,'import')">
+            <input type="file" id="importInput" multiple
+              accept=".xlsx,.xls,.csv,.txt,.md,.pdf,.doc,.docx,.json,.pptx,.ppt"
+              onchange="importFiles(event)">
+            <span class="drop-icon">📥</span>
+            <div class="drop-text">
+              <b>Click or drag & drop — all types welcome</b><br>
+              Excel, CSV, PDF, Word (DOCX), TXT, MD, JSON, PowerPoint
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><div class="pdot y"></div><span class="panel-title">Import Options</span></div>
+        <div class="panel-body">
+          <div class="fg">
+            <label class="fl">Default type</label>
+            <select id="importType">
+              <option value="test_cases">Test Cases</option>
+              <option value="prd">PRD / Feature Spec</option>
+              <option value="note">QA Note / Bug Pattern</option>
+              <option value="code">Code Snippet</option>
+              <option value="feat">Feature Doc</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Default area tag</label>
+            <input type="text" id="importArea" placeholder="e.g. FTUE, Store, Super Ability">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:2px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--mute);">
+              <input type="checkbox" id="splitSheets" checked style="width:auto;accent-color:var(--blue);">
+              Split Excel sheets into separate entries
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--mute);">
+              <input type="checkbox" id="splitHeadings" checked style="width:auto;accent-color:var(--blue);">
+              Split TXT/MD by ## headings
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="panel" id="importProgPanel" style="display:none;">
+        <div class="panel-hd"><div class="pdot g"></div><span class="panel-title">Progress</span></div>
+        <div class="panel-body">
+          <div class="prog-track"><div class="prog-bar" id="progBar"></div></div>
+          <div class="prog-lbl" id="progLbl">0 / 0</div>
+          <div class="prog-log" id="progLog"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div id="importPreview" style="display:none;">
+        <div class="import-preview">
+          <div class="import-preview-hd">
+            <div class="import-stat"><b id="chunkCnt">0</b> chunks · <b id="chunkSel">0</b> selected</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost btn-xs" onclick="selAll(true)">All</button>
+              <button class="btn btn-ghost btn-xs" onclick="selAll(false)">None</button>
+              <button class="btn btn-jade btn-xs" id="saveChunksBtn" onclick="saveChunks()">☁ Save to KB</button>
+            </div>
+          </div>
+          <div id="chunkList"></div>
+        </div>
+      </div>
+      <div class="empty-state" id="importEmpty">
+        <span class="empty-icon">📥</span>
+        Upload files on the left to preview<br>chunks before saving to KB
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-pane" id="p-kb">
+  <div class="page-hd">
+    <h2>Cloud <span>Knowledge Base</span></h2>
+    <p>Admin only · Stored in Cloudflare KV · injected as context into every AI analysis · truncated automatically to fit context window</p>
+  </div>
+  <div class="g2">
+    <div class="panel">
+      <div class="panel-hd"><div class="pdot g"></div><span class="panel-title">Add Entry</span></div>
+      <div class="panel-body">
+        <div class="fg">
+          <label class="fl">Type</label>
+          <select id="kbType">
+            <option value="test_cases">Test Cases</option>
+            <option value="prd">PRD / Feature Spec</option>
+            <option value="code">Code Snippet</option>
+            <option value="note">QA Note / Bug Pattern</option>
+            <option value="feat">Feature Doc</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Title</label><input type="text" id="kbTitle" placeholder="e.g. SA Activation — Full Regression Suite"></div>
+        <div class="fg"><label class="fl">Area</label><input type="text" id="kbArea" placeholder="e.g. Super Ability, FTUE, Store"></div>
+        <div class="fg"><label class="fl">Content</label><textarea id="kbContent" style="min-height:180px;" placeholder="Paste test cases, PRD text, code, QA notes, bug patterns…"></textarea></div>
+        <button class="btn btn-jade btn-sm" onclick="saveKB()" style="width:100%;margin-top:4px;" id="kbSaveBtn">☁ Save to KB</button>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:7px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--mute);">
+          Entries: <b style="color:var(--text)" id="kbTotal">—</b>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <select id="kbFilter" onchange="renderKB()" style="padding:4px 8px;font-size:10px;width:auto;">
+            <option value="all">All</option>
+            <option value="test_cases">Test Cases</option>
+            <option value="prd">PRD</option>
+            <option value="code">Code</option>
+            <option value="note">Notes</option>
+            <option value="feat">Feature Docs</option>
+          </select>
+          <button class="btn btn-ghost btn-xs" onclick="loadKB()">↺ Refresh</button>
+          <button class="btn btn-ghost btn-xs" onclick="clearKB()" style="color:var(--red);border-color:rgba(255,45,85,.3);">🗑 Clear All</button>
+        </div>
+      </div>
+      <div id="kbList">
+        <div class="empty-state"><span class="empty-icon">☁️</span>Connecting…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <script>
-// ── CONFIG — update this with your Cloudflare Worker URL ─────
-const WORKER_URL = 'https://orange-waterfall-030e.kunal-249.workers.dev';
-// e.g.  'https://qa-blueprint-proxy.johndoe.workers.dev'
-// Get this from Cloudflare dashboard after deploying worker.js
-// ─────────────────────────────────────────────────────────────
 
-// ── API KEY → never here, lives in Cloudflare secret only ────
-// ── PASSWORD → never here, checked by Cloudflare Worker only ─
-
-let _sessionToken = null;
-let _failCount = 0;
-const MAX_FAILS = 5;
-
-async function unlock() {
-  const pwd = document.getElementById('pwdInput').value;
-  const errEl = document.getElementById('lockError');
-  const attEl = document.getElementById('lockAttempts');
-
-  if (_failCount >= MAX_FAILS) {
-    errEl.textContent = 'Too many attempts. Refresh the page.';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${WORKER_URL}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pwd })
-    });
-    const data = await res.json();
-
-    if (res.ok && data.ok) {
-      _sessionToken = data.token;
-      const lock = document.getElementById('lockScreen');
-      lock.style.transition = 'opacity 0.4s';
-      lock.style.opacity = '0';
-      setTimeout(() => lock.style.display = 'none', 400);
-    } else {
-      _failCount++;
-      const remaining = MAX_FAILS - _failCount;
-      errEl.textContent = data.error || 'Incorrect password.';
-      if (remaining > 0) attEl.textContent = `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
-      else attEl.textContent = 'No attempts remaining. Refresh to retry.';
-      const box = document.getElementById('lockBox');
-      box.classList.remove('lock-shake');
-      void box.offsetWidth;
-      box.classList.add('lock-shake');
-      document.getElementById('pwdInput').value = '';
-    }
-  } catch(e) {
-    errEl.textContent = 'Connection error. Is the server running?';
-  }
-}
-
-const QA_CHECKLIST = {
-
-  // ════════════════════════════════════════════════════════════
-  // SECTION A: NEW USER FLOW (FTUE)
-  // ════════════════════════════════════════════════════════════
-
-  "FTUE 1 – Offline Mode & Initial Setup": [
-    "Game loads completely in offline mode",
-    "No crashes occur until team creation screen",
-    "Country selection dropdown displays all valid countries",
-    "Country selection saves correctly",
-    "City selection screen loads with correct cities for selected country",
-    "City selection Back button returns to country screen",
-    "City selection Submit button proceeds to next step",
-    "Narrative slides display with proper text and images",
-    "Narrative slides Skip button skips to dashboard",
-    "Narrative slides Next button advances correctly",
-  ],
-
-  "FTUE 2 – Scouting & Match 1": [
-    "Natasha/Harsha scouting dialogue appears automatically",
-    "Only 1 player (Master Blaster) available for scouting",
-    "Master Blaster scout button is clickable",
-    "Scrolling animation plays after scouting Master Blaster",
-    "Master Blaster player card appears on screen with correct info",
-    "Match 1 auto-starts immediately after scouting",
-    "Natasha/Harsha dialogue displays 'Score 18 runs in 2 overs'",
-    "Soft nudge highlight appears on Master Blaster",
-    "Soft nudge highlight appears on common player",
-    "Hand pointer appears on play cards (0,1,2,4,6)",
-    "Success rate % displays correctly on all play cards",
-    "Success rate highlights on striker and bowler correctly",
-    "Screen shatter animation triggers on successful six (Straight Drive)",
-    "Opponent team shows only common players",
-    "Opponent has no wickets lost during Match 1",
-    "Opponent has no SA active time during Match 1",
-    "Natasha/Harsha SA mana dialogue appears when SA fills",
-    "Hand pointer blinks on SA button when available",
-    "SA info screen displays correctly after activation",
-    "Fire animation triggers on 4s and 6s when SA active",
-    "Player dance animation plays on Match 1 victory screen",
-  ],
-
-  "FTUE 3 – Training Tutorial": [
-    "Natasha/Harsha Training Points (TP) explanation dialogue appears",
-    "Natasha/Harsha instructs to train player dialogue appears",
-    "Hand pointer highlights player on dashboard",
-    "Player Detail screen opens from dashboard player tap",
-    "Natasha/Harsha dialogue appears on Player Detail screen",
-    "Hand pointer highlights Train button",
-    "Train button functional up to Level 5",
-    "Back button non-interactable during training dialogue",
-    "Other UI buttons non-interactable during dialogue",
-  ],
-
-  "FTUE 4 – Notifications & Connectivity": [
-    "Screen tap during dialogue shows PK/Natasha conversation",
-    "PK icon displays with blinking animation",
-    "Hand pointer appears on PK icon",
-    "Hand pointer appears on Accept Challenge button",
-    "'Remind when team ready' dialogue box appears",
-    "'Remind me later' button functional",
-    "'Yes definitely' button functional",
-    "System notification popup displays Allow/Don't Allow options",
-    "Connect to Internet popup appears when offline",
-    "Team creation succeeds after enabling internet",
-  ],
-
-  "FTUE 5 – Match 2 Flow": [
-    "Natasha/Harsha 'Play 3 more matches' dialogue appears",
-    "Hand pointer appears on Play button",
-    "Train button accessible from VS screen",
-    "Play button visible and functional on VS screen",
-    "Lineup button visible on VS screen",
-    "SA tutorial appears inside match when mana filled",
-    "Victory screen shows player shards dialogue",
-    "Loss case: Match replayable from same screen",
-    "Loss case: Goal progress doesn't update until win",
-  ],
-
-  "FTUE 6 – Store & Super Chest": [
-    "Hand pointer appears on Store icon",
-    "Natasha/Harsha Super Chest introduction dialogue appears",
-    "Buy button shows 50 HC price with 0 HC balance",
-    "Buy button allows direct access despite 0 HC",
-    "No HC deducted from free Super Chest opening",
-    "Chest opening animation plays completely",
-    "User redirects to VS screen after chest opens",
-    "Train player accessible from VS screen post-chest",
-    "Back button functional on VS screen",
-    "Play button functional on VS screen",
-    "Lineup button functional on VS screen",
-    "Match 3 starts and completes without issues",
-  ],
-
-  "FTUE 7 – ESP Trigger & Dashboard": [
-    "ESP (Ultimate Finisher Pack) triggers after Match 3",
-    "Arrow animation appears on Play button",
-    "ESP icon appears on dashboard",
-    "PK icon blinks on dashboard",
-    "Events tab remains locked",
-    "PvP tab remains locked",
-    "League tab remains locked",
-    "Store shows Golden glow effect",
-    "Store shows Free tag when free item available",
-    "Nets 1 shows Earn tag correctly",
-    "Net 2 shows locked state with 400 HC requirement",
-    "Match 4 playable without crashes",
-  ],
-
-  "FTUE 8 – League Unlock": [
-    "Natasha/Harsha League unlock dialogue appears on dashboard",
-    "Hand pointer highlights League button",
-    "League page loads with journey dialogue",
-    "Hand pointer highlights Play button on League screen",
-    "League Play button redirects to VS screen",
-    "SP icon becomes visible on dashboard after Match 4",
-    "ESP offer icon remains visible post-League unlock",
-  ],
-
-  "FTUE 9 – PK Match Flow": [
-    "PK Match starts and completes successfully",
-    "PK loss triggers 5-minute timer",
-    "PK Match becomes replayable after timer",
-    "PK win shows Haryana Hurricane and Athena rewards",
-    "Selected players added to squad correctly",
-  ],
-
-  "FTUE 10 – Post-LM1 Popups & Unlocks": [
-    "Captain Cool – Thala offer popup appears first",
-    "7-Day Login popup appears after Thala offer",
-    "ESP icon replaced by Thala offer icon after acceptance",
-    "Events tab unlocks and becomes accessible",
-    "My Team tab unlocks and becomes accessible",
-    "Fast Mode accessible from LM1 innings screen",
-    "Leaderboard appears after LM1 win",
-    "SP/Quest challenges visible on LM1 victory screen",
-    "Hand pointer appears on Trophy Road",
-    "Trophy Road rewards claimable",
-    "Season Pass unlocks after LM1",
-    "All HUD icons visible on dashboard",
-    "Equipment (EQ) unlock flow completes",
-    "Inventory tab unlocks",
-  ],
-
-  // ════════════════════════════════════════════════════════════
-  // SECTION B: APP LAUNCH (OLD + NEW USER)
-  // ════════════════════════════════════════════════════════════
-
-  "App Launch – Icon & PLAY CTA": [
-    "App Icon is accurate with no spacing or sizing issues",
-    "PLAY CTA has the breathing & shine animation",
-    "PLAY CTA is clickable",
-    "Addressables/Assets downloaded on loading screen after PLAY tap (old user)",
-    "Install Release build on top of current PlayStore/Live build and check",
-  ],
-
-  "App Launch – Login Methods": [
-    "Login: Google Play / Apple ID / Game Center works",
-    "Login: Facebook works",
-    "Login: Hitwicket ID works",
-    "Login: WhatsApp works",
-    "Login: Recover Account through Recover account popup",
-    "Login: Recover Account through 'Recover account' CTA",
-    "Contact Us — redirects outside of game correctly",
-  ],
-
-  // ════════════════════════════════════════════════════════════
-  // SECTION C: CURRENT SYSTEM — FULL FEATURE STRUCTURE
-  // ════════════════════════════════════════════════════════════
-
-  "Manager Profile": [
-    "Manager Profile surfaced at top-left of dashboard",
-    "Team Name displays current name",
-    "Team Name Edit CTA opens rename screen",
-    "Team Name saves with valid input (min 3 chars)",
-    "User Name displays current name",
-    "User Name Edit CTA opens edit screen",
-    "User Name rejects special characters",
-    "City field shows FTUE-selected city",
-    "City Edit CTA opens city selection",
-    "City updates and saves correctly",
-    "Total Matches Played stat displays correctly",
-    "Win Rate displays as percentage",
-    "Trophies count in Stats displays accurately",
-    "Players Scouted count displays correctly",
-    "Badges display with correct icons",
-    "Badge tooltip appears on badge tap",
-    "All owned Badges visible",
-    "Trophies section shows all owned trophies",
-    "Level shows current MRP number",
-    "XP value matches admin panel",
-    "XP progression bar fills correctly toward next level",
-    "League Level displays current tier (matches League lobby)",
-    "Alliance Name shows 'No Alliance' or joined alliance name (matches Alliance lobby)",
-    "PvP Reputation Rank visible and matches PvP page",
-    "Team OVR value matches dashboard display",
-    "Batting Power value correct",
-    "Bowling Power value correct",
-    "Lineup section shows correct player cards with correct rarity",
-    "Lineup in Manager Profile matches actual in-game lineup",
-    "Player card tap opens Player Detail screen",
-    "Close CTA returns to Dashboard",
-  ],
-
-  "Icons Logic & Dashboard": [
-    "All dashboard icon logic works per unlock state",
-    "Store icon accessible",
-    "Store shows Golden glow effect if free chest available",
-    "Store shows Free tag when free item available",
-    "Small event CTA available above event banners",
-    "Offer image, timer, price, Close all functional on Offer icon",
-    "All HUD icons display correct values",
-    "Back button returns to Dashboard",
-    "Home button returns to Dashboard",
-  ],
-
-  "Store – Offers": [
-    "Offers tab displays active offers",
-    "Offer image displays correctly",
-    "Offer timer countdown works",
-    "Offer discount tag visible",
-    "Offer Close CTA dismisses popup",
-    "Two-tap offer purchase flow works",
-    "Payment success credits rewards instantly",
-  ],
-
-  "Store – Season Store": [
-    "Season Store tab accessible",
-    "Season Store purchase deducts HC",
-    "Season Store rewards credit to account",
-    "Season Store shows SP exclusive items with correct pricing",
-  ],
-
-  "Store – Featured Items": [
-    "Featured Items tab shows current featured items",
-    "Featured item purchase flow works",
-    "Featured item rewards credit correctly",
-  ],
-
-  "Store – Chests": [
-    "Chests tab shows Free, Super, and 10x options",
-    "Free chest 'i' button shows contents",
-    "Super chest 'i' button shows contents",
-    "10x chest 'i' button shows contents",
-    "Chest rewards credit to inventory",
-    "2-hour chest timer displays correctly for free chest",
-    "RV free chest accessible via ads",
-    "10x reward animation plays fully",
-    "No HC deducted from free Super Chest opening",
-  ],
-
-  "Store – Get Player": [
-    "Get Player tab shows SPB and EPB scouting options",
-    "SPB scouting deducts correct HC",
-    "EPB scouting deducts correct HC",
-    "Scouted player added to squad",
-    "Shard scouting deducts fragments correctly",
-    "Reliable/Brilliant/WC scouting works post-MRP 5",
-    "'i' button shows player image and pity counters for EPB, SPB, PB, Player Scout",
-    "Medium card opens after tapping background for EPB & SPB",
-    "Scout counter & shards quantity matches Store display",
-    "Ticker counter appears for EPB, SPB & PB but NOT for Player Scout",
-    "Player Scout (Reliable/Brilliant/WC) updated value matches Get Players and Store",
-  ],
-
-  "Store – Currencies": [
-    "Currencies tab shows all currency types",
-    "Currency balances display accurately",
-    "HC purchase flow works",
-    "HC buy redirects to store",
-  ],
-
-  "HUDs – Energy / TP / HC": [
-    "Energy balance displays correctly on HUD",
-    "Energy refill with HC works",
-    "Get Elite Pass CTA functional from energy HUD",
-    "Training Points count accurate on HUD",
-    "TP tooltip appears on tap",
-    "Hitcoins balance updates on all transactions",
-    "Hitcoins HUD taps redirect to Store",
-    "Daily PvP wins tooltip on PLAY CTA",
-  ],
-
-  "My Team – Squad": [
-    "Squad tab loads with all players",
-    "All filter shows complete squad",
-    "Batsmen filter shows only batsmen",
-    "Bowlers filter shows only bowlers",
-    "Not Found filter shows Locked / Unscouted players",
-    "Get Player button functional from My Team",
-    "By Rarity filter sorts players correctly",
-    "Red dot appears on untrained players",
-    "Red dot appears on players with available equipment",
-    "Player card tap opens Player Detail screen",
-    "Rename player function works",
-    "Fire player removes from squad",
-    "Star-up animation triggers at MRP 9 or above",
-  ],
-
-  "My Team – Player Detail": [
-    "Player Detail screen accessible via player card tap",
-    "Player name, rarity, and stats display correctly",
-    "Train button visible and functional",
-    "Train deducts TP correctly",
-    "Train updates player power",
-    "Power-up animation plays on level gain",
-    "Trait unlock at Lvl 7 works correctly",
-    "Trait unlock at Lvl 14 works correctly",
-    "EQ equip boosts power correctly",
-    "Enhancer equip works correctly",
-    "Passive trait upgrade functional",
-    "Stats page Next/Previous navigation works",
-    "Stats page double-tap zoom works",
-  ],
-
-  "My Team – Lineup": [
-    "Lineup tab accessible from My Team",
-    "Batsmen filter shows correct players",
-    "Bowler filter shows correct players",
-    "Player swap via tap + drag-drop works",
-    "Bowling sequence reorder saves correctly",
-    "AUTO PICK generates optimal lineup",
-    "SAVE CTA persists lineup changes",
-    "Team OVR recalculates correctly when player is swapped",
-    "Team OVR logic verified after lineup change",
-  ],
-
-  "Inventory – General": [
-    "General panel loads correctly",
-    "Tokens visible and equippable",
-    "Basic EQ visible and equippable",
-    "'i' buttons show detailed stats for items",
-    "Sell function deducts items from inventory",
-    "Sell function credits HC correctly",
-  ],
-
-  "Inventory – Cosmetics": [
-    "Cosmetics panel loads correctly",
-    "Skins display correctly",
-    "Skin preview shows on equip",
-  ],
-
-  "Inventory – Powerups": [
-    "Powerups panel loads correctly",
-    "Powerups (EQ) visible and assignable to players",
-  ],
-
-  "Auction": [
-    "Timer displays remaining auction time correctly",
-    "Result tab shows completed auctions",
-    "Cash balance (HUD) displays correctly",
-    "Tokens balance (HUD) displays correctly",
-    "'i' button shows auction rules",
-    "History tab loads past auctions",
-    "Bids History shows user's bids",
-    "World Class players visible in auction",
-    "Brilliant players visible in auction",
-    "Reliable players visible in auction",
-    "Player card 'i' button shows player stats",
-    "Bid CTA opens bid popup",
-    "When SP character available — Buy Season Pass popup triggers",
-    "Place Bid — '+' button increases bid amount",
-    "Place Bid — '-' button decreases bid amount",
-    "Dismiss CTA closes bid popup without placing bid",
-    "Bid CTA places bid successfully",
-    "Winning bid adds player to squad",
-  ],
-
-  "Alliance – Details & Join": [
-    "Alliance Name displays correctly",
-    "Alliance Details page loads",
-    "Join Button opens WhatsApp link",
-    "Join Button opens Discord link",
-    "Leave Alliance CTA shows confirmation before leaving",
-    "Player Detail accessible through leaderboard tap",
-    "Players ranking displays correctly",
-    "Leaderboard is scrollable",
-    "Members Count displays accurately",
-    "Online Member Count updates correctly",
-    "Boosted Player Count displays",
-    "Co-op Flag Count displays",
-  ],
-
-  "Alliance – Friendlies & Search": [
-    "Friendly battle count shows correctly",
-    "Chase Target CTA is functional",
-    "Search bar accepts alliance name input",
-    "Search CTA filters alliances correctly",
-    "Community Search via WhatsApp link works",
-    "Community Search via Discord link works",
-    "Recommended Alliances visible",
-    "User able to view alliance details from recommended list",
-  ],
-
-  "Alliance – Chat, Battle & Chibis": [
-    "Chat section loads and is scrollable",
-    "Send message button sends message to alliance chat",
-    "Chat send shows toast confirmation",
-    "Request CTA sends join request successfully",
-    "Battle CTA — PvP challenge works",
-    "Battle CTA — Challenge confirmation message appears",
-    "Close CTA cancels challenge and dismisses popup",
-    "Tapping on chibi shows player profile",
-    "Tapping on chibi shows Team OVR",
-    "Tapping on chibi shows Challenge button",
-    "Tapping on chibi shows Title",
-    "Tapping on chibi shows Last Active time",
-  ],
-
-  "Alliance – Daily Co-op": [
-    "Daily Co-op rewards list scrollable vertically",
-    "Daily Co-op rewards marked as claimable when available",
-    "Daily Co-op 'i' button displays reward details",
-    "Daily Co-op Play button redirects to Quest Screen",
-    "Close CTA dismisses Daily Co-op screen",
-    "Attempts counter displays accurately",
-    "Play Co-op button interactable when attempts available",
-    "Play Co-op button disabled when no attempts remaining (HC option available)",
-    "Alliance Flags visible on Quest Screen",
-    "Milestone rewards claimable after completing",
-    "All achieved milestone rewards collectible",
-    "Reset timer visible below reward milestone",
-  ],
-
-  "Alliance – Huddle & Invite / Automatch": [
-    "Huddle + icon opens 'Invite friend to play' popup",
-    "Invite functionality sends invitation successfully",
-    "Lobby code visible in invite popup",
-    "Join Lobby using code works correctly",
-    "Community CTA opens Discord link",
-    "Share CTA copies lobby link",
-    "Share CTA allows WhatsApp/Message sharing",
-    "Automatch feature starts matchmaking",
-    "Automatch shows 'Joining players' status",
-    "Mic option visible after players join via automatch",
-    "Speaker option visible after players join via automatch",
-    "Co-op match playable end to end",
-    "Close CTA exits lobby during matchmaking",
-    "Close CTA exits during pre-match lobby",
-    "Back CTA returns to Dashboard",
-    "Home CTA returns to Dashboard",
-  ],
-
-  "Training Nets": [
-    "Net 2 locked until MRP 18 (or 400 HC to unlock)",
-    "Net 2 unlockable with 400 HC",
-    "Net 1 Start CTA deducts Cash correctly",
-    "Cash deduction amount correct for Net 1",
-    "End Training early using HC — HC deducted correctly",
-    "Reduce timer using RV (Reward Video / Ad) works",
-    "Close CTA exits Nets screen",
-    "XP credited to account after training",
-    "TP credited to account after training",
-  ],
-
-  "Season Pass": [
-    "Rewards track loads correctly",
-    "Timer shows days/hours remaining for season",
-    "Activate CTA visible when Season Pass not purchased",
-    "Activate CTA opens purchase confirmation popup",
-    "Purchase confirmation shows correct price",
-    "Purchase success credits Season Pass instantly",
-    "Rewards marked as claimable when eligible",
-    "Claimable rewards highlighted with Claim button",
-    "Rewards list scrollable vertically through all tiers",
-    "Claim animation plays on reward collection",
-    "Claimed rewards show checkmark permanently",
-    "Rewards credit to user's account",
-    "Season Store CTA redirects to Store screen",
-    "'i' button shows reward details popup",
-    "Progress bar shows current tier advancement",
-    "Free tier rewards accessible without purchase",
-    "Premium tier rewards locked pre-purchase",
-    "Post-purchase premium rewards can be claimed",
-    "Back CTA returns to Dashboard",
-    "Home CTA redirects to Dashboard",
-  ],
-
-  "Quests System": [
-    "Daily Quest tab loads SP Screen successfully",
-    "SP Screen displays correctly without crashes",
-    "Daily quest displays with reset timer visible",
-    "Season challenges list loads completely",
-    "Tapping Daily quest redirects to respective challenge screen",
-    "Tapping Season quest redirects to respective challenge screen",
-    "SP points visible on challenges",
-    "SP points increment on challenge completion",
-    "Reset timer countdown displays accurately",
-    "Completed quests show checkmark status",
-    "Active quests show progress bar",
-    "Locked quests show requirement text",
-    "Season Store CTA redirects to Store",
-    "Home button redirects to Dashboard",
-    "Back CTA returns to Dashboard",
-  ],
-
-  "Play Button – Game Modes": [
-    "Daily PvP Win chest icons visible on dashboard above Play",
-    "Play CTA functional on dashboard",
-    "Game Modes tiles screen loads",
-    "Classics section visible — League tile accessible",
-    "Classics section visible — PvP tile accessible",
-    "Events section visible — YC tile accessible",
-    "Events section visible — ABR tile accessible",
-    "Banner displays correct active game mode",
-    "Banner Game Mode Tiles — League tile works",
-    "Banner Game Mode Tiles — PvP tile works",
-    "Banner Events Tiles — YC works",
-    "Banner Events Tiles — ABR works",
-  ],
-
-  "League Mode": [
-    "League mode tile accessible post league unlock",
-    "League level displays correctly with trophy count on tile",
-    "Tapping Play redirects to VS page",
-    "Tapping Hub redirects to League page",
-    "League level visible correctly on League page",
-    "'i' button shows league levels and requirements",
-    "Close CTA closes league levels popup",
-    "Trophies count visible with text to unlock next level",
-    "HUD displays Trophies and Energy correctly",
-    "Back button redirects to Game Modes tiles",
-    "Home CTA redirects to Dashboard",
-    "Match history visible with streak count and icons",
-    "Tapping Play on match history redirects to VS page",
-    "Player visible on leaderboard with correct rank",
-    "User rank highlighted with blue color",
-    "Tapping Refresh shows updated community data",
-  ],
-
-  "PvP Mode": [
-    "PvP mode accessible post-MRP 3 unlock",
-    "Proper rep rank with rep points visible on PvP tile",
-    "Tapping Play redirects to VS screen",
-    "Tapping HUD redirects to PvP reputation screen",
-    "Rewards visible on PvP Trophy Road",
-    "Rewards claimable over progression",
-    "Career page shows PvP career stats",
-    "Career page shows match history with bowler/batsmen stats",
-    "Close CTA closes PvP career popup",
-    "PvP lineup redirects to Lineup screen",
-    "Bowling option functional in PvP lineup",
-    "Save option persists PvP lineup changes",
-    "Drag and replace player accessible in PvP lineup",
-    "Filter for bowlers and batsmen accessible",
-    "Back CTA redirects to PvP page",
-    "Practice match option accessible",
-    "Friendly match creates room with unique room ID",
-    "Join room functional using room ID",
-    "Discord option available to join room",
-    "Easy / Medium / Hard mode selectable in Practice",
-    "Tapping Play with any difficulty redirects to Lineup",
-    "Saving lineup redirects to VS page",
-    "Match starts successfully after lineup save",
-    "PvP Mania Leaderboard visible and scrollable",
-    "End timer visible with mega reward preview",
-    "Rep points displayed next to Play button",
-    "Win shows '+X rep points' message",
-    "Loss shows rep points deduction message",
-    "Daily PvP wins icons visible above Play button",
-    "'?' button shows PvP info with infographics",
-    "'i' button shows 'How to Play PvP' guide",
-    "Close CTA closes information popup",
-    "<> buttons change How to Play slides correctly",
-    "Events tiles visible and accessible (YC, ABR, etc.)",
-  ],
-
-  "Hamburger – My Feed": [
-    "My Feed tab loads matches",
-    "Career section shows stats progression",
-    "Stats tab displays correctly",
-    "Challenges tab lists active challenges",
-    "Chase Target CTA functional",
-    "Chase Target shows timer",
-    "Challenges list scrollable",
-    "Challenges show correct stats",
-    "Close CTA dismisses Hamburger menu",
-  ],
-
-  "Hamburger – Community": [
-    "Community tab loads Spotlight",
-    "All Content visible",
-    "Subscribe CTA — HC added to user account",
-    "YouTube link functional",
-    "Discord link functional",
-    "Instagram link functional",
-    "Redeem Code CTA works",
-  ],
-
-  "Inbox": [
-    "Inbox shows Invites",
-    "Inbox shows Messages",
-    "Inbox shows Reward Claims",
-    "Inbox shows Refund items",
-    "Reward from in-game mail credits correctly",
-    "Reward validation matches admin panel",
-  ],
-
-  "Invite System": [
-    "Shareable link copies to clipboard",
-    "Shareable link opens via WhatsApp",
-    "Reward credits when friend joins and reaches MRP 3",
-    "'i' button shows invite details",
-    "Close CTA dismisses invite screen",
-  ],
-
-  "Leaderboard": [
-    "Trophies tab loads",
-    "Trophies – Weekly tab loads",
-    "Trophies – All Time tab loads",
-    "Trophies – Scrollable using arrow CTAs",
-    "Reputation Points tab loads",
-    "Reputation Points – Scrollable using arrow CTAs",
-    "Team Overall tab loads",
-    "Team Overall – Scrollable using arrow CTAs",
-  ],
-
-  "Daily Login": [
-    "Daily Login popup accessible from Hamburger Menu",
-    "Reward claimable when available",
-    "Claim 'Architect' and verify player added to squad",
-    "Streak count displays correctly",
-    "Close CTA dismisses popup",
-    "Reset occurs correctly after Day 7",
-  ],
-
-  "Friends": [
-    "Send Request CTA functional",
-    "Add Friend CTA functional",
-    "Invite CTA functional",
-    "Received invitations visible",
-    "Hitwicket ID displays correctly",
-  ],
-
-  "Hitwicket TV": [
-    "Watch CTA works",
-    "'i' Button shows match details",
-    "Live user count displays",
-    "Back button functional",
-    "Home button functional",
-    "Page scrollable",
-    "YC matches filter works",
-    "PvP matches filter works",
-    "Friendly Battle matches filter works",
-    "Alliance Members matches filter works",
-  ],
-
-  "Settings – Audio & Quality": [
-    "Sound toggle persists after toggle",
-    "Music toggle persists after toggle",
-    "Vibration toggle persists after toggle",
-    "PvP Voice Chat toggle persists after toggle",
-    "Quality Low selectable",
-    "Quality Medium selectable",
-    "Quality High selectable",
-    "60 FPS toggle functional",
-  ],
-
-  "Settings – Connect & Social HC": [
-    "Google Play connect works",
-    "Facebook connect works",
-    "WhatsApp connect works",
-    "HC credited on Facebook social connect",
-    "HC credited on Instagram social connect",
-    "HC credited on Twitter social connect",
-    "HC credited on YouTube social connect",
-    "HC credited on Discord social connect",
-    "Harsha popup appears on WhatsApp connect",
-    "Connect CTA completes WhatsApp linking",
-    "Close CTA dismisses WhatsApp connect popup",
-  ],
-
-  "Settings – Support & Rate Us": [
-    "FAQ sections expandable",
-    "Facing Issue — Help and Support opens",
-    "Help and Support — Payments section accessible",
-    "Help and Support — Other Issues section accessible",
-    "Rate Us opens store review page",
-    "Rate Us — Submit CTA functional",
-    "Rate Us — Close CTA functional",
-  ],
-
-  "HUD – Dashboard Elements": [
-    "Energy balance displays correctly",
-    "Energy refill with HC works",
-    "Get Elite Pass CTA functional from Energy HUD",
-    "Training Points count accurate",
-    "Hitcoins balance updates on all transactions",
-    "Hitcoins tap redirects to Store",
-    "Huddle visible on dashboard",
-    "Tapping any player in Huddle opens their Player Detail screen",
-    "Player landing animation in Huddle triggers on game open",
-    "Huddle player scroll shows SP player or EPB player correctly",
-  ],
-
-  "Trophy Road": [
-    "Trophy Road visible on dashboard",
-    "Trophy count displays correctly",
-    "Next reward shown on Trophy Road",
-    "Progression bar accurate",
-    "Trophy Road redirect works correctly",
-    "Trophy Road rewards claimable",
-  ],
-
-  "PvP Road": [
-    "PvP Road visible on dashboard",
-    "Rep points display correctly",
-    "Rep rank displays correctly",
-    "Next reward shown on PvP Road",
-    "Total Rep Points visible",
-    "PvP Road redirects to PvP page correctly",
-  ],
-
-  "MRP Progression Unlocks": [
-    "PvP unlocks at MRP 3",
-    "SP / Alliance / Co-op / WC Scout unlock at MRP 5",
-    "Auction / YC / Hitwicket TV unlock at MRP 6",
-    "League Arenas / PvP Mania unlock at MRP 7",
-    "Star-Up unlocks at MRP 9",
-    "SP player on dashboard accessible after MRP 10",
-    "Training Nets 2 unlocks at MRP 18",
-  ],
-
+const WORKER = 'https://orange-waterfall-030e.kunal-249.workers.dev';
+
+let GOOGLE_CLIENT = '';
+let ALLOWED       = '';
+
+const EXCEL_COLS = [
+  'TC ID','Feature','Test Title','Category','Preconditions',
+  'Steps','Expected Result','Break Point','Systems','Edge Case',
+  'Priority','Status','Dev Result','QA Result'
+];
+
+const FEATURES = [
+  'FTUE','Login/Auth','Super Ability','Match Engine','Store',
+  'Squad/Lineup','Player Detail','Training','League Mode','PvP',
+  'Auction','Alliance','HW TV','Trophy Road','Season Pass',
+  'Player Scout','Dashboard','Notifications','iOS/Game Center',
+  'Android','Network/Offline','Analytics'
+];
+
+const PROVIDER_META = {
+  anthropic:   { label: 'Anthropic',   cls: 'pb-anthropic' },
+  openrouter:  { label: 'OpenRouter',  cls: 'pb-openrouter' },
+  groq:        { label: 'Groq',        cls: 'pb-groq' },
 };
 
-// All checklist items flat
-const ALL_ITEMS = Object.entries(QA_CHECKLIST).flatMap(([cat, items]) => 
-  items.map(item => ({ cat, item }))
-);
 
-// Populate checklist chips
-function populateChips() {
-  const container = document.getElementById('checklistChips');
-  const sample = ALL_ITEMS.slice(0, 80); // show first 80 as preview
-  container.innerHTML = sample.map(({ item }) => 
-    `<span class="checklist-chip">${item.length > 45 ? item.substring(0, 43) + '…' : item}</span>`
-  ).join('') + `<span class="checklist-chip" style="color: var(--accent2);">+${ALL_ITEMS.length - 80} more items</span>`;
-}
+let G = {
+  user: null,
+  kb: [],
+  prdFile: null,
+  importChunks: [],
+  lastImpact: null,
+  lastPRD: null,
+  histFilter: 'all',
+  lastProvider: null,
+  sessionToken: null,   
+  configLoaded: false, 
+};
 
-// Loading steps animation
-let stepInterval = null;
-function startLoadingSteps() {
-  const steps = ['step1','step2','step3','step4','step5'];
-  let i = 0;
-  steps.forEach(s => document.getElementById(s).classList.remove('active'));
-  stepInterval = setInterval(() => {
-    if (i < steps.length) {
-      document.getElementById(steps[i]).classList.add('active');
-      i++;
-    }
-  }, 800);
-}
+const SESSION_KEY = 'qabp_session_v7';
 
-function stopLoadingSteps() {
-  if (stepInterval) clearInterval(stepInterval);
-}
-
-function showError(msg) {
-  stopLoadingSteps();
-  document.getElementById('loadingState').classList.remove('visible');
-  const errEl = document.getElementById('errorState');
-  errEl.classList.add('visible');
-  document.getElementById('errorMsg').textContent = msg;
-  document.getElementById('resultsPanel').classList.add('visible');
-  document.getElementById('analyzeBtn').disabled = false;
-}
-
-function renderResults(result) {
-  document.getElementById('loadingState').classList.remove('visible');
-  document.getElementById('analyzeBtn').disabled = false;
-
-  // Timestamp
-  document.getElementById('analysisTimestamp').textContent = 
-    'Analyzed at ' + new Date().toLocaleTimeString();
-
-  // Count by severity
-  const counts = { critical: 0, high: 0, medium: 0, low: 0 };
-  (result.impact_areas || []).forEach(area => {
-    if (counts[area.severity] !== undefined) counts[area.severity]++;
-  });
-
-  document.getElementById('countCritical').textContent = counts.critical;
-  document.getElementById('countHigh').textContent = counts.high;
-  document.getElementById('countMedium').textContent = counts.medium;
-  document.getElementById('countLow').textContent = counts.low;
-  document.getElementById('countTests').textContent = (result.specific_test_cases || []).length;
-
-  const summaryBar = document.getElementById('summaryBar');
-  summaryBar.style.display = 'flex';
-
-  // Add regression priority badge
-  const regBadge = document.createElement('div');
-  regBadge.className = 'summary-stat';
-  regBadge.style.marginLeft = '16px';
-  const regColor = result.regression_priority === 'HIGH' ? 'var(--accent)' : 
-                   result.regression_priority === 'MEDIUM' ? 'var(--warn)' : 'var(--accent3)';
-  regBadge.innerHTML = `<span class="stat-num" style="color:${regColor}">${result.regression_priority || 'MED'}</span>
-    <span class="stat-label">Regression Priority</span>`;
-
-  // Remove old badge if exists
-  const oldBadge = summaryBar.querySelector('.regression-badge');
-  if (oldBadge) oldBadge.remove();
-  regBadge.classList.add('regression-badge');
-  summaryBar.appendChild(regBadge);
-
-  // Summary card
-  const grid = document.getElementById('impactGrid');
-  grid.innerHTML = '';
-
-  if (result.summary) {
-    const summaryCard = document.createElement('div');
-    summaryCard.className = 'impact-card';
-    summaryCard.style.cssText = 'grid-column: 1 / -1; border-color: rgba(0,212,255,0.2); background: rgba(0,212,255,0.03);';
-    summaryCard.innerHTML = `
-      <div class="impact-card-header">
-        <span style="font-size: 16px;">📋</span>
-        <span class="impact-card-title" style="color: var(--accent2);">Executive Summary</span>
-        ${result.recommendation ? `<span class="severity-badge sev-medium" style="margin-left:auto; white-space:nowrap; font-size:9px;">Recommendation</span>` : ''}
-      </div>
-      <p style="font-size: 13px; line-height: 1.7; color: #d0d0e0;">${result.summary}</p>
-      ${result.recommendation ? `<p style="font-size: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--warn);">💡 ${result.recommendation}</p>` : ''}
-    `;
-    grid.appendChild(summaryCard);
-  }
-
-  // Impact area cards
-  (result.impact_areas || []).forEach(area => {
-    const card = document.createElement('div');
-    card.className = 'impact-card';
-    const sevClass = {
-      critical: 'sev-critical',
-      high: 'sev-high',
-      medium: 'sev-medium',
-      low: 'sev-low'
-    }[area.severity] || 'sev-medium';
-
-    const icon = {
-      critical: '🔴',
-      high: '🟠',
-      medium: '🔵',
-      low: '🟢'
-    }[area.severity] || '⚪';
-
-    card.innerHTML = `
-      <div class="impact-card-header">
-        <span>${icon}</span>
-        <span class="impact-card-title">${area.title}</span>
-        <span class="severity-badge ${sevClass}">${area.severity}</span>
-      </div>
-      <ul class="impact-items">
-        ${(area.items || []).map(item => `<li class="impact-item">${item}</li>`).join('')}
-      </ul>
-    `;
-    grid.appendChild(card);
-  });
-
-  // Edge cases card
-  if ((result.edge_cases || []).length > 0) {
-    const edgeCard = document.createElement('div');
-    edgeCard.className = 'impact-card';
-    edgeCard.innerHTML = `
-      <div class="impact-card-header">
-        <span>🧩</span>
-        <span class="impact-card-title">Edge Cases to Check</span>
-        <span class="severity-badge sev-high">Must Test</span>
-      </div>
-      <ul class="impact-items">
-        ${result.edge_cases.map(e => `<li class="impact-item">${e}</li>`).join('')}
-      </ul>
-    `;
-    grid.appendChild(edgeCard);
-  }
-
-  // Downstream risks card
-  if ((result.downstream_risks || []).length > 0) {
-    const downCard = document.createElement('div');
-    downCard.className = 'impact-card';
-    downCard.innerHTML = `
-      <div class="impact-card-header">
-        <span>🔗</span>
-        <span class="impact-card-title">Downstream Dependencies</span>
-        <span class="severity-badge sev-medium">Indirect Risk</span>
-      </div>
-      <ul class="impact-items">
-        ${result.downstream_risks.map(r => `<li class="impact-item">${r}</li>`).join('')}
-      </ul>
-    `;
-    grid.appendChild(downCard);
-  }
-
-  // Specific test cases table
-  if ((result.specific_test_cases || []).length > 0) {
-    const container = document.getElementById('testCasesContainer');
-    const div = document.createElement('div');
-    div.className = 'test-cases-section';
-    div.innerHTML = `
-      <div class="test-cases-title">✅ Specific Checklist Items to Re-Test (${result.specific_test_cases.length})</div>
-      ${result.specific_test_cases.map((tc, i) => `
-        <div class="test-case-row">
-          <span class="tc-num">#${String(i+1).padStart(2,'0')}</span>
-          <span>${tc}</span>
-        </div>
-      `).join('')}
-    `;
-    container.appendChild(div);
-  }
-
-  // Highlight affected chips
-  const chips = document.querySelectorAll('.checklist-chip');
-  chips.forEach(chip => {
-    chip.classList.remove('highlighted');
-    const chipText = chip.textContent.toLowerCase();
-    const desc = document.getElementById('changeDesc').value.toLowerCase();
-    if ((result.specific_test_cases || []).some(tc => 
-      chipText.split('…')[0].trim().length > 10 && 
-      tc.toLowerCase().includes(chipText.split('…')[0].trim().substring(0, 20))
-    )) {
-      chip.classList.add('highlighted');
-    }
-  });
-
-  resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// ── ANALYZE — calls proxy, never Anthropic directly ─────────
-async function analyze() {
-  if (!_sessionToken) { alert('Please unlock first.'); return; }
-
-  const changeDesc = document.getElementById('changeDesc').value.trim();
-  const changeType = document.getElementById('changeType').value;
-  if (!changeDesc) { showError('Please describe what was changed.'); return; }
-
-  const resultsPanel = document.getElementById('resultsPanel');
-  resultsPanel.classList.add('visible');
-  document.getElementById('loadingState').classList.add('visible');
-  document.getElementById('errorState').classList.remove('visible');
-  document.getElementById('summaryBar').style.display = 'none';
-  document.getElementById('impactGrid').innerHTML = '';
-  document.getElementById('testCasesContainer').innerHTML = '';
-  document.getElementById('analyzeBtn').disabled = true;
-  startLoadingSteps();
-  setTimeout(() => resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-
-  const checklistText = Object.entries(QA_CHECKLIST).map(([cat, items]) =>
-    `## ${cat}\n${items.map((item, i) => `${i+1}. ${item}`).join('\n')}`
-  ).join('\n\n');
-
-  const prompt = `You are a senior QA engineer and mobile game expert. A developer made a change to the game and you need to analyze what could break.
-
-## Change Information
-- Type: ${changeType}
-- Description: ${changeDesc}
-
-## Full QA Checklist (548 items across 54 feature sections)
-${checklistText}
-
-## Your Task
-Analyze this change and return a JSON object with EXACTLY this structure:
-
-{
-  "summary": "2-3 sentence executive summary of the risk",
-  "impact_areas": [
-    {
-      "title": "Area name",
-      "severity": "critical|high|medium|low",
-      "items": ["specific risk item 1", "specific risk item 2"]
-    }
-  ],
-  "specific_test_cases": ["Exact checklist item: specific concern"],
-  "edge_cases": ["Edge case scenario"],
-  "downstream_risks": ["Feature that could be indirectly affected and why"],
-  "regression_priority": "HIGH|MEDIUM|LOW",
-  "recommendation": "1-2 sentence testing recommendation"
-}
-
-Rules:
-- Be SPECIFIC to the change described, not generic
-- Reference actual checklist items by name when possible
-- Consider FTUE flows, match flows, UI states, animation triggers, state persistence, currency deductions, dialogue sequences, button states, popup flows
-- severity "critical" = could block release, "high" = likely regression, "medium" = possible edge case, "low" = minor watch item
-- Return ONLY valid JSON, no markdown, no explanation`;
-
+function saveSession() {
+  if (!G.user) return;
   try {
-    const res = await fetch(`${WORKER_URL}/api/analyze`, {
-      method: 'POST',
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      user:         G.user,
+      sessionToken: G.sessionToken,
+      savedAt:      Date.now()
+    }));
+  } catch(e) {}
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s.user || !s.savedAt || (Date.now() - s.savedAt) > 8 * 60 * 60 * 1000) {
+      localStorage.removeItem(SESSION_KEY); return null;
+    }
+    return s;
+  } catch(e) { return null; }
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+function histKey(email) {
+  return `qabp_hist_${(email||'').replace(/[^a-z0-9]/gi,'_')}`;
+}
+function loadHistory(email) {
+  try { const r = localStorage.getItem(histKey(email)); return r ? JSON.parse(r) : []; } catch(e) { return []; }
+}
+function saveHistory(email, entries) {
+  try { localStorage.setItem(histKey(email), JSON.stringify(entries.slice(0, 50))); } catch(e) {}
+}
+function addHistoryEntry(type, input, output, title) {
+  if (!G.user?.email) return;
+  const entries = loadHistory(G.user.email);
+  entries.unshift({
+    id: Date.now(), type,
+    title: title || 'Untitled',
+    input, output,
+    ts: Date.now(),
+    provider: G.lastProvider,
+    dateStr: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })
+  });
+  saveHistory(G.user.email, entries);
+  renderHistoryDrawer();
+}
+function getHistory() { return G.user?.email ? loadHistory(G.user.email) : []; }
+function clearHistory() {
+  if (!G.user?.email || !confirm('Clear all your history?')) return;
+  localStorage.removeItem(histKey(G.user.email));
+  renderHistoryDrawer(); toast('History cleared', 'ok');
+}
+function deleteHistoryEntry(id) {
+  if (!G.user?.email) return;
+  saveHistory(G.user.email, loadHistory(G.user.email).filter(e => e.id !== id));
+  renderHistoryDrawer();
+}
+function setHistFilter(f) {
+  G.histFilter = f;
+  ['all','impact','prd'].forEach(k => document.getElementById('hf-'+k)?.classList.toggle('on', k === f));
+  renderHistoryDrawer();
+}
+function renderHistoryDrawer() {
+  const all     = getHistory();
+  const entries = G.histFilter === 'all' ? all : all.filter(e => e.type === G.histFilter);
+  const list    = document.getElementById('histList');
+  const cnt     = document.getElementById('histCnt');
+  if (cnt) cnt.textContent = all.length;
+  const lbl = document.getElementById('histUserLabel');
+  if (lbl && G.user) lbl.textContent = G.user.email.split('@')[0];
+  if (!entries.length) {
+    list.innerHTML = `<div class="hist-empty">${all.length ? 'No entries for this filter.' : 'No history yet.<br>Run an analysis to see it here.'}</div>`;
+    return;
+  }
+  list.innerHTML = entries.map(e => {
+    const pm = PROVIDER_META[e.provider];
+    const pBadge = pm ? `<span class="provider-badge on ${pm.cls}" style="font-size:8px;padding:1px 5px;">${pm.label}</span>` : '';
+    return `<div class="hist-item" onclick="restoreHistory(${e.id})">
+      <div class="hist-item-top">
+        <span class="hist-item-type ${e.type === 'impact' ? 'ht-impact' : 'ht-prd'}">${e.type === 'impact' ? '⚡ Impact' : '📋 PRD'}</span>
+        <span class="hist-item-title">${escHtml(e.title)}</span>
+        ${pBadge}
+        <button class="hist-item-del" onclick="event.stopPropagation();deleteHistoryEntry(${e.id})" title="Delete">✕</button>
+      </div>
+      <div class="hist-item-meta">${e.dateStr} · ${e.output?.test_cases?.length || 0} test cases</div>
+      <div class="hist-item-preview">${escHtml(e.output?.summary || e.output?.feature_name || '—')}</div>
+    </div>`;
+  }).join('');
+}
+function restoreHistory(id) {
+  const entry = getHistory().find(e => e.id === id);
+  if (!entry) return;
+  closeHistory();
+  if (entry.type === 'impact') {
+    goTab('impact');
+    const d = entry.input;
+    document.getElementById('iDesc').value     = d.desc     || '';
+    document.getElementById('iType').value     = d.type     || '';
+    document.getElementById('iPlatform').value = d.platform || '';
+    document.querySelectorAll('#iTags .tag').forEach(t => t.classList.toggle('on', (d.tags||[]).includes(t.dataset.v)));
+    G.lastImpact = entry.output; G.lastProvider = entry.provider;
+    document.getElementById('iResultPanel').style.display = 'block';
+    document.getElementById('iLoader').classList.remove('on');
+    document.getElementById('iOut').style.display = 'block';
+    renderImpact(entry.output);
+    document.getElementById('iTime').innerHTML = `${entry.dateStr} <span class="restored-badge">↩ restored</span>`;
+    setTimeout(() => document.getElementById('iResultPanel').scrollIntoView({behavior:'smooth',block:'start'}), 100);
+  } else if (entry.type === 'prd') {
+    goTab('prd');
+    const d = entry.input;
+    document.getElementById('prdTxt').value      = d.txt      || '';
+    document.getElementById('prdPrio').value     = d.prio     || '';
+    document.getElementById('prdPlatform').value = d.platform || '';
+    document.getElementById('prdFocus').value    = d.focus    || '';
+    G.lastPRD = entry.output; G.lastProvider = entry.provider;
+    document.getElementById('prdLoader').classList.remove('on');
+    document.getElementById('prdOut').style.display   = 'block';
+    document.getElementById('prdActs').style.display  = 'flex';
+    document.getElementById('prdEmpty').style.display = 'none';
+    renderPRD(entry.output);
+    document.getElementById('prdStats').innerHTML =
+      `${entry.output.feature_name||'Feature'} · ${entry.output.test_cases?.length||0} test cases &nbsp;<span class="restored-badge">↩ restored from ${entry.dateStr}</span>`;
+  }
+  toast(`Restored: ${entry.title}`, 'ok');
+}
+function toggleHistory() {
+  const drawer = document.getElementById('histDrawer');
+  if (drawer.classList.contains('open')) { closeHistory(); }
+  else { renderHistoryDrawer(); drawer.classList.add('open'); document.getElementById('histOverlay').classList.add('on'); }
+}
+function closeHistory() {
+  document.getElementById('histDrawer')?.classList.remove('open');
+  document.getElementById('histOverlay')?.classList.remove('on');
+}
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showGlobalProvider(provider) {
+  G.lastProvider = provider;
+  const el = document.getElementById('providerBadge');
+  if (!el) return;
+  const pm = PROVIDER_META[provider];
+  if (!pm) return;
+  el.className = `provider-badge on ${pm.cls}`;
+  el.textContent = pm.label;
+}
+
+async function fetchConfig() {
+  try {
+    const res  = await fetch(WORKER + '/config');
+    const data = await res.json();
+    if (data.google_client_id) {
+      GOOGLE_CLIENT     = data.google_client_id;
+      ALLOWED           = data.allowed_domain || 'hitwicket.com';
+      G.configLoaded    = true;
+    } else {
+      throw new Error('Config missing google_client_id');
+    }
+  } catch(e) {
+    loginErr('Failed to load app config. Check your internet connection or contact admin.');
+    throw e;
+  }
+}
+
+function doGoogleSignIn() {
+  if (!G.configLoaded) { loginErr('App config not loaded yet, please wait…'); return; }
+  if (typeof google === 'undefined') { loginErr('Google SDK not loaded. Check your internet connection.'); return; }
+  google.accounts.id.initialize({
+    client_id:             GOOGLE_CLIENT,
+    callback:              handleGoogleCred,
+    auto_select:           false,
+    cancel_on_tap_outside: false,
+  });
+  google.accounts.id.prompt(notification => {
+    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+      const url = `https://accounts.google.com/o/oauth2/v2/auth`
+        + `?client_id=${GOOGLE_CLIENT}`
+        + `&redirect_uri=${encodeURIComponent(location.origin + location.pathname)}`
+        + `&response_type=id_token`
+        + `&scope=openid%20email%20profile`
+        + `&nonce=${Math.random().toString(36).slice(2)}`
+        + `&hd=${ALLOWED}`;
+      const popup = window.open(url, 'gauth', 'width=480,height=580');
+      const timer = setInterval(() => {
+        try {
+          const h = popup?.location?.hash || '';
+          if (h.includes('id_token')) {
+            clearInterval(timer); popup.close();
+            const p = new URLSearchParams(h.slice(1));
+            handleGoogleCred({ credential: p.get('id_token') });
+          }
+        } catch(e) {}
+        if (!popup || popup.closed) clearInterval(timer);
+      }, 500);
+    }
+  });
+}
+
+async function handleGoogleCred(response) {
+  const token = response.credential;
+  if (!token) { loginErr('No credential received.'); return; }
+  document.getElementById('loginSpinner').style.display = 'block';
+  document.getElementById('loginErr').classList.remove('on');
+  try {
+  
+    const res  = await fetch(WORKER + '/auth/verify', {
+      method:  'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-session-token': _sessionToken
+     
+        'X-Auth-Token': 'qabp_hw2024'
       },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify({ id_token: token })
     });
-
-    stopLoadingSteps();
-
-    if (res.status === 401) {
-      showError('Session expired. Please refresh and log in again.');
-      return;
-    }
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      showError(`Error ${res.status}: ${err.error || 'Something went wrong'}`);
-      return;
-    }
-
     const data = await res.json();
-    const text = (data.content || []).map(c => c.text || '').join('');
-    let result;
-    try {
-      result = JSON.parse(text.replace(/```json|```/g, '').trim());
-    } catch(e) {
-      showError('Could not parse AI response. Please try again.');
-      return;
-    }
-    renderResults(result);
-
+    if (!res.ok) throw new Error(data.error || 'Auth failed');
+    G.user         = { email: data.email, name: data.name, picture: data.picture, role: data.role };
+    G.sessionToken = data.sessionToken;  // store session token, NOT the raw idToken
+    onLoginSuccess();
   } catch(e) {
-    stopLoadingSteps();
-    showError(`Network error: ${e.message}`);
+    loginErr(e.message);
+    document.getElementById('loginSpinner').style.display = 'none';
   }
 }
+
+function loginErr(msg) {
+  const el = document.getElementById('loginErr');
+  el.textContent = msg; el.classList.add('on');
+  document.getElementById('loginSpinner').style.display = 'none';
+}
+
+function onLoginSuccess() {
+  saveSession();
+  const ls = document.getElementById('loginScreen');
+  ls.style.transition = 'opacity .35s'; ls.style.opacity = '0';
+  setTimeout(() => ls.style.display = 'none', 360);
+  applyRole(G.user.role);
+  const chip = document.getElementById('userChip'); chip.style.display = 'flex';
+  const av   = document.getElementById('uAv');
+  if (G.user.picture) { av.innerHTML = `<img src="${G.user.picture}" alt="">`; }
+  else { av.textContent = (G.user.name || 'U')[0].toUpperCase(); }
+  document.getElementById('uNm').textContent = (G.user.name || G.user.email).split(' ')[0];
+  const rt = document.getElementById('uRole');
+  rt.textContent = G.user.role; rt.className = `role-tag role-${G.user.role}`;
+  renderHistoryDrawer();
+  loadKB();
+  toast(`Welcome back, ${(G.user.name || '').split(' ')[0]} 👋`, 'ok');
+}
+
+function applyRole(role) {
+  const isAdmin = role === 'admin';
+  document.querySelectorAll('.admin-tab').forEach(el => el.style.display = isAdmin ? 'flex'        : 'none');
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'inline-flex' : 'none');
+}
+
+function doSignOut() {
+  if (!confirm('Sign out?')) return;
+  try { google.accounts.id.disableAutoSelect(); } catch(e) {}
+  clearSession(); G.user = null; G.sessionToken = null; location.reload();
+}
+
+function goTab(id) {
+  ['impact','prd','import','kb'].forEach(t => {
+    document.getElementById('p-'+t)?.classList.toggle('on', t === id);
+    document.getElementById('t-'+t)?.classList.toggle('on', t === id);
+  });
+  if (id === 'kb') renderKB();
+}
+
+async function wFetch(path, method = 'GET', body = null) {
+  if (!G.user) throw new Error('Not authenticated');
+  const opts = {
+    method,
+    headers: {
+      'Content-Type':    'application/json',
+      'X-Session-Token': G.sessionToken,   
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res  = await fetch(WORKER + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+async function wAI(prompt) {
+  const d = await wFetch('/ai/analyze', 'POST', { prompt });
+  if (d.provider) {
+    showGlobalProvider(d.provider);
+  }
+  return d.text;
+}
+
+function setCloud(state, label) {
+  const pip = document.getElementById('cpip');
+  pip.className = 'cloud-pip ' + (state || '');
+  const lbl = document.getElementById('clbl');
+  lbl.textContent = label;
+  lbl.style.color = state === 'ok'   ? 'var(--jade)' :
+                    state === 'err'  ? 'var(--red)'  :
+                    state === 'busy' ? 'var(--gold)'  : 'var(--mute)';
+}
+
+async function loadKB() {
+  setCloud('busy', 'syncing…');
+  try {
+    const d = await wFetch('/kb');
+    G.kb = d.entries || [];
+    updateKBUI();
+    const cnt = d.count ?? G.kb.length;
+    setCloud('ok', `☁ ${cnt}`);
+  } catch(e) {
+    setCloud('err', 'error'); toast(e.message, 'err');
+  }
+}
+
+function updateKBUI() {
+  const n = G.kb.length;
+  document.getElementById('kbCnt').textContent   = n;
+  document.getElementById('kbTotal').textContent = n;
+  const panel = document.getElementById('kbCtxPanel');
+  if (!n) {
+    panel.innerHTML = '<div class="info-row"><span class="info-dot" style="color:var(--mute)">○</span> KB empty — add entries to improve AI output</div>';
+    return;
+  }
+  const tc = G.kb.filter(e=>e.type==='test_cases').length;
+  const co = G.kb.filter(e=>e.type==='code').length;
+  const pr = G.kb.filter(e=>e.type==='prd').length;
+  const no = G.kb.filter(e=>e.type==='note').length;
+  const fe = G.kb.filter(e=>e.type==='feat').length;
+  panel.innerHTML = `
+    <div class="info-row"><span class="info-dot">✓</span> <b style="color:var(--jade)">${n} KB entries</b> injected server-side into every analysis</div>
+    ${tc ? `<div class="info-row"><span class="info-dot">›</span> ${tc} test case set${tc>1?'s':''}</div>` : ''}
+    ${pr ? `<div class="info-row"><span class="info-dot">›</span> ${pr} PRD / spec</div>` : ''}
+    ${fe ? `<div class="info-row"><span class="info-dot">›</span> ${fe} feature doc${fe>1?'s':''}</div>` : ''}
+    ${co ? `<div class="info-row"><span class="info-dot">›</span> ${co} code snippet${co>1?'s':''}</div>` : ''}
+    ${no ? `<div class="info-row"><span class="info-dot">›</span> ${no} QA note${no>1?'s':''}</div>` : ''}
+  `;
+}
+
+async function saveKB() {
+  const title   = document.getElementById('kbTitle').value.trim();
+  const content = document.getElementById('kbContent').value.trim();
+  const area    = document.getElementById('kbArea').value.trim();
+  const type    = document.getElementById('kbType').value;
+  if (!title || !content) { toast('Title and Content required', 'err'); return; }
+  const btn = document.getElementById('kbSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  setCloud('busy', 'saving…');
+  try {
+    const d = await wFetch('/kb', 'POST', { type, title, area, content });
+    G.kb.unshift(d.entry); updateKBUI(); renderKB();
+    setCloud('ok', `☁ ${G.kb.length}`);
+    document.getElementById('kbTitle').value   = '';
+    document.getElementById('kbArea').value    = '';
+    document.getElementById('kbContent').value = '';
+    toast('Saved ✓', 'ok');
+  } catch(e) { setCloud('err', 'error'); toast(e.message, 'err'); }
+  btn.disabled = false; btn.textContent = '☁ Save to KB';
+}
+
+async function deleteKBEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  try {
+    await wFetch(`/kb/${id}`, 'DELETE');
+    G.kb = G.kb.filter(e => e.id !== id); updateKBUI(); renderKB();
+    setCloud('ok', `☁ ${G.kb.length}`); toast('Deleted', 'ok');
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+async function clearKB() {
+  if (!confirm('Delete ALL KB entries? Cannot be undone.')) return;
+  try {
+    await wFetch('/kb', 'DELETE');
+    G.kb = []; updateKBUI(); renderKB();
+    setCloud('ok', '☁ 0'); toast('Cleared', 'ok');
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+function renderKB() {
+  const filter  = document.getElementById('kbFilter').value;
+  const entries = filter === 'all' ? G.kb : G.kb.filter(e => e.type === filter);
+  const list    = document.getElementById('kbList');
+  if (!entries.length) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-icon">☁️</span>No entries${filter!=='all'?' for this type':''}</div>`;
+    return;
+  }
+  const tl  = { test_cases:'TC', code:'Code', prd:'PRD', note:'Note', feat:'Feature' };
+  const tcl = { test_cases:'tb-tc', code:'tb-code', prd:'tb-prd', note:'tb-note', feat:'tb-feat' };
+  const isAdmin = G.user?.role === 'admin';
+  list.innerHTML = entries.map(e => `
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+      <span class="type-badge ${tcl[e.type]||'tb-note'}">${tl[e.type]||e.type}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">${e.title}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--mute);margin-bottom:5px;">${e.area?'📍 '+e.area+' · ':''}${e.addedAt}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--dim);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${e.content.substring(0,200)}${e.content.length>200?'…':''}</div>
+        ${isAdmin ? `<button onclick="deleteKBEntry(${e.id})" style="background:none;border:1px solid rgba(255,45,85,.2);color:var(--red2);font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;cursor:pointer;margin-top:7px;" onmouseover="this.style.background='rgba(255,45,85,.1)'" onmouseout="this.style.background='none'">Delete</button>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function saveImpactKB() {
+  if (!G.lastImpact) { toast('No analysis to save', 'err'); return; }
+  const desc = document.getElementById('iDesc').value.slice(0, 60);
+  const tags = [...document.querySelectorAll('#iTags .tag.on')].map(t=>t.dataset.v).join(', ');
+  setCloud('busy', 'saving…');
+  try {
+    const d = await wFetch('/kb', 'POST', { type:'test_cases', title:'Impact: '+desc+'…', area:tags||'', content:JSON.stringify(G.lastImpact,null,2) });
+    G.kb.unshift(d.entry); updateKBUI();
+    setCloud('ok', `☁ ${G.kb.length}`); toast('Saved to KB ✓', 'ok');
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+async function savePRDKB() {
+  if (!G.lastPRD) { toast('No results to save', 'err'); return; }
+  setCloud('busy', 'saving…');
+  try {
+    const d = await wFetch('/kb', 'POST', { type:'prd', title:'PRD: '+(G.lastPRD.feature_name||'Feature'), area:G.lastPRD.feature_name||'', content:JSON.stringify(G.lastPRD,null,2) });
+    G.kb.unshift(d.entry); updateKBUI();
+    setCloud('ok', `☁ ${G.kb.length}`); toast('Saved to KB ✓', 'ok');
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+function tcToRow(tc) {
+  return [
+    tc.id||'', tc.feature||'', tc.title||tc.test_title||'', tc.category||'',
+    tc.preconditions||'', tc.steps||'', tc.expected||tc.expected_result||'',
+    tc.break_point||tc.breakpoint||'', tc.systems||tc.affected_systems||'',
+    tc.edge_case||tc.is_edge_case||'', tc.priority||'', '', '', ''
+  ];
+}
+
+function dlExcel(src) {
+  const tcs = src === 'impact' ? (G.lastImpact?.test_cases||[]) : (G.lastPRD?.test_cases||[]);
+  if (!tcs.length) { toast('No test cases to download', 'err'); return; }
+  const label = src === 'impact'
+    ? (document.getElementById('iDesc').value.substring(0,28) || 'Impact')
+    : (G.lastPRD?.feature_name || 'PRD');
+  const fname = `${label.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'')}_TCs_${new Date().toISOString().slice(0,10)}.xlsx`;
+  const wb    = XLSX.utils.book_new();
+  const ws    = XLSX.utils.aoa_to_sheet([EXCEL_COLS, ...tcs.map(tcToRow)]);
+  ws['!cols'] = [{wch:8},{wch:16},{wch:40},{wch:13},{wch:28},{wch:42},{wch:42},{wch:20},{wch:14},{wch:9},{wch:9},{wch:10},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws, label.substring(0,31));
+  XLSX.writeFile(wb, fname);
+  toast(`Downloaded ${fname} ✓`, 'ok');
+}
+
+function copyToClipboard(src) {
+  const tcs = src === 'impact' ? (G.lastImpact?.test_cases||[]) : (G.lastPRD?.test_cases||[]);
+  if (!tcs.length) { toast('No test cases', 'err'); return; }
+  const text = [EXCEL_COLS.join('\t'), ...tcs.map(tc => tcToRow(tc).map(v => (v||'').toString().replace(/\t/g,' ')).join('\t'))].join('\n');
+  navigator.clipboard.writeText(text)
+    .then(()  => toast(`${tcs.length} rows copied — paste into Excel ✓`, 'ok'))
+    .catch(()  => {
+      const ta = document.createElement('textarea'); ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      toast(`${tcs.length} rows copied ✓`, 'ok');
+    });
+}
+
+function parseAIJson(raw) {
+  
+  let text = raw.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+
+  
+  const start = text.indexOf('{');
+  const end   = text.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error('No JSON object found in AI response');
+  text = text.slice(start, end + 1);
+
+
+  try { return JSON.parse(text); } catch(e1) {
+    let fixed = text.replace(/,\s*([\]}])/g, '$1');
+
+
+    fixed = fixed.replace(/"((?:[^"\\]|\\.)*)"/g, match =>
+      match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')
+    );
+
+    try { return JSON.parse(fixed); } catch(e2) {
+      try {
+        const tcs = [];
+        const tcRegex = /\{\s*"id"\s*:\s*"TC-\d+[\s\S]*?\}/g;
+        let m;
+        while ((m = tcRegex.exec(raw)) !== null) {
+          try { tcs.push(JSON.parse(m[0])); } catch {}
+        }
+        if (tcs.length > 0) {
+          const summaryMatch = raw.match(/"summary"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+          const riskMatch    = raw.match(/"risk_score"\s*:\s*"([A-Z]+)"/);
+          return {
+            summary:          summaryMatch ? summaryMatch[1] : 'Analysis completed (response was partially truncated)',
+            risk_score:       riskMatch    ? riskMatch[1]    : 'MEDIUM',
+            impact_areas:     [],
+            test_cases:       tcs,
+            edge_cases:       [],
+            downstream_risks: [],
+            regression_scope: [],
+            _partial:         true,
+            _recovered_tcs:   tcs.length,
+          };
+        }
+      } catch {}
+      throw new Error(`JSON parse failed: ${e2?.message}. The AI response may have been truncated — try again.`);
+    }
+  }
+}
+
+async function runImpact() {
+  const desc = document.getElementById('iDesc').value.trim();
+  if (!desc) { toast('Describe the change', 'err'); return; }
+
+  const type     = document.getElementById('iType').value;
+  const platform = document.getElementById('iPlatform').value;
+  const tags     = [...document.querySelectorAll('#iTags .tag.on')].map(t=>t.dataset.v);
+  // Truncate very long descriptions to avoid prompt overflow
+  const descSafe = desc.length > 3000 ? desc.substring(0, 3000) + '…[truncated]' : desc;
+
+  document.getElementById('iBtn').disabled = true;
+  document.getElementById('iResultPanel').style.display = 'block';
+  document.getElementById('iLoader').classList.add('on');
+  document.getElementById('iOut').style.display = 'none';
+  setTimeout(() => document.getElementById('iResultPanel').scrollIntoView({behavior:'smooth',block:'start'}), 100);
+
+  const steps = ['Scanning KB context…','Mapping affected systems…','Generating test cases…','Validating coverage…','Finalizing report…'];
+  let si = 0;
+  const lbl    = document.getElementById('iLbl');
+  const ticker = setInterval(() => { lbl.textContent = steps[si=(si+1)%steps.length]; }, 2200);
+
+  // NOTE: No kbCtx here — worker injects KB server-side
+  const prompt = `You are a PRINCIPAL QA ENGINEER at Hitwicket — a mobile cricket strategy game (Android + iOS).
+
+You have expert-level knowledge of the entire Hitwicket tech stack:
+- GAMEPLAY: Super Ability (SA) system with mana/threshold mechanics, Match Engine (batting/bowling/fielding AI), Player Stats (OVR, PER, form), Squad/Lineup builder, Training system
+- PROGRESSION: League Mode, Trophy Road, Season Pass, Alliance, PvP matchmaking
+- ECONOMY: Store (chests, EPB/SPB player scouts, offers, bundles), Auction house, in-app purchases
+- SOCIAL: Alliance chat, PvP challenges, HW TV (replays), Player Scout system
+- PLATFORM: iOS (Game Center, Sign-in with Apple), Android (Play Games, Google Sign-In), WhatsApp/Facebook auth
+- ONBOARDING: FTUE (First Time User Experience) with all tutorial steps
+- INFRASTRUCTURE: Push notifications, offline mode, network retry logic, Analytics events
+
+A developer made the following change:
+CHANGE TYPE: ${type}
+PLATFORM: ${platform}
+FEATURE TAGS: ${tags.join(', ')||'not specified'}
+
+CHANGE DESCRIPTION:
+${descSafe}
+
+Your task: perform an EXHAUSTIVE QA impact analysis. Every field must be FULLY detailed — no short answers.
+
+Return ONLY a valid JSON object (no markdown, no code fences, nothing before {, nothing after }):
+
+{
+  "summary": "A thorough 4-5 sentence executive summary covering: what changed, all systems that could be affected, key risks, platform-specific concerns, and the critical path for testing. Be specific about Hitwicket screen names and flows.",
+  "risk_score": "CRITICAL|HIGH|MEDIUM|LOW",
+  "impact_areas": [
+    {
+      "title": "Exact impacted area name",
+      "severity": "critical|high|medium|low",
+      "items": [
+        "Detailed check item 1 — reference exact screen name, button, or flow in Hitwicket",
+        "Detailed check item 2 — include expected behavior and what could break",
+        "Detailed check item 3",
+        "Detailed check item 4"
+      ]
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-001",
+      "feature": "Exact Hitwicket feature/screen name",
+      "title": "Full descriptive test case title — what is being verified",
+      "category": "Functional|Regression|Edge Case|UI|Performance|Integration",
+      "preconditions": "Exact setup state required: account type, player state, mana level, screen to start from, any prerequisite actions",
+      "steps": "1. Navigate to [exact screen]\\n2. [Exact action with specific element name]\\n3. [Next action]\\n4. [Verification step]",
+      "expected": "Precise expected outcome — what the user sees, what data should be stored, what events fire, what the UI shows",
+      "break_point": "Exact condition that would cause this test to fail — the specific failure mode",
+      "systems": "SA Manager, Match Engine (comma-separated Hitwicket systems involved)",
+      "edge_case": "Yes|No",
+      "priority": "P0|P1|P2|P3"
+    }
+  ],
+  "edge_cases": [
+    "Specific edge case description with exact Hitwicket scenario"
+  ],
+  "downstream_risks": [
+    "Specific downstream system/flow that could break and why"
+  ],
+  "regression_scope": ["Area1", "Area2"]
+}
+
+HARD REQUIREMENTS:
+- Generate EXACTLY 15 test cases numbered TC-001 through TC-015
+- Every test case must have ALL 10 fields fully populated — no empty strings
+- Steps must be numbered and detailed (minimum 3 steps each)
+- Preconditions must specify exact account/game state
+- Expected result must be precise and verifiable
+- Break point must describe the specific failure scenario
+- Systems must list actual Hitwicket system names
+- Include at least 4 P0, 4 P1, 4 P2, 3 P3 test cases
+- Impact areas: minimum 6, each with minimum 4 items
+- Reference actual Hitwicket screens: Player Card, SA Activation screen, Match lobby, Squad Builder, Store tab, FTUE wizard, Trophy Road map, etc.
+- Edge cases: minimum 8 specific scenarios
+- Downstream risks: minimum 5 specific risks`;
+
+  try {
+    const raw    = await wAI(prompt);
+    clearInterval(ticker);
+    const result = parseAIJson(raw);
+    if (result._partial) {
+      toast(`⚠ Response truncated — recovered ${result._recovered_tcs} test cases`, 'info');
+    }
+    G.lastImpact = result;
+    renderImpact(result);
+    document.getElementById('iTime').textContent = new Date().toLocaleTimeString();
+    addHistoryEntry('impact', { desc, type, platform, tags }, result, desc.substring(0,60)+(desc.length>60?'…':''));
+  } catch(e) {
+    clearInterval(ticker);
+    document.getElementById('iLoader').classList.remove('on');
+    document.getElementById('iOut').style.display = 'block';
+    document.getElementById('iCards').innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:12px;padding:10px 0;">Error: ${e.message}</div>`;
+    toast(e.message, 'err');
+  }
+  document.getElementById('iBtn').disabled = false;
+}
+
+function renderImpact(r) {
+  document.getElementById('iLoader').classList.remove('on');
+  document.getElementById('iOut').style.display = 'block';
+  const tcs = r.test_cases || [];
+  const p0  = tcs.filter(t=>t.priority==='P0').length;
+  const p1  = tcs.filter(t=>t.priority==='P1').length;
+  const p2  = tcs.filter(t=>t.priority==='P2').length;
+  const p3  = tcs.filter(t=>t.priority==='P3').length;
+  const rc  = {CRITICAL:'c-red',HIGH:'c-orange',MEDIUM:'c-blue',LOW:'c-jade'}[r.risk_score] || 'c-blue';
+  document.getElementById('iStats').innerHTML = `
+    <div class="stat-cell"><span class="stat-num ${rc}">${r.risk_score||'—'}</span><span class="stat-lbl">Risk Level</span></div>
+    <div class="stat-cell"><span class="stat-num c-red">${p0}</span><span class="stat-lbl">P0 Blocker</span></div>
+    <div class="stat-cell"><span class="stat-num c-orange">${p1}</span><span class="stat-lbl">P1 Critical</span></div>
+    <div class="stat-cell"><span class="stat-num c-blue">${p2}</span><span class="stat-lbl">P2 Important</span></div>
+    <div class="stat-cell"><span class="stat-num c-jade">${p3}</span><span class="stat-lbl">P3 Low</span></div>
+    <div class="stat-cell" style="margin-left:auto;"><span class="stat-num">${tcs.length}</span><span class="stat-lbl">Total TCs</span></div>
+  `;
+  let html = `<div class="icard" style="grid-column:1/-1;border-color:rgba(61,142,255,.2);">
+    <div class="icard-hd"><span>📋</span><span class="icard-title">Executive Summary</span></div>
+    <p style="font-size:12px;line-height:1.8;color:var(--mist);">${r.summary||''}</p>
+    ${r.regression_scope?.length ? `
+      <div style="margin-top:12px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mute);margin-bottom:7px;">Regression Scope</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">${r.regression_scope.map(s=>`<span style="background:rgba(61,142,255,.1);border:1px solid rgba(61,142,255,.2);color:var(--blue2);font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;">${s}</span>`).join('')}</div>
+      </div>` : ''}
+  </div>`;
+  (r.impact_areas||[]).forEach(a => {
+    const icon = {critical:'🔴',high:'🟠',medium:'🔵',low:'🟢'}[a.severity] || '⚪';
+    html += `<div class="icard"><div class="icard-hd"><span>${icon}</span><span class="icard-title">${a.title}</span><span class="sev sev-${a.severity||'medium'}">${a.severity}</span></div><ul>${(a.items||[]).map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+  });
+  if (r.edge_cases?.length) html += `<div class="icard"><div class="icard-hd"><span>⚠️</span><span class="icard-title">Edge Cases (${r.edge_cases.length})</span><span class="sev sev-high">watch</span></div><ul>${r.edge_cases.map(e=>`<li>${e}</li>`).join('')}</ul></div>`;
+  if (r.downstream_risks?.length) html += `<div class="icard"><div class="icard-hd"><span>🔗</span><span class="icard-title">Downstream Risks (${r.downstream_risks.length})</span><span class="sev sev-medium">deps</span></div><ul>${r.downstream_risks.map(d=>`<li>${d}</li>`).join('')}</ul></div>`;
+  document.getElementById('iCards').innerHTML = html;
+  const pc = {P0:'p0',P1:'p1',P2:'p2',P3:'p3'};
+  if (tcs.length) {
+    document.getElementById('iTCWrap').innerHTML = `
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--jade);margin-bottom:10px;">TEST CASES (${tcs.length})</div>
+      <div class="tbl-scroll"><table class="tc-table">
+        <thead><tr>
+          <th>TC ID</th><th>Feature</th><th>Test Title</th><th>Category</th>
+          <th>Preconditions</th><th>Steps</th><th>Expected Result</th>
+          <th>Break Point</th><th>Systems</th><th>Edge Case</th>
+          <th>Priority</th><th>Status</th><th>Dev Result</th><th>QA Result</th>
+        </tr></thead>
+        <tbody>${tcs.map(tc=>`<tr>
+          <td class="tc-id">${tc.id||''}</td>
+          <td style="white-space:nowrap;">${tc.feature||''}</td>
+          <td style="min-width:180px;font-weight:500;color:var(--text);">${tc.title||''}</td>
+          <td>${tc.category||''}</td>
+          <td style="min-width:160px;">${(tc.preconditions||'').replace(/\\n/g,'<br>')}</td>
+          <td style="min-width:220px;">${(tc.steps||'').replace(/\\n/g,'<br>').replace(/(\d+\.)/g,'<br>$1').replace(/^<br>/,'')}</td>
+          <td style="min-width:200px;">${tc.expected||tc.expected_result||''}</td>
+          <td style="min-width:140px;color:var(--red2);">${tc.break_point||tc.breakpoint||''}</td>
+          <td style="white-space:nowrap;">${tc.systems||tc.affected_systems||''}</td>
+          <td style="text-align:center;">${tc.edge_case||''}</td>
+          <td><span class="prio ${pc[tc.priority]||'p2'}">${tc.priority||''}</span></td>
+          <td></td><td></td><td></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+  }
+}
+
+async function runPRD() {
+  const txt = document.getElementById('prdTxt').value.trim();
+  if (!G.prdFile && !txt) { toast('Upload or paste PRD content', 'err'); return; }
+
+  const prio     = document.getElementById('prdPrio').value;
+  const platform = document.getElementById('prdPlatform').value;
+  const focus    = document.getElementById('prdFocus').value.trim();
+  const contentSafe = (G.prdFile?.type === 'text' ? G.prdFile.data : txt).substring(0, 8000);
+
+  document.getElementById('prdBtn').disabled = true;
+  document.getElementById('prdLoader').classList.add('on');
+  document.getElementById('prdOut').style.display   = 'none';
+  document.getElementById('prdEmpty').style.display = 'none';
+  document.getElementById('prdActs').style.display  = 'none';
+
+  const steps = ['Reading document…','Extracting requirements…','Mapping test scenarios…','Generating 14-col suite…','Applying KB context…'];
+  let si = 0;
+  const lbl    = document.getElementById('prdLbl');
+  const ticker = setInterval(() => { lbl.textContent = steps[si=(si+1)%steps.length]; }, 2000);
+
+  const prompt = `You are a PRINCIPAL QA ENGINEER at Hitwicket (mobile cricket strategy game, Android + iOS).
+
+Analyze the following PRD / feature specification and generate a COMPREHENSIVE, DETAILED test suite. Every single test case must be fully filled out — no empty fields, no placeholder text.
+
+PRD CONTENT:
+${G.prdFile?.type === 'pdf' ? '[PDF attached — analyze the document provided]' : contentSafe}
+
+${focus ? `SPECIAL FOCUS: ${focus}` : ''}
+PLATFORM: ${platform}
+PRIORITY SYSTEM: ${prio}
+
+Return ONLY valid JSON (no markdown, no code fences, nothing before {, nothing after }):
+
+{
+  "feature_name": "Exact feature name from the PRD",
+  "test_cases": [
+    {
+      "id": "TC-001",
+      "feature": "Sub-feature or component name",
+      "title": "Full descriptive title of what is being tested",
+      "category": "Functional|UI|Regression|Edge Case|Performance|Integration|Security",
+      "preconditions": "Exact prerequisite state — account type, game state, data setup needed, screen to navigate to first",
+      "steps": "1. [Exact step with specific screen/element name]\\n2. [Next step]\\n3. [Verification or input step]\\n4. [Check result step]",
+      "expected_result": "Precise verifiable outcome — what the user sees, data saved, UI state, any backend events",
+      "break_point": "The exact condition or failure mode that would make this test fail",
+      "systems": "Affected Hitwicket systems (e.g. SAManager, StoreService, MatchEngine)",
+      "edge_case": "Yes|No",
+      "priority": "${prio === 'P0-P3' ? 'P0|P1|P2|P3' : 'Critical|High|Medium|Low'}"
+    }
+  ]
+}
+
+REQUIREMENTS:
+- Generate 20 test cases (TC-001 through TC-020)
+- ALL 10 fields fully populated for every test case — no empty strings allowed
+- Steps must be numbered and have minimum 4 steps each
+- Cover: happy path, negative/failure flows, boundary values, UI states, error messages, loading states, empty states
+- Include both Android and iOS specific cases where behaviors differ
+- preconditions must specify the exact starting game state
+- break_point must identify the specific failure scenario
+- Reference actual Hitwicket UI: specific screen names, button labels, tabs
+- Distribute priorities: ~4 P0, ~6 P1, ~6 P2, ~4 P3`;
+
+  try {
+    let raw;
+    if (G.prdFile?.type === 'pdf') {
+      raw = await wAI(prompt.replace('[PDF attached — analyze the document provided]', `[PDF: ${G.prdFile.name} — please analyze based on filename context and the KB entries]`));
+    } else {
+      raw = await wAI(prompt);
+    }
+    clearInterval(ticker);
+    const result = parseAIJson(raw);
+    G.lastPRD = result;
+    renderPRD(result);
+    addHistoryEntry('prd', { txt: txt.substring(0,500), prio, platform, focus }, result, result.feature_name || txt.substring(0,50) || 'PRD Analysis');
+  } catch(e) {
+    clearInterval(ticker);
+    document.getElementById('prdLoader').classList.remove('on');
+    document.getElementById('prdEmpty').style.display = 'block';
+    document.getElementById('prdEmpty').innerHTML = `<span class="empty-icon">⚠️</span>Error: ${e.message}`;
+    toast(e.message, 'err');
+  }
+  document.getElementById('prdBtn').disabled = false;
+}
+
+function renderPRD(r) {
+  document.getElementById('prdLoader').classList.remove('on');
+  document.getElementById('prdOut').style.display  = 'block';
+  document.getElementById('prdActs').style.display = 'flex';
+  const tcs = r.test_cases || [];
+  document.getElementById('prdStats').textContent = `${r.feature_name||'Feature'} · ${tcs.length} test cases generated`;
+  const pc = {P0:'p0',P1:'p1',P2:'p2',P3:'p3',Critical:'p0',High:'p1',Medium:'p2',Low:'p3'};
+  document.getElementById('prdBody').innerHTML = tcs.map(tc => `<tr>
+    <td class="tc-id">${tc.id||''}</td>
+    <td style="white-space:nowrap;">${tc.feature||''}</td>
+    <td style="min-width:180px;font-weight:500;color:var(--text);">${tc.title||''}</td>
+    <td>${tc.category||''}</td>
+    <td style="min-width:160px;">${(tc.preconditions||'').replace(/\\n/g,'<br>')}</td>
+    <td style="min-width:220px;">${(tc.steps||'').replace(/\\n/g,'<br>').replace(/(\d+\.)/g,'<br>$1').replace(/^<br>/,'')}</td>
+    <td style="min-width:200px;">${tc.expected_result||tc.expected||''}</td>
+    <td style="min-width:140px;color:var(--red2);">${tc.break_point||tc.breakpoint||''}</td>
+    <td style="white-space:nowrap;">${tc.systems||tc.affected_systems||''}</td>
+    <td style="text-align:center;">${tc.edge_case||''}</td>
+    <td><span class="prio ${pc[tc.priority]||'p2'}">${tc.priority||''}</span></td>
+    <td></td><td></td><td></td>
+  </tr>`).join('');
+}
+function dOver(e, id)   { e.preventDefault(); document.getElementById(id)?.classList.add('drag'); }
+function dLeave(id)     { document.getElementById(id)?.classList.remove('drag'); }
+function dDrop(e, type) {
+  e.preventDefault();
+  const id = type === 'prd' ? 'prdDrop' : 'importDrop';
+  dLeave(id);
+  if (type === 'import') { importFiles({ target: { files: e.dataTransfer.files } }); }
+  else if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0], type);
+}
+function fPick(e, type) { if (e.target.files[0]) processFile(e.target.files[0], type); }
+function processFile(file, type) {
+  const nameEl  = document.getElementById(type+'FN');
+  const badgeEl = document.getElementById(type+'FileBadge');
+  if (nameEl)  nameEl.textContent    = file.name;
+  if (badgeEl) badgeEl.style.display = 'block';
+  const reader = new FileReader();
+  if (file.type === 'application/pdf') {
+    reader.onload = e => { if (type==='prd') G.prdFile = { type:'pdf', data:e.target.result.split(',')[1], name:file.name }; };
+    reader.readAsDataURL(file);
+  } else {
+    reader.onload = e => { if (type==='prd') G.prdFile = { type:'text', data:e.target.result, name:file.name }; };
+    reader.readAsText(file);
+  }
+}
+function rmFile(type) {
+  if (type==='prd') G.prdFile = null;
+  const el = document.getElementById(type+'FileBadge');
+  if (el) el.style.display = 'none';
+}
+
+async function importFiles(e) {
+  const files = Array.from(e.target?.files || []);
+  if (!files.length) return;
+  G.importChunks = [];
+  const drop = document.getElementById('importDrop');
+  drop.classList.add('loaded');
+  drop.querySelector('.drop-text').innerHTML = `<b>${files.length} file${files.length>1?'s':''} loaded</b> — parsing…`;
+  for (const file of files) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    try {
+      if (['xlsx','xls'].includes(ext))      await parseExcel(file);
+      else if (ext === 'csv')               await parseCSV(file);
+      else if (['txt','md'].includes(ext))  await parseTxt(file);
+      else if (ext === 'pdf')               await parsePDF(file);
+      else if (['doc','docx'].includes(ext))await parseDocx(file);
+      else if (ext === 'json')              await parseJSON(file);
+      else if (['pptx','ppt'].includes(ext))await parsePptx(file);
+      else                                  await parseTxt(file);
+    } catch(err) { toast(`${file.name}: ${err.message}`, 'err'); }
+  }
+  drop.querySelector('.drop-text').innerHTML = `<b>${files.length} file${files.length>1?'s':''}</b> loaded · ${G.importChunks.length} chunks extracted`;
+  renderImportPreview();
+  document.getElementById('importInput').value = '';
+}
+async function parseExcel(file) {
+  const splitSheets = document.getElementById('splitSheets').checked;
+  const defType = document.getElementById('importType').value;
+  const defArea = document.getElementById('importArea').value.trim();
+  return new Promise((res, rej) => {
+    const rd = new FileReader();
+    rd.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        if (splitSheets) {
+          wb.SheetNames.forEach(sn => {
+            const csv = XLSX.utils.sheet_to_csv(wb.Sheets[sn]);
+            if (csv.trim().length > 20) G.importChunks.push({ title:`${file.name.replace(/\.(xlsx|xls)$/i,'')} — ${sn}`, area:defArea||sn, type:defType, content:csv, selected:true, meta:`${csv.split('\n').length-1} rows` });
+          });
+        } else {
+          let c = ''; wb.SheetNames.forEach(sn => { c += `\n=== ${sn} ===\n${XLSX.utils.sheet_to_csv(wb.Sheets[sn])}\n`; });
+          G.importChunks.push({ title:file.name, area:defArea, type:defType, content:c.trim(), selected:true, meta:`${wb.SheetNames.length} sheets` });
+        }
+        res();
+      } catch(err) { rej(err); }
+    };
+    rd.onerror = rej; rd.readAsArrayBuffer(file);
+  });
+}
+async function parseCSV(file) {
+  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej) => {
+    const rd=new FileReader();
+    rd.onload=e => { G.importChunks.push({ title:file.name.replace(/\.csv$/i,''), area:defArea, type:defType, content:e.target.result, selected:true, meta:`${e.target.result.split('\n').filter(r=>r.trim()).length} rows` }); res(); };
+    rd.onerror=rej; rd.readAsText(file);
+  });
+}
+async function parseTxt(file) {
+  const splitH=document.getElementById('splitHeadings').checked;
+  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej) => {
+    const rd=new FileReader();
+    rd.onload=e => {
+      const content=e.target.result;
+      if (splitH && /\n#{1,3}\s/.test(content)) {
+        const secs=content.split(/\n(?=#{1,3}\s)/); let added=0;
+        secs.forEach((sec,i) => {
+          if (sec.trim().length<30) return;
+          G.importChunks.push({ title:sec.split('\n')[0].replace(/^#+\s*/,'').trim()||`${file.name} §${i+1}`, area:defArea, type:defType, content:sec.trim(), selected:true, meta:`${sec.split('\n').length} lines` }); added++;
+        });
+        if (!added) G.importChunks.push({ title:file.name.replace(/\.(txt|md)$/i,''), area:defArea, type:defType, content, selected:true, meta:`${content.split('\n').length} lines` });
+      } else {
+        G.importChunks.push({ title:file.name.replace(/\.(txt|md)$/i,''), area:defArea, type:defType, content, selected:true, meta:`${content.split('\n').length} lines` });
+      }
+      res();
+    };
+    rd.onerror=rej; rd.readAsText(file);
+  });
+}
+async function parsePDF(file) {
+  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej) => {
+    const rd=new FileReader();
+    rd.onload=e => { G.importChunks.push({ title:file.name.replace(/\.pdf$/i,''), area:defArea, type:defType, content:`[PDF FILE: ${file.name}]\n[Size: ${(file.size/1024).toFixed(1)} KB]`, selected:true, meta:`PDF · ${(file.size/1024).toFixed(1)} KB`, pdfData:e.target.result.split(',')[1] }); res(); };
+    rd.onerror=rej; rd.readAsDataURL(file);
+  });
+}
+async function parseDocx(file) {
+  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej) => {
+    const rd=new FileReader();
+    rd.onload=async e => {
+      let text='';
+      try { const wb=XLSX.read(e.target.result,{type:'array'}); wb.SheetNames.forEach(sn=>{text+=XLSX.utils.sheet_to_csv(wb.Sheets[sn])+'\n';}); }
+      catch { try { const raw=new TextDecoder('utf-8').decode(new Uint8Array(e.target.result)); text=raw.replace(/[^\x20-\x7E\n\r\t]/g,' ').replace(/\s{3,}/g,'\n').trim(); if(text.length<50) text=`[DOCX: ${file.name}]`; } catch { text=`[DOCX: ${file.name}]`; } }
+      G.importChunks.push({ title:file.name.replace(/\.(doc|docx)$/i,''), area:defArea, type:defType, content:text.substring(0,8000), selected:true, meta:`DOCX · ${(file.size/1024).toFixed(1)} KB` }); res();
+    };
+    rd.onerror=rej; rd.readAsArrayBuffer(file);
+  });
+}
+async function parseJSON(file) {
+  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej) => {
+    const rd=new FileReader();
+    rd.onload=e => { let c=e.target.result; try{c=JSON.stringify(JSON.parse(c),null,2);}catch{} G.importChunks.push({ title:file.name.replace(/\.json$/i,''), area:defArea, type:defType, content:c, selected:true, meta:`JSON · ${c.split('\n').length} lines` }); res(); };
+    rd.onerror=rej; rd.readAsText(file);
+  });
+}
+async function parsePptx(file) {
+  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
+  return new Promise(res => {
+    const rd=new FileReader();
+    rd.onload=e => { let c=''; try{const wb=XLSX.read(e.target.result,{type:'array'});wb.SheetNames.forEach(sn=>{c+=`\n=== ${sn} ===\n${XLSX.utils.sheet_to_csv(wb.Sheets[sn])}\n`;});}catch{c=`[PowerPoint: ${file.name}]`;} G.importChunks.push({ title:file.name.replace(/\.(pptx|ppt)$/i,''), area:defArea, type:defType, content:c.trim()||`[${file.name}]`, selected:true, meta:`PPT · ${(file.size/1024).toFixed(1)} KB` }); res(); };
+    rd.onerror=()=>{ G.importChunks.push({ title:file.name, area:'', type:defType, content:`[PPT: ${file.name}]`, selected:true, meta:'PPT' }); res(); };
+    rd.readAsArrayBuffer(file);
+  });
+}
+function renderImportPreview() {
+  const wrap=document.getElementById('importPreview'), empty=document.getElementById('importEmpty');
+  if (!G.importChunks.length) { wrap.style.display='none'; empty.style.display='block'; empty.innerHTML='<span class="empty-icon">📥</span>No chunks detected.'; return; }
+  wrap.style.display='block'; empty.style.display='none';
+  const tl={test_cases:'TC',code:'Code',prd:'PRD',note:'Note',feat:'Feature'};
+  const tcl={test_cases:'tb-tc',code:'tb-code',prd:'tb-prd',note:'tb-note',feat:'tb-feat'};
+  document.getElementById('chunkList').innerHTML=G.importChunks.map((c,i)=>`
+    <div class="chunk-item">
+      <input type="checkbox" class="chunk-check" ${c.selected?'checked':''} onchange="G.importChunks[${i}].selected=this.checked;updateChunkCounts()">
+      <div class="chunk-body">
+        <div class="chunk-top"><span class="chunk-title">${c.title}</span><span class="type-badge ${tcl[c.type]||'tb-note'}">${tl[c.type]||c.type}</span></div>
+        <div class="chunk-meta">${c.meta||''} ${c.area?'· '+c.area:''}</div>
+        <div class="chunk-preview">${c.content.substring(0,160).replace(/\n/g,' ')}…</div>
+        <div class="chunk-edit">
+          <input type="text" value="${c.title}" onchange="G.importChunks[${i}].title=this.value" placeholder="Title">
+          <input type="text" value="${c.area||''}" onchange="G.importChunks[${i}].area=this.value" placeholder="Area tag" style="max-width:110px;">
+          <select onchange="G.importChunks[${i}].type=this.value">
+            <option value="test_cases" ${c.type==='test_cases'?'selected':''}>Test Cases</option>
+            <option value="prd" ${c.type==='prd'?'selected':''}>PRD</option>
+            <option value="code" ${c.type==='code'?'selected':''}>Code</option>
+            <option value="note" ${c.type==='note'?'selected':''}>Note</option>
+            <option value="feat" ${c.type==='feat'?'selected':''}>Feature</option>
+          </select>
+        </div>
+      </div>
+    </div>`).join('');
+  updateChunkCounts();
+}
+function updateChunkCounts() {
+  document.getElementById('chunkCnt').textContent = G.importChunks.length;
+  document.getElementById('chunkSel').textContent = G.importChunks.filter(c=>c.selected).length;
+}
+function selAll(val) { G.importChunks.forEach(c=>c.selected=val); renderImportPreview(); }
+async function saveChunks() {
+  const sel = G.importChunks.filter(c=>c.selected);
+  if (!sel.length) { toast('Nothing selected','err'); return; }
+  const btn=document.getElementById('saveChunksBtn'); btn.disabled=true;
+  document.getElementById('importProgPanel').style.display='block';
+  const bar=document.getElementById('progBar'), lbl=document.getElementById('progLbl'), log=document.getElementById('progLog');
+  log.innerHTML=''; let saved=0, failed=0;
+  for (let i=0;i<sel.length;i++) {
+    const c=sel[i]; lbl.textContent=`${i+1} / ${sel.length}`;
+    bar.style.width=`${Math.round((i/sel.length)*100)}%`;
+    try {
+      const d=await wFetch('/kb','POST',{ type:c.type, title:c.title||`Import ${i+1}`, area:c.area||'', content:c.content });
+      G.kb.unshift(d.entry); saved++; log.innerHTML+=`<span style="color:var(--jade)">✓</span> ${c.title}<br>`;
+    } catch(e) { failed++; log.innerHTML+=`<span style="color:var(--red)">✗</span> ${c.title}: ${e.message}<br>`; }
+    log.scrollTop=log.scrollHeight;
+    await new Promise(r=>setTimeout(r,150));
+  }
+  bar.style.width='100%'; lbl.textContent=`${saved} saved${failed?`, ${failed} failed`:''}`;
+  updateKBUI(); setCloud('ok',`☁ ${G.kb.length}`); btn.disabled=false;
+  toast(`${saved} entries saved to KB ✓`, saved>0?'ok':'err');
+  G.importChunks=G.importChunks.filter(c=>!c.selected);
+  setTimeout(renderImportPreview, 500);
+}
+
+let _tt;
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `on ${type}`;
+  clearTimeout(_tt); _tt = setTimeout(() => el.className = '', 3500);
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+ 
+  const wrap = document.getElementById('iTags');
+  FEATURES.forEach(f => {
+    const s = document.createElement('span');
+    s.className = 'tag'; s.textContent = f; s.dataset.v = f;
+    s.onclick = () => s.classList.toggle('on');
+    wrap.appendChild(s);
+  });
+
+
+  try {
+    await fetchConfig();
+  } catch(e) {
+    return; 
+  }
+
+
+  if (typeof google !== 'undefined') {
+    google.accounts.id.initialize({
+      client_id:   GOOGLE_CLIENT,
+      callback:    handleGoogleCred,
+      auto_select: false,
+    });
+  }
+
+
+  const saved = loadSession();
+  if (saved?.user && saved?.sessionToken) {
+    G.user         = saved.user;
+    G.sessionToken = saved.sessionToken;
+   
+    try {
+      await wFetch('/kb'); 
+      saveSession(); 
+      onLoginSuccess();
+      toast('Session restored ✓', 'ok');
+    } catch(e) {
+   
+      clearSession(); G.user = null; G.sessionToken = null;
+  
+      if (typeof google !== 'undefined') {
+        google.accounts.id.initialize({ client_id: GOOGLE_CLIENT, callback: handleGoogleCred, auto_select: false });
+      }
+    }
+  }
+  
+});
 </script>
 </body>
 </html>
