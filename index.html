@@ -6,7 +6,8 @@
 <title>QA Blueprint · Hitwicket</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <style>
 /* ══ THEME VARIABLES ══ */
 :root[data-theme="dark"] {
@@ -307,29 +308,31 @@ body::after {
 .wrap {
   position: relative; z-index: 1; max-width: 1320px; margin: 0 auto;
   padding: 28px 20px 120px;
-  overflow-x: hidden; /* FIX: prevent horizontal overflow */
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
-.tab-pane { display: none; }
-.tab-pane.on { display: block; animation: fadein .22s ease; }
+.tab-pane { display: none; width: 100%; box-sizing: border-box; }
+.tab-pane.on { display: block; animation: fadein .22s ease; width: 100%; }
 @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.page-hd { margin-bottom: 24px; }
+.page-hd { margin-bottom: 24px; overflow: hidden; }
 .page-hd h2 { font-family: var(--disp); font-size: 30px; letter-spacing: 4px; color: var(--text); }
 .page-hd h2 span { color: var(--red); }
-.page-hd p { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.7; }
+.page-hd p { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere; max-width: 100%; }
 
 /* FIX: minmax(0,1fr) is the correct way — prevents tracks from ever being wider than available space */
-.g2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; width: 100%; }
-.g2 > * { min-width: 0; max-width: 100%; overflow: hidden; }
+.g2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; width: 100%; max-width: 100%; box-sizing: border-box; }
+.g2 > * { min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; }
 @media(max-width:840px) { .g2 { grid-template-columns: minmax(0,1fr); } }
 
 /* FIX: flex column containers inside grid cells */
-.g2-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; max-width: 100%; overflow: hidden; }
+.g2-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; }
 
-.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; transition: background .3s, border-color .3s; min-width: 0; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; }
+.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; transition: background .3s, border-color .3s; min-width: 0; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; box-sizing: border-box; width: 100%; }
 .panel-hd {
   padding: 11px 16px; border-bottom: 1px solid var(--bd); background: var(--s2);
-  display: flex; align-items: center; gap: 8px;
-  transition: background .3s, border-color .3s;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  transition: background .3s, border-color .3s; min-width: 0; overflow: hidden;
 }
 .pdot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
 .pdot.r { background: var(--red); }
@@ -641,6 +644,103 @@ select option { background: var(--s2); }
 }
 .footer-bug-btn:hover { background: rgba(255,45,85,.14); border-color: rgba(255,45,85,.35); }
 .footer-bug-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); animation: pipblink 2s ease-in-out infinite; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ══════════════════════════════════════════ */
+
+/* ── TABLET: ≤ 960px ── */
+@media (max-width: 960px) {
+  .wrap { padding: 20px 16px 100px; }
+  .nav { padding: 0 12px; }
+  .nav-brand { font-size: 16px; letter-spacing: 2px; padding: 0 12px 0 0; }
+  .cloud-lbl { display: none; }
+  .provider-badge { display: none; }
+  .user-nm { display: none; }
+  .stat-cell { padding: 10px 14px; }
+  .stat-num  { font-size: 20px; }
+  .impact-grid { grid-template-columns: repeat(auto-fill, minmax(min(200px,100%), 1fr)); }
+}
+
+/* ── MOBILE: ≤ 640px ── */
+@media (max-width: 640px) {
+  body { font-size: 13px; }
+  .wrap { padding: 16px 12px 90px; }
+  .page-hd { margin-bottom: 16px; }
+  .page-hd h2 { font-size: 22px; letter-spacing: 2px; }
+
+  /* Nav */
+  .nav { height: 48px; padding: 0 8px; }
+  .nav-brand { font-size: 13px; letter-spacing: 1px; padding: 0 8px 0 0; margin-right: 2px; }
+  .nav-tab { padding: 0 10px; font-size: 9px; letter-spacing: 1px; }
+  .nav-end { gap: 6px; padding-left: 8px; }
+  .bug-sheet-btn span:last-child { display: none; } /* hide "Bugs" text, keep icon */
+  .bug-sheet-btn { padding: 4px 7px; }
+  .theme-toggle { width: 28px; height: 28px; font-size: 13px; }
+  .hist-btn { padding: 0 8px; font-size: 9px; }
+  .hist-btn span:first-of-type { display: none; } /* hide clock emoji label */
+
+  /* History drawer full width */
+  .hist-drawer { width: 100%; border-left: none; top: 48px; }
+
+  /* Two-col form grid → single col */
+  .g2-f { grid-template-columns: 1fr; }
+
+  /* Panel */
+  .panel-body { padding: 12px; }
+  .panel-hd   { padding: 9px 12px; }
+
+  /* Stats bar */
+  .stat-cell { padding: 8px 10px; flex: 1 1 28%; min-width: 0; }
+  .stat-num  { font-size: 17px; }
+  .stat-lbl  { font-size: 8px; letter-spacing: 1px; }
+
+  /* Impact cards: single col */
+  .impact-grid { grid-template-columns: 1fr; }
+
+  /* TC table scroll */
+  .tbl-scroll { max-height: 360px; }
+  .tc-table th, .tc-table td { padding: 5px 6px; font-size: 10px; }
+
+  /* Drop zone */
+  .drop-zone { padding: 18px 12px; }
+  .drop-icon { font-size: 20px; }
+  .drop-text { font-size: 10px; }
+
+  /* Export bar */
+  .dl-bar { gap: 5px; padding: 8px 10px; }
+  .btn-sm { padding: 5px 9px; font-size: 10px; }
+
+  /* Footer */
+  .site-footer { height: auto; padding: 8px 12px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .footer-credit { gap: 6px; flex-wrap: wrap; }
+  .footer-right { gap: 6px; }
+  .footer-version, .footer-sep, .footer-hw { display: none; }
+
+  /* Login card */
+  .login-card { padding: 28px 20px 24px; margin: 0 12px; max-width: 100%; }
+  .login-title { font-size: 24px; letter-spacing: 3px; }
+
+  /* Toast full width */
+  #toast { right: 10px; left: 10px; max-width: unset; font-size: 10px; bottom: 60px; }
+
+  /* Nav end — hide less important items */
+  .user-role { display: none; }
+}
+
+/* ── SMALL MOBILE: ≤ 400px ── */
+@media (max-width: 400px) {
+  .nav-brand { display: none; }
+  .nav-tab   { padding: 0 8px; font-size: 8px; letter-spacing: 0; }
+  .page-hd h2 { font-size: 19px; }
+  .stat-cell { padding: 6px 8px; }
+  .stat-num  { font-size: 15px; }
+  .panel-body { padding: 10px; }
+  .wrap { padding: 12px 8px 80px; }
+  .g2 { gap: 10px; }
+  .g2-col { gap: 10px; }
+}
 </style>
 </head>
 <body>
@@ -1579,23 +1679,216 @@ function tcToRow(tc) {
     tc.id||'', tc.feature||'', tc.title||tc.test_title||'', tc.category||'',
     tc.preconditions||'', tc.steps||'', tc.expected||tc.expected_result||'',
     tc.break_point||tc.breakpoint||'', tc.systems||tc.affected_systems||'',
-    tc.edge_case||tc.is_edge_case||'', tc.priority||'', '', '', ''
+    tc.edge_case||tc.is_edge_case||'', tc.priority||'', 'Not Started', '', ''
   ];
 }
 
 function dlExcel(src) {
   const tcs = src === 'impact' ? (G.lastImpact?.test_cases||[]) : (G.lastPRD?.test_cases||[]);
   if (!tcs.length) { toast('No test cases to download', 'err'); return; }
+
   const label = src === 'impact'
     ? (document.getElementById('iDesc').value.substring(0,28) || 'Impact')
     : (G.lastPRD?.feature_name || 'PRD');
   const fname = `${label.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'')}_TCs_${new Date().toISOString().slice(0,10)}.xlsx`;
-  const wb    = XLSX.utils.book_new();
-  const ws    = XLSX.utils.aoa_to_sheet([EXCEL_COLS, ...tcs.map(tcToRow)]);
-  ws['!cols'] = [{wch:8},{wch:16},{wch:40},{wch:13},{wch:28},{wch:42},{wch:42},{wch:20},{wch:14},{wch:9},{wch:9},{wch:10},{wch:12},{wch:10}];
-  XLSX.utils.book_append_sheet(wb, ws, label.substring(0,31));
-  XLSX.writeFile(wb, fname);
-  toast(`Downloaded ${fname} ✓`, 'ok');
+
+  // ── Use XLSXStyle if available, fall back to plain XLSX ──
+  const XS = window.XLSXStyle || window.XLSX;
+  const useStyle = !!window.XLSXStyle;
+
+  // ── Column config: [key, header, width] ──
+  const COLS = [
+    ['TC ID',          'TC ID',           9],
+    ['Feature',        'Feature',         18],
+    ['Test Title',     'Test Title',       42],
+    ['Category',       'Category',        14],
+    ['Preconditions',  'Preconditions',   32],
+    ['Steps',          'Steps',           46],
+    ['Expected Result','Expected Result', 46],
+    ['Break Point',    'Break Point',     28],
+    ['Systems',        'Systems',         16],
+    ['Edge Case',      'Edge Case',       10],
+    ['Priority',       'Priority',        10],
+    ['Status',         'Status',          12],
+    ['Dev Result',     'Dev Result',      14],
+    ['QA Result',      'QA Result',       12],
+  ];
+
+  // Priority colour map (background ARGB)
+  const PRIO_COLORS = {
+    P0:       { bg: 'FFFFE0E0', fg: 'FFC0392B', label: '🔴 P0' },
+    P1:       { bg: 'FFFFF3E0', fg: 'FFD35400', label: '🟠 P1' },
+    P2:       { bg: 'FFE8F4FD', fg: 'FF2471A3', label: '🔵 P2' },
+    P3:       { bg: 'FFE8F8F0', fg: 'FF1E8449', label: '🟢 P3' },
+    Critical: { bg: 'FFFFE0E0', fg: 'FFC0392B', label: '🔴 Critical' },
+    High:     { bg: 'FFFFF3E0', fg: 'FFD35400', label: '🟠 High' },
+    Medium:   { bg: 'FFE8F4FD', fg: 'FF2471A3', label: '🔵 Medium' },
+    Low:      { bg: 'FFE8F8F0', fg: 'FF1E8449', label: '🟢 Low' },
+  };
+
+  // Category colour map
+  const CAT_COLORS = {
+    'Functional':   'FFE8F4FD',
+    'Regression':   'FFF5EEF8',
+    'Edge Case':    'FFFEF9E7',
+    'UI':           'FFE8F8F5',
+    'Performance':  'FFF9EBE8',
+    'Integration':  'FFEAF2FF',
+    'Security':     'FFFDF2F8',
+  };
+
+  // ── Helper: make a styled cell ──
+  function sc(v, style) {
+    if (!useStyle) return v;
+    return { v, t: 's', s: style };
+  }
+
+  // ── Header style ──
+  const HDR_STYLE = {
+    font:      { name: 'Arial', sz: 10, bold: true, color: { rgb: 'FFFFFFFF' } },
+    fill:      { patternType: 'solid', fgColor: { rgb: 'FF1A1A2E' } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+    border: {
+      top:    { style: 'medium', color: { rgb: 'FF3D8EFF' } },
+      bottom: { style: 'medium', color: { rgb: 'FF3D8EFF' } },
+      left:   { style: 'thin',   color: { rgb: 'FF3D8EFF' } },
+      right:  { style: 'thin',   color: { rgb: 'FF3D8EFF' } },
+    }
+  };
+
+  // ── Base data cell style ──
+  function dataStyle(rowIdx, extraFg, extraBg) {
+    const zebra = rowIdx % 2 === 0 ? 'FFF5F5FA' : 'FFFFFFFF';
+    return {
+      font:      { name: 'Arial', sz: 9, color: { rgb: extraFg || 'FF1A1A2E' } },
+      fill:      { patternType: 'solid', fgColor: { rgb: extraBg || zebra } },
+      alignment: { vertical: 'top', wrapText: true },
+      border: {
+        top:    { style: 'hair', color: { rgb: 'FFDDDDEE' } },
+        bottom: { style: 'hair', color: { rgb: 'FFDDDDEE' } },
+        left:   { style: 'hair', color: { rgb: 'FFDDDDEE' } },
+        right:  { style: 'hair', color: { rgb: 'FFDDDDEE' } },
+      }
+    };
+  }
+
+  // ── TC ID style ──
+  function tcIdStyle(rowIdx) {
+    return {
+      font:      { name: 'Courier New', sz: 9, bold: true, color: { rgb: 'FF2471A3' } },
+      fill:      { patternType: 'solid', fgColor: { rgb: rowIdx%2===0 ? 'FFF0F6FF' : 'FFE8F2FF' } },
+      alignment: { horizontal: 'center', vertical: 'top' },
+      border:    dataStyle(rowIdx).border,
+    };
+  }
+
+  // ── Build header row ──
+  const headerRow = COLS.map(([,h]) => sc(h, HDR_STYLE));
+
+  // ── Build data rows ──
+  const dataRows = tcs.map((tc, ri) => {
+    const row = tcToRow(tc);
+    const prio = tc.priority || '';
+    const cat  = tc.category || '';
+    const pc   = PRIO_COLORS[prio] || {};
+    const cc   = CAT_COLORS[cat]   || null;
+
+    return row.map((val, ci) => {
+      if (!useStyle) return val;
+      const v = String(val || '');
+
+      // TC ID col (0)
+      if (ci === 0) return sc(v, tcIdStyle(ri));
+
+      // Priority col (10)
+      if (ci === 10 && pc.bg) {
+        return sc(prio, {
+          font:      { name: 'Arial', sz: 9, bold: true, color: { rgb: pc.fg } },
+          fill:      { patternType: 'solid', fgColor: { rgb: pc.bg } },
+          alignment: { horizontal: 'center', vertical: 'top' },
+          border:    dataStyle(ri).border,
+        });
+      }
+
+      // Category col (3)
+      if (ci === 3 && cc) {
+        return sc(v, {
+          font:      { name: 'Arial', sz: 9, color: { rgb: 'FF2C3E50' } },
+          fill:      { patternType: 'solid', fgColor: { rgb: cc } },
+          alignment: { horizontal: 'center', vertical: 'top', wrapText: true },
+          border:    dataStyle(ri).border,
+        });
+      }
+
+      // Edge Case col (9)
+      if (ci === 9) {
+        const isYes = v.toLowerCase() === 'yes';
+        return sc(v, {
+          font:      { name: 'Arial', sz: 9, bold: isYes, color: { rgb: isYes ? 'FFCA6F1E' : 'FF7F8C8D' } },
+          fill:      { patternType: 'solid', fgColor: { rgb: isYes ? 'FFFEF5E7' : (ri%2===0?'FFF5F5FA':'FFFFFFFF') } },
+          alignment: { horizontal: 'center', vertical: 'top' },
+          border:    dataStyle(ri).border,
+        });
+      }
+
+      // Status col (11)
+      if (ci === 11) {
+        return sc(v || 'Not Started', {
+          font:      { name: 'Arial', sz: 9, color: { rgb: 'FF7F8C8D' } },
+          fill:      { patternType: 'solid', fgColor: { rgb: ri%2===0?'FFF5F5FA':'FFFFFFFF' } },
+          alignment: { horizontal: 'center', vertical: 'top' },
+          border:    dataStyle(ri).border,
+        });
+      }
+
+      // Break point col (7) — red tint
+      if (ci === 7) {
+        return sc(v, {
+          font:      { name: 'Arial', sz: 9, color: { rgb: 'FFC0392B' } },
+          fill:      { patternType: 'solid', fgColor: { rgb: ri%2===0?'FFFFF5F5':'FFFEF9F9' } },
+          alignment: { vertical: 'top', wrapText: true },
+          border:    dataStyle(ri).border,
+        });
+      }
+
+      // Steps col (5) and Expected (6) — slightly blue tint
+      if (ci === 5 || ci === 6) {
+        return sc(v, {
+          font:      { name: 'Arial', sz: 9, color: { rgb: 'FF1A1A2E' } },
+          fill:      { patternType: 'solid', fgColor: { rgb: ri%2===0?'FFF8FBFF':'FFF3F8FF' } },
+          alignment: { vertical: 'top', wrapText: true },
+          border:    dataStyle(ri).border,
+        });
+      }
+
+      // Default
+      return sc(v, dataStyle(ri));
+    });
+  });
+
+  // ── Assemble sheet ──
+  const aoa = [headerRow, ...dataRows];
+  const ws  = XS.utils.aoa_to_sheet(aoa);
+
+  // ── Column widths ──
+  ws['!cols'] = COLS.map(([,,w]) => ({ wch: w }));
+
+  // ── Row heights: header taller, data rows tall enough for wrapped text ──
+  ws['!rows'] = [
+    { hpt: 30 }, // header
+    ...tcs.map(() => ({ hpt: 72 })) // data rows — tall for wrap
+  ];
+
+  // ── Freeze top row ──
+  ws['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomLeft' };
+
+  // ── Workbook ──
+  const wb = XS.utils.book_new();
+  XS.utils.book_append_sheet(wb, ws, label.substring(0, 31));
+
+  // ── Write ──
+  XS.writeFile(wb, fname, { bookType: 'xlsx', type: 'binary', cellStyles: useStyle });
+  toast(`Downloaded ${fname} (${tcs.length} TCs) ✓`, 'ok');
 }
 
 function copyToClipboard(src) {
