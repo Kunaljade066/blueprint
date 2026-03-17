@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
 /* ══ THEME VARIABLES ══ */
 :root[data-theme="dark"] {
@@ -1674,221 +1674,293 @@ async function savePRDKB() {
   } catch(e) { toast(e.message, 'err'); }
 }
 
-function tcToRow(tc) {
-  return [
-    tc.id||'', tc.feature||'', tc.title||tc.test_title||'', tc.category||'',
-    tc.preconditions||'', tc.steps||'', tc.expected||tc.expected_result||'',
-    tc.break_point||tc.breakpoint||'', tc.systems||tc.affected_systems||'',
-    tc.edge_case||tc.is_edge_case||'', tc.priority||'', 'Not Started', '', ''
-  ];
-}
-
-function dlExcel(src) {
+// ══ EXCEL EXPORT — ExcelJS full styling ══
+async function dlExcel(src) {
   const tcs = src === 'impact' ? (G.lastImpact?.test_cases||[]) : (G.lastPRD?.test_cases||[]);
   if (!tcs.length) { toast('No test cases to download', 'err'); return; }
+  if (typeof ExcelJS === 'undefined') { toast('Excel library loading… try again in 2s', 'info'); return; }
 
-  const label = src === 'impact'
-    ? (document.getElementById('iDesc').value.substring(0,28) || 'Impact')
+  const btn = document.querySelector(`button[onclick="dlExcel('${src}')"]`);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Building…'; }
+
+  const featureName = src === 'impact'
+    ? (document.getElementById('iDesc').value.substring(0,40) || 'Impact Analysis')
     : (G.lastPRD?.feature_name || 'PRD');
-  const fname = `${label.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'')}_TCs_${new Date().toISOString().slice(0,10)}.xlsx`;
+  const sheetName = featureName.replace(/[\\\/\?\*\[\]:]/g,'').substring(0,31);
+  const fname = `${featureName.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'')}_TCs_${new Date().toISOString().slice(0,10)}.xlsx`;
 
-  // ── Use XLSXStyle if available, fall back to plain XLSX ──
-  const XS = window.XLSXStyle || window.XLSX;
-  const useStyle = !!window.XLSXStyle;
+  // ── colour maps ──
+  const PRIO_ROW_BG = { P0:'FFE8E8',P1:'FFF0D9',P2:'FFFDE7',P3:'E8F5E9',Critical:'FFE8E8',High:'FFF0D9',Medium:'FFFDE7',Low:'E8F5E9' };
+  const PRIO_FG     = { P0:'C0392B',P1:'D35400',P2:'B7950B',P3:'1E8449',Critical:'C0392B',High:'D35400',Medium:'B7950B',Low:'1E8449' };
+  const PRIO_CELL   = { P0:'FDDCDC',P1:'FDEBD0',P2:'FEF9E7',P3:'D5F5E3',Critical:'FDDCDC',High:'FDEBD0',Medium:'FEF9E7',Low:'D5F5E3' };
+  const CAT_BG      = { Functional:'D6EAF8',Regression:'E8DAED','Edge Case':'FEF9E7',UI:'D5F5E3',Performance:'FDEDEC',Integration:'DDEEFF',Security:'FDF2F8' };
+  const STATUS_FG   = { 'Not Started':'7F8C8D','In Progress':'1A5276',Pass:'1E8449',Passed:'1E8449',Fail:'C0392B',Failed:'C0392B',Blocked:'D35400' };
+  const STATUS_BG   = { 'Not Started':'F2F3F4','In Progress':'D6EAF8',Pass:'D5F5E3',Passed:'D5F5E3',Fail:'FDEDEC',Failed:'FDEDEC',Blocked:'FEF9E7' };
 
-  // ── Column config: [key, header, width] ──
-  const COLS = [
-    ['TC ID',          'TC ID',           9],
-    ['Feature',        'Feature',         18],
-    ['Test Title',     'Test Title',       42],
-    ['Category',       'Category',        14],
-    ['Preconditions',  'Preconditions',   32],
-    ['Steps',          'Steps',           46],
-    ['Expected Result','Expected Result', 46],
-    ['Break Point',    'Break Point',     28],
-    ['Systems',        'Systems',         16],
-    ['Edge Case',      'Edge Case',       10],
-    ['Priority',       'Priority',        10],
-    ['Status',         'Status',          12],
-    ['Dev Result',     'Dev Result',      14],
-    ['QA Result',      'QA Result',       12],
-  ];
+  const HDR_BG = '1F3864', HDR_FG = 'FFFFFF';
+  const TITLE_BG = '0D0D1A';
 
-  // Priority colour map (background ARGB)
-  const PRIO_COLORS = {
-    P0:       { bg: 'FFFFE0E0', fg: 'FFC0392B', label: '🔴 P0' },
-    P1:       { bg: 'FFFFF3E0', fg: 'FFD35400', label: '🟠 P1' },
-    P2:       { bg: 'FFE8F4FD', fg: 'FF2471A3', label: '🔵 P2' },
-    P3:       { bg: 'FFE8F8F0', fg: 'FF1E8449', label: '🟢 P3' },
-    Critical: { bg: 'FFFFE0E0', fg: 'FFC0392B', label: '🔴 Critical' },
-    High:     { bg: 'FFFFF3E0', fg: 'FFD35400', label: '🟠 High' },
-    Medium:   { bg: 'FFE8F4FD', fg: 'FF2471A3', label: '🔵 Medium' },
-    Low:      { bg: 'FFE8F8F0', fg: 'FF1E8449', label: '🟢 Low' },
-  };
-
-  // Category colour map
-  const CAT_COLORS = {
-    'Functional':   'FFE8F4FD',
-    'Regression':   'FFF5EEF8',
-    'Edge Case':    'FFFEF9E7',
-    'UI':           'FFE8F8F5',
-    'Performance':  'FFF9EBE8',
-    'Integration':  'FFEAF2FF',
-    'Security':     'FFFDF2F8',
-  };
-
-  // ── Helper: make a styled cell ──
-  function sc(v, style) {
-    if (!useStyle) return v;
-    return { v, t: 's', s: style };
+  function thinBorder(color='C5CAE9') {
+    const s = { style:'thin', color:{ argb:'FF'+color } };
+    return { top:s, left:s, bottom:s, right:s };
+  }
+  function medBorder(color='3D8EFF') {
+    const s = { style:'medium', color:{ argb:'FF'+color } };
+    return { top:s, left:s, bottom:s, right:s };
   }
 
-  // ── Header style ──
-  const HDR_STYLE = {
-    font:      { name: 'Arial', sz: 10, bold: true, color: { rgb: 'FFFFFFFF' } },
-    fill:      { patternType: 'solid', fgColor: { rgb: 'FF1A1A2E' } },
-    alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
-    border: {
-      top:    { style: 'medium', color: { rgb: 'FF3D8EFF' } },
-      bottom: { style: 'medium', color: { rgb: 'FF3D8EFF' } },
-      left:   { style: 'thin',   color: { rgb: 'FF3D8EFF' } },
-      right:  { style: 'thin',   color: { rgb: 'FF3D8EFF' } },
-    }
-  };
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'QA Blueprint · Hitwicket';
+  wb.created = new Date();
 
-  // ── Base data cell style ──
-  function dataStyle(rowIdx, extraFg, extraBg) {
-    const zebra = rowIdx % 2 === 0 ? 'FFF5F5FA' : 'FFFFFFFF';
-    return {
-      font:      { name: 'Arial', sz: 9, color: { rgb: extraFg || 'FF1A1A2E' } },
-      fill:      { patternType: 'solid', fgColor: { rgb: extraBg || zebra } },
-      alignment: { vertical: 'top', wrapText: true },
-      border: {
-        top:    { style: 'hair', color: { rgb: 'FFDDDDEE' } },
-        bottom: { style: 'hair', color: { rgb: 'FFDDDDEE' } },
-        left:   { style: 'hair', color: { rgb: 'FFDDDDEE' } },
-        right:  { style: 'hair', color: { rgb: 'FFDDDDEE' } },
+  // ══ SHEET 1: Test Cases ══
+  const ws = wb.addWorksheet(sheetName, {
+    pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1 }
+  });
+  ws.properties.tabColor = { argb:'FF1F3864' };
+
+  const HEADERS = ['TC ID','Feature','Test Title','Category','Preconditions',
+                   'Steps','Expected Result','Break Point','Systems','Edge Case',
+                   'Priority','Status','Dev Result','QA Result'];
+  const COL_W   = [10,18,44,14,32,46,46,30,18,11,11,13,13,13];
+
+  // set column widths
+  COL_W.forEach((w,i) => { ws.getColumn(i+1).width = w; });
+
+  // ── Row 1: Title banner ──
+  ws.mergeCells(1,1,1,14);
+  const titleCell = ws.getCell('A1');
+  titleCell.value = `  QA Blueprint · Hitwicket  —  ${featureName}`;
+  titleCell.font  = { name:'Calibri', size:13, bold:true, color:{argb:'FF'+HDR_FG} };
+  titleCell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+TITLE_BG} };
+  titleCell.alignment = { horizontal:'left', vertical:'middle' };
+  ws.getRow(1).height = 38;
+
+  // ── Row 2: Headers ──
+  const hdrRow = ws.getRow(2);
+  hdrRow.height = 32;
+  HEADERS.forEach((h, i) => {
+    const cell = hdrRow.getCell(i+1);
+    cell.value = h;
+    cell.font      = { name:'Calibri', size:10, bold:true, color:{argb:'FF'+HDR_FG} };
+    cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+HDR_BG} };
+    cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+    cell.border    = medBorder();
+  });
+
+  // ── Data rows ──
+  tcs.forEach((tc, idx) => {
+    const rowNum = idx + 3;
+    const prio   = String(tc.priority||''). trim();
+    const cat    = String(tc.category||''). trim();
+    const status = String(tc.status||'Not Started').trim() || 'Not Started';
+    const edge   = String(tc.edge_case || tc.is_edge_case || '').trim();
+    const rowBg  = PRIO_ROW_BG[prio] || (rowNum%2===0 ? 'F7F9FC' : 'FFFFFF');
+    const steps  = String(tc.steps||''). replace(/\\n/g,'\n');
+
+    const vals = [
+      tc.id||''                                , // 1  TC ID
+      tc.feature||''                           , // 2  Feature
+      tc.title||tc.test_title||''              , // 3  Test Title
+      cat                                       , // 4  Category
+      tc.preconditions||''                     , // 5  Preconditions
+      steps                                     , // 6  Steps
+      tc.expected||tc.expected_result||''      , // 7  Expected Result
+      tc.break_point||tc.breakpoint||''        , // 8  Break Point
+      tc.systems||tc.affected_systems||''      , // 9  Systems
+      edge                                      , // 10 Edge Case
+      prio                                      , // 11 Priority
+      status                                    , // 12 Status
+      tc.dev_result||''                        , // 13 Dev Result
+      tc.qa_result||''                         , // 14 QA Result
+    ];
+
+    const row = ws.getRow(rowNum);
+    row.height = 75;
+
+    vals.forEach((val, ci) => {
+      const cell = row.getCell(ci+1);
+      cell.value  = String(val||'');
+      cell.border = thinBorder();
+
+      if (ci === 0) { // TC ID
+        cell.font      = { name:'Courier New', size:9, bold:true, color:{argb:'FF1565C0'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFE3F2FD':'FFEEF6FD'} };
+        cell.alignment = { horizontal:'center', vertical:'middle' };
+
+      } else if (ci === 1) { // Feature
+        cell.font      = { name:'Calibri', size:10, bold:true, color:{argb:'FF2C3E50'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+rowBg} };
+        cell.alignment = { horizontal:'left', vertical:'middle' };
+
+      } else if (ci === 2) { // Test Title
+        cell.font      = { name:'Calibri', size:10, bold:true, color:{argb:'FF0D0D1A'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+rowBg} };
+        cell.alignment = { horizontal:'left', vertical:'middle', wrapText:true };
+
+      } else if (ci === 3) { // Category
+        const catBg = CAT_BG[cat] || 'EAF2FF';
+        cell.font      = { name:'Calibri', size:9, color:{argb:'FF2C3E50'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+catBg} };
+        cell.alignment = { horizontal:'center', vertical:'middle' };
+
+      } else if (ci === 4) { // Preconditions
+        cell.font      = { name:'Calibri', size:9, color:{argb:'FF5D6D7E'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFFAFBFC':'FFF5F6F8'} };
+        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
+
+      } else if (ci === 5) { // Steps
+        cell.font      = { name:'Calibri', size:9, color:{argb:'FF1A1A2E'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF0F6FF':'FFE8F2FF'} };
+        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
+
+      } else if (ci === 6) { // Expected Result
+        cell.font      = { name:'Calibri', size:9, color:{argb:'FF145A32'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF0FBF5':'FFE8F8EE'} };
+        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
+
+      } else if (ci === 7) { // Break Point
+        cell.font      = { name:'Calibri', size:9, color:{argb:'FFC0392B'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFFEF5F5':'FFFDF0F0'} };
+        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
+
+      } else if (ci === 8) { // Systems
+        cell.font      = { name:'Calibri', size:8, color:{argb:'FF5D6D7E'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF8F9FA':'FFF2F3F4'} };
+        cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+
+      } else if (ci === 9) { // Edge Case
+        const isYes = val.toLowerCase() === 'yes';
+        cell.font      = { name:'Calibri', size:9, bold:isYes, color:{argb: isYes?'FFCA6F1E':'FF7F8C8D'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: isYes?'FFFEF5E7':'FF'+rowBg} };
+        cell.alignment = { horizontal:'center', vertical:'middle' };
+
+      } else if (ci === 10) { // Priority
+        const pfg = PRIO_FG[prio]   || '555555';
+        const pbg = PRIO_CELL[prio] || 'EEEEEE';
+        cell.font      = { name:'Calibri', size:9, bold:true, color:{argb:'FF'+pfg} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+pbg} };
+        cell.alignment = { horizontal:'center', vertical:'middle' };
+
+      } else if (ci === 11) { // Status
+        const sfg = STATUS_FG[status] || '7F8C8D';
+        const sbg = STATUS_BG[status] || 'F2F3F4';
+        cell.font      = { name:'Calibri', size:9, color:{argb:'FF'+sfg} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+sbg} };
+        cell.alignment = { horizontal:'center', vertical:'middle' };
+
+      } else { // Dev Result, QA Result
+        cell.font      = { name:'Calibri', size:9, color:{argb:'FF7F8C8D'} };
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF8F9FA'} };
+        cell.alignment = { horizontal:'center', vertical:'middle' };
       }
-    };
-  }
-
-  // ── TC ID style ──
-  function tcIdStyle(rowIdx) {
-    return {
-      font:      { name: 'Courier New', sz: 9, bold: true, color: { rgb: 'FF2471A3' } },
-      fill:      { patternType: 'solid', fgColor: { rgb: rowIdx%2===0 ? 'FFF0F6FF' : 'FFE8F2FF' } },
-      alignment: { horizontal: 'center', vertical: 'top' },
-      border:    dataStyle(rowIdx).border,
-    };
-  }
-
-  // ── Build header row ──
-  const headerRow = COLS.map(([,h]) => sc(h, HDR_STYLE));
-
-  // ── Build data rows ──
-  const dataRows = tcs.map((tc, ri) => {
-    const row = tcToRow(tc);
-    const prio = tc.priority || '';
-    const cat  = tc.category || '';
-    const pc   = PRIO_COLORS[prio] || {};
-    const cc   = CAT_COLORS[cat]   || null;
-
-    return row.map((val, ci) => {
-      if (!useStyle) return val;
-      const v = String(val || '');
-
-      // TC ID col (0)
-      if (ci === 0) return sc(v, tcIdStyle(ri));
-
-      // Priority col (10)
-      if (ci === 10 && pc.bg) {
-        return sc(prio, {
-          font:      { name: 'Arial', sz: 9, bold: true, color: { rgb: pc.fg } },
-          fill:      { patternType: 'solid', fgColor: { rgb: pc.bg } },
-          alignment: { horizontal: 'center', vertical: 'top' },
-          border:    dataStyle(ri).border,
-        });
-      }
-
-      // Category col (3)
-      if (ci === 3 && cc) {
-        return sc(v, {
-          font:      { name: 'Arial', sz: 9, color: { rgb: 'FF2C3E50' } },
-          fill:      { patternType: 'solid', fgColor: { rgb: cc } },
-          alignment: { horizontal: 'center', vertical: 'top', wrapText: true },
-          border:    dataStyle(ri).border,
-        });
-      }
-
-      // Edge Case col (9)
-      if (ci === 9) {
-        const isYes = v.toLowerCase() === 'yes';
-        return sc(v, {
-          font:      { name: 'Arial', sz: 9, bold: isYes, color: { rgb: isYes ? 'FFCA6F1E' : 'FF7F8C8D' } },
-          fill:      { patternType: 'solid', fgColor: { rgb: isYes ? 'FFFEF5E7' : (ri%2===0?'FFF5F5FA':'FFFFFFFF') } },
-          alignment: { horizontal: 'center', vertical: 'top' },
-          border:    dataStyle(ri).border,
-        });
-      }
-
-      // Status col (11)
-      if (ci === 11) {
-        return sc(v || 'Not Started', {
-          font:      { name: 'Arial', sz: 9, color: { rgb: 'FF7F8C8D' } },
-          fill:      { patternType: 'solid', fgColor: { rgb: ri%2===0?'FFF5F5FA':'FFFFFFFF' } },
-          alignment: { horizontal: 'center', vertical: 'top' },
-          border:    dataStyle(ri).border,
-        });
-      }
-
-      // Break point col (7) — red tint
-      if (ci === 7) {
-        return sc(v, {
-          font:      { name: 'Arial', sz: 9, color: { rgb: 'FFC0392B' } },
-          fill:      { patternType: 'solid', fgColor: { rgb: ri%2===0?'FFFFF5F5':'FFFEF9F9' } },
-          alignment: { vertical: 'top', wrapText: true },
-          border:    dataStyle(ri).border,
-        });
-      }
-
-      // Steps col (5) and Expected (6) — slightly blue tint
-      if (ci === 5 || ci === 6) {
-        return sc(v, {
-          font:      { name: 'Arial', sz: 9, color: { rgb: 'FF1A1A2E' } },
-          fill:      { patternType: 'solid', fgColor: { rgb: ri%2===0?'FFF8FBFF':'FFF3F8FF' } },
-          alignment: { vertical: 'top', wrapText: true },
-          border:    dataStyle(ri).border,
-        });
-      }
-
-      // Default
-      return sc(v, dataStyle(ri));
     });
   });
 
-  // ── Assemble sheet ──
-  const aoa = [headerRow, ...dataRows];
-  const ws  = XS.utils.aoa_to_sheet(aoa);
+  // Freeze below title+header, auto-filter on header row
+  ws.views = [{ state:'frozen', xSplit:0, ySplit:2, activeCell:'A3' }];
+  ws.autoFilter = { from:'A2', to:{ row:2, column:14 } };
 
-  // ── Column widths ──
-  ws['!cols'] = COLS.map(([,,w]) => ({ wch: w }));
+  // ══ SHEET 2: Summary ══
+  const p = k => tcs.filter(t=>t.priority===k).length;
+  const ec = tcs.filter(t=>(t.edge_case||t.is_edge_case||''). toLowerCase()==='yes').length;
 
-  // ── Row heights: header taller, data rows tall enough for wrapped text ──
-  ws['!rows'] = [
-    { hpt: 30 }, // header
-    ...tcs.map(() => ({ hpt: 72 })) // data rows — tall for wrap
+  const ws2 = wb.addWorksheet('Summary', {});
+  ws2.properties.tabColor = { argb:'FF00D4A0' };
+  ws2.getColumn(1).width = 28;
+  ws2.getColumn(2).width = 16;
+  ws2.getColumn(3).width = 20;
+
+  ws2.mergeCells('A1:C1');
+  const st = ws2.getCell('A1');
+  st.value     = '  Test Suite Summary';
+  st.font      = { name:'Calibri', size:14, bold:true, color:{argb:'FFFFFFFF'} };
+  st.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+TITLE_BG} };
+  st.alignment = { horizontal:'left', vertical:'middle' };
+  ws2.getRow(1).height = 42;
+
+  ws2.mergeCells('A2:C2');
+  const ss = ws2.getCell('A2');
+  ss.value     = `  ${featureName}  ·  ${tcs.length} Test Cases`;
+  ss.font      = { name:'Calibri', size:10, color:{argb:'FFAAAACC'} };
+  ss.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1A1A2E'} };
+  ss.alignment = { horizontal:'left', vertical:'middle' };
+  ws2.getRow(2).height = 24;
+
+  ws2.getRow(3).height = 10;
+
+  // Summary header
+  ['METRIC','COUNT','BADGE'].forEach((h,i) => {
+    const c = ws2.getRow(4).getCell(i+1);
+    c.value = h;
+    c.font   = { name:'Calibri', size:10, bold:true, color:{argb:'FF'+HDR_FG} };
+    c.fill   = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+HDR_BG} };
+    c.alignment = { horizontal:'center', vertical:'middle' };
+    c.border = medBorder();
+  });
+  ws2.getRow(4).height = 28;
+
+  const summaryRows = [
+    ['Total Test Cases', tcs.length, 'All',        '2471A3','E8F4FD'],
+    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
+    ['P0 — Blocker',    p('P0')+p('Critical'),'Critical', 'C0392B','FDDCDC'],
+    ['P1 — Critical',   p('P1')+p('High'),   'High',     'D35400','FDEBD0'],
+    ['P2 — Important',  p('P2')+p('Medium'), 'Medium',   'B7950B','FEF9E7'],
+    ['P3 — Low',        p('P3')+p('Low'),    'Low',      '1E8449','D5F5E3'],
+    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
+    ['Edge Cases',      ec,           'Watch',    'CA6F1E','FEF5E7'],
+    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
+    ['Not Started',     tcs.length,   'Pending',  '7F8C8D','F2F3F4'],
+    ['In Progress',     0,            'Active',   '1A5276','D6EAF8'],
+    ['Passed',          0,            'Done',     '1E8449','D5F5E3'],
+    ['Failed',          0,            'Action',   'C0392B','FDEDEC'],
   ];
 
-  // ── Freeze top row ──
-  ws['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomLeft' };
+  summaryRows.forEach(([label, count, badge, fg, bg], i) => {
+    const row = ws2.getRow(i+5);
+    row.height = 30;
+    if (String(label).startsWith('────')) {
+      [1,2,3].forEach(c => { row.getCell(c).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF0F2F5'} }; });
+      return;
+    }
+    const la = row.getCell(1), lb = row.getCell(2), lc = row.getCell(3);
+    la.value = label; lb.value = count; lc.value = badge;
+    la.font      = { name:'Calibri', size:10, color:{argb:'FF2C3E50'} };
+    la.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF8F9FA'} };
+    la.alignment = { horizontal:'left', vertical:'middle', indent:2 };
+    la.border    = thinBorder();
+    [lb,lc].forEach(c => {
+      c.font   = { name:'Calibri', size: c===lb?14:9, bold: c===lb, color:{argb:'FF'+fg} };
+      c.fill   = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+bg} };
+      c.alignment = { horizontal:'center', vertical:'middle' };
+      c.border = thinBorder();
+    });
+  });
 
-  // ── Workbook ──
-  const wb = XS.utils.book_new();
-  XS.utils.book_append_sheet(wb, ws, label.substring(0, 31));
+  // ── Write & download ──
+  try {
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob   = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href = url; a.download = fname; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast(`Downloaded ${fname} (${tcs.length} TCs) ✓`, 'ok');
+  } catch(e) {
+    toast('Export failed: ' + e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ Excel'; }
+  }
+}
 
-  // ── Write ──
-  XS.writeFile(wb, fname, { bookType: 'xlsx', type: 'binary', cellStyles: useStyle });
-  toast(`Downloaded ${fname} (${tcs.length} TCs) ✓`, 'ok');
+function tcToRow(tc) {
+  return [
+    tc.id||'', tc.feature||'', tc.title||tc.test_title||'', tc.category||'',
+    tc.preconditions||'', (tc.steps||'').replace(/\\n/g,'\n'),
+    tc.expected||tc.expected_result||'',
+    tc.break_point||tc.breakpoint||'', tc.systems||tc.affected_systems||'',
+    tc.edge_case||tc.is_edge_case||'', tc.priority||'', tc.status||'Not Started', '', ''
+  ];
 }
 
 function copyToClipboard(src) {
