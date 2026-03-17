@@ -317,15 +317,15 @@ body::after {
 .page-hd h2 span { color: var(--red); }
 .page-hd p { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.7; }
 
-/* FIX: ensure grid cells never overflow their track */
-.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; min-width: 0; }
-.g2 > * { min-width: 0; overflow: hidden; }
-@media(max-width:840px) { .g2 { grid-template-columns: 1fr; } }
+/* FIX: minmax(0,1fr) is the correct way — prevents tracks from ever being wider than available space */
+.g2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; width: 100%; }
+.g2 > * { min-width: 0; max-width: 100%; overflow: hidden; }
+@media(max-width:840px) { .g2 { grid-template-columns: minmax(0,1fr); } }
 
 /* FIX: flex column containers inside grid cells */
-.g2-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; overflow: hidden; }
+.g2-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; max-width: 100%; overflow: hidden; }
 
-.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; transition: background .3s, border-color .3s; min-width: 0; }
+.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; transition: background .3s, border-color .3s; min-width: 0; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; }
 .panel-hd {
   padding: 11px 16px; border-bottom: 1px solid var(--bd); background: var(--s2);
   display: flex; align-items: center; gap: 8px;
@@ -419,22 +419,24 @@ select option { background: var(--s2); }
 .c-ghost  { color: var(--ghost); }
 .c-purple { color: var(--purple); }
 
-/* FIX: impact grid uses min() to prevent cards from being wider than their container */
+/* FIX: impact grid — minmax(0,...) prevents cards from inflating grid track width */
 .impact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: 10px;
+  min-width: 0;
+  width: 100%;
 }
-.icard { background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; padding: 13px; transition: background .3s; }
-.icard-hd { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--bd); }
-.icard-title { font-size: 12px; font-weight: 600; flex: 1; color: var(--text); }
-.sev { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 20px; font-weight: 700; }
+.icard { background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; padding: 13px; transition: background .3s; min-width: 0; overflow: hidden; word-break: break-word; overflow-wrap: anywhere; }
+.icard-hd { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--bd); flex-wrap: wrap; }
+.icard-title { font-size: 12px; font-weight: 600; flex: 1; color: var(--text); min-width: 0; word-break: break-word; }
+.sev { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 20px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
 .sev-critical { background: rgba(255,45,85,.12); color: var(--red);    border: 1px solid rgba(255,45,85,.25); }
 .sev-high     { background: rgba(255,159,67,.1);  color: var(--orange); border: 1px solid rgba(255,159,67,.22); }
 .sev-medium   { background: rgba(61,142,255,.1);  color: var(--blue2);  border: 1px solid rgba(61,142,255,.2); }
 .sev-low      { background: rgba(0,212,160,.08);  color: var(--jade);   border: 1px solid rgba(0,212,160,.18); }
 .icard ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
-.icard li { font-size: 11px; line-height: 1.65; color: var(--mist); padding-left: 14px; position: relative; }
+.icard li { font-size: 11px; line-height: 1.65; color: var(--mist); padding-left: 14px; position: relative; word-break: break-word; overflow-wrap: anywhere; }
 .icard li::before { content: '›'; position: absolute; left: 0; color: var(--blue); font-size: 13px; line-height: 1.4; }
 
 .tc-table { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -586,14 +588,20 @@ select option { background: var(--s2); }
 }
 
 /* ══ RESULT PANEL OVERFLOW FIXES ══ */
-#iResultPanel { min-width: 0; overflow: hidden; }
-#iOut { min-width: 0; overflow: hidden; }
+#iResultPanel { min-width: 0; max-width: 100%; overflow: hidden; }
+#iOut { min-width: 0; max-width: 100%; overflow: hidden; }
 
 /* Ensure the iTCWrap scrollable table area is bounded */
-#iTCWrap { min-width: 0; overflow: hidden; }
+#iTCWrap { min-width: 0; max-width: 100%; overflow: hidden; }
 
 /* PRD output panel */
-#prdOut { min-width: 0; overflow: hidden; }
+#prdOut { min-width: 0; max-width: 100%; overflow: hidden; }
+
+/* Executive summary paragraph */
+#iCards p { word-break: break-word; overflow-wrap: anywhere; }
+
+/* Regression scope tag row — must wrap, never overflow */
+#iCards .regression-tags { display: flex; flex-wrap: wrap; gap: 5px; max-width: 100%; overflow: hidden; }
 
 /* ══ FOOTER ══ */
 .site-footer {
@@ -800,9 +808,9 @@ select option { background: var(--s2); }
         </div>
         <div id="iOut" style="display:none;">
           <div class="stats-bar" id="iStats"></div>
-          <div style="padding:16px;min-width:0;overflow:hidden;">
+          <div style="padding:16px;min-width:0;max-width:100%;overflow:hidden;box-sizing:border-box;">
             <div class="impact-grid" id="iCards"></div>
-            <div id="iTCWrap" style="margin-top:16px;min-width:0;overflow:hidden;"></div>
+            <div id="iTCWrap" style="margin-top:16px;min-width:0;max-width:100%;overflow:hidden;"></div>
           </div>
           <div class="dl-bar">
             <span class="dl-lbl">Export:</span>
@@ -1130,7 +1138,8 @@ let G = {
   configLoaded: false,
 };
 
-const SESSION_KEY = 'qabp_session_v7';
+const SESSION_KEY    = 'qabp_session_v7';
+const LAST_EMAIL_KEY = 'qabp_last_email'; // persists independently of session expiry
 
 function saveSession() {
   if (!G.user) return;
@@ -1140,6 +1149,9 @@ function saveSession() {
       sessionToken: G.sessionToken,
       savedAt:      Date.now()
     }));
+    // Always keep last known email in a separate key — never expires
+    // This ensures history is readable even after session token expires
+    localStorage.setItem(LAST_EMAIL_KEY, G.user.email);
   } catch(e) {}
 }
 
@@ -1148,7 +1160,8 @@ function loadSession() {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
-    if (!s.user || !s.savedAt || (Date.now() - s.savedAt) > 8 * 60 * 60 * 1000) {
+    // Extended to 30 days — was 8h which caused silent history loss on long sessions
+    if (!s.user || !s.savedAt || (Date.now() - s.savedAt) > 30 * 24 * 60 * 60 * 1000) {
       localStorage.removeItem(SESSION_KEY); return null;
     }
     return s;
@@ -1157,6 +1170,14 @@ function loadSession() {
 
 function clearSession() {
   localStorage.removeItem(SESSION_KEY);
+  // NOTE: intentionally do NOT remove LAST_EMAIL_KEY here —
+  // sign-out should preserve history so it's accessible on next login
+}
+
+// Returns the best available email for history key resolution.
+// Falls back to last-known email so history is never "lost" due to G.user being null.
+function resolveHistEmail() {
+  return G.user?.email || localStorage.getItem(LAST_EMAIL_KEY) || null;
 }
 
 function histKey(email) {
@@ -1760,11 +1781,11 @@ function renderImpact(r) {
   `;
   let html = `<div class="icard" style="grid-column:1/-1;border-color:rgba(61,142,255,.2);">
     <div class="icard-hd"><span>📋</span><span class="icard-title">Executive Summary</span></div>
-    <p style="font-size:12px;line-height:1.8;color:var(--mist);">${r.summary||''}</p>
+    <p style="font-size:12px;line-height:1.8;color:var(--mist);word-break:break-word;overflow-wrap:anywhere;">${r.summary||''}</p>
     ${r.regression_scope?.length ? `
       <div style="margin-top:12px;">
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mute);margin-bottom:7px;">Regression Scope</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px;">${r.regression_scope.map(s=>`<span style="background:rgba(61,142,255,.1);border:1px solid rgba(61,142,255,.2);color:var(--blue2);font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;">${s}</span>`).join('')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;max-width:100%;overflow:hidden;">${r.regression_scope.map(s=>`<span style="background:rgba(61,142,255,.1);border:1px solid rgba(61,142,255,.2);color:var(--blue2);font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;white-space:nowrap;">${s}</span>`).join('')}</div>
       </div>` : ''}
   </div>`;
   (r.impact_areas||[]).forEach(a => {
