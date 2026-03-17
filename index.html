@@ -121,7 +121,6 @@ body::after {
   display: flex; align-items: center; justify-content: center;
 }
 
-/* Video background */
 #loginVideoBg {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; z-index: 0; opacity: 0.45;
@@ -129,7 +128,6 @@ body::after {
   transition: opacity 1s ease;
 }
 
-/* Dark overlay on video */
 #loginScreen::before {
   content: '';
   position: absolute; inset: 0; z-index: 1;
@@ -155,7 +153,6 @@ body::after {
   to   { opacity: 1; transform: none; }
 }
 
-/* HW Logo */
 .login-logo-wrap {
   margin: 0 auto 20px;
   display: flex; align-items: center; justify-content: center;
@@ -197,7 +194,6 @@ body::after {
 .login-err.on { display: block; }
 .login-spinner { margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: rgba(84,84,120,.8); text-transform: uppercase; display: none; }
 
-/* Login footer credit */
 .login-credit {
   margin-top: 24px; padding-top: 16px;
   border-top: 1px solid rgba(255,255,255,.06);
@@ -245,7 +241,6 @@ body::after {
   transition: border-color .3s;
 }
 
-/* Theme toggle button */
 .theme-toggle {
   display: flex; align-items: center; justify-content: center;
   width: 32px; height: 32px; border-radius: 8px;
@@ -255,7 +250,6 @@ body::after {
 }
 .theme-toggle:hover { border-color: var(--blue); background: rgba(61,142,255,.08); transform: scale(1.05); }
 
-/* Bug Sheet link button */
 .bug-sheet-btn {
   display: flex; align-items: center; gap: 5px;
   padding: 5px 11px; border-radius: 6px;
@@ -310,7 +304,11 @@ body::after {
 .role-viewer { background: rgba(61,142,255,.1); color: var(--blue2); border: 1px solid rgba(61,142,255,.2); }
 
 /* ══ LAYOUT ══ */
-.wrap { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; padding: 28px 20px 120px; }
+.wrap {
+  position: relative; z-index: 1; max-width: 1320px; margin: 0 auto;
+  padding: 28px 20px 120px;
+  overflow-x: hidden; /* FIX: prevent horizontal overflow */
+}
 .tab-pane { display: none; }
 .tab-pane.on { display: block; animation: fadein .22s ease; }
 @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -318,9 +316,14 @@ body::after {
 .page-hd h2 { font-family: var(--disp); font-size: 30px; letter-spacing: 4px; color: var(--text); }
 .page-hd h2 span { color: var(--red); }
 .page-hd p { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.7; }
+
+/* FIX: ensure grid cells never overflow their track */
 .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; min-width: 0; }
 .g2 > * { min-width: 0; overflow: hidden; }
 @media(max-width:840px) { .g2 { grid-template-columns: 1fr; } }
+
+/* FIX: flex column containers inside grid cells */
+.g2-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; overflow: hidden; }
 
 .panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; transition: background .3s, border-color .3s; min-width: 0; }
 .panel-hd {
@@ -416,7 +419,12 @@ select option { background: var(--s2); }
 .c-ghost  { color: var(--ghost); }
 .c-purple { color: var(--purple); }
 
-.impact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 10px; }
+/* FIX: impact grid uses min() to prevent cards from being wider than their container */
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: 10px;
+}
 .icard { background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; padding: 13px; transition: background .3s; }
 .icard-hd { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--bd); }
 .icard-title { font-size: 12px; font-weight: 600; flex: 1; color: var(--text); }
@@ -446,7 +454,15 @@ select option { background: var(--s2); }
 .p1 { background: rgba(255,159,67,.1);  color: var(--orange); }
 .p2 { background: rgba(61,142,255,.1);  color: var(--blue2); }
 .p3 { background: rgba(0,212,160,.08);  color: var(--jade); }
-.tbl-scroll { overflow-x: auto; max-height: 520px; overflow-y: auto; }
+
+/* FIX: tbl-scroll bounded to its container */
+.tbl-scroll {
+  overflow-x: auto;
+  max-height: 520px;
+  overflow-y: auto;
+  max-width: 100%;
+  width: 100%;
+}
 .tbl-scroll::-webkit-scrollbar { height: 3px; width: 3px; }
 
 .import-preview { background: var(--bg); border: 1px solid var(--bd); border-radius: 8px; overflow: hidden; transition: background .3s; }
@@ -460,11 +476,11 @@ select option { background: var(--s2); }
 :root[data-theme="light"] .chunk-item { border-bottom: 1px solid rgba(0,0,0,.04); }
 .chunk-item:last-child { border-bottom: none; }
 .chunk-check { width: 14px; height: 14px; accent-color: var(--blue); cursor: pointer; margin-top: 2px; flex-shrink: 0; }
-.chunk-body { flex: 1; }
+.chunk-body { flex: 1; min-width: 0; } /* FIX: min-width:0 on flex child */
 .chunk-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 3px; }
 .chunk-title { font-size: 12px; font-weight: 500; color: var(--text); }
 .chunk-meta { font-family: var(--mono); font-size: 10px; color: var(--mute); margin-bottom: 4px; }
-.chunk-preview { font-family: var(--mono); font-size: 10px; color: var(--dim); line-height: 1.5; }
+.chunk-preview { font-family: var(--mono); font-size: 10px; color: var(--dim); line-height: 1.5; word-break: break-word; } /* FIX: word-break */
 .chunk-edit { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
 .chunk-edit input, .chunk-edit select { padding: 3px 8px; font-size: 10px; background: var(--s3); border: 1px solid var(--bd2); color: var(--text); border-radius: 4px; outline: none; }
 .chunk-edit input { flex: 1; min-width: 100px; }
@@ -553,8 +569,8 @@ select option { background: var(--s2); }
 .hist-item-type { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 7px; border-radius: 20px; }
 .ht-impact { background: rgba(255,45,85,.1);  color: var(--red2);  border: 1px solid rgba(255,45,85,.2); }
 .ht-prd    { background: rgba(61,142,255,.1); color: var(--blue2); border: 1px solid rgba(61,142,255,.2); }
-.hist-item-title { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hist-item-meta  { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-bottom: 4px; }
+.hist-item-title  { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-item-meta   { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-bottom: 4px; }
 .hist-item-preview { font-family: var(--mono); font-size: 10px; color: var(--dim); line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .hist-item-del { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--dim); font-size: 13px; cursor: pointer; padding: 2px; border-radius: 3px; transition: color .15s; display: none; }
 .hist-item:hover .hist-item-del { display: block; }
@@ -568,6 +584,16 @@ select option { background: var(--s2); }
   border-radius: 20px; padding: 2px 9px;
   font-family: var(--mono); font-size: 9px; color: var(--blue2); margin-left: 8px;
 }
+
+/* ══ RESULT PANEL OVERFLOW FIXES ══ */
+#iResultPanel { min-width: 0; overflow: hidden; }
+#iOut { min-width: 0; overflow: hidden; }
+
+/* Ensure the iTCWrap scrollable table area is bounded */
+#iTCWrap { min-width: 0; overflow: hidden; }
+
+/* PRD output panel */
+#prdOut { min-width: 0; overflow: hidden; }
 
 /* ══ FOOTER ══ */
 .site-footer {
@@ -584,64 +610,40 @@ select option { background: var(--s2); }
   display: flex; align-items: center; justify-content: space-between;
   width: 100%; max-width: 1320px; margin: 0 auto;
 }
-.footer-credit {
-  display: flex; align-items: center; gap: 10px;
-}
-.footer-name {
-  font-family: var(--mono); font-size: 11px;
-  color: var(--mist); letter-spacing: 1px;
-}
-.footer-name strong {
-  color: var(--text); font-weight: 600;
-}
+.footer-credit { display: flex; align-items: center; gap: 10px; }
+.footer-name { font-family: var(--mono); font-size: 11px; color: var(--mist); letter-spacing: 1px; }
+.footer-name strong { color: var(--text); font-weight: 600; }
 .footer-role {
   font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px;
   text-transform: uppercase; padding: 2px 8px; border-radius: 20px;
-  background: rgba(255,45,85,.08); border: 1px solid rgba(255,45,85,.2);
-  color: var(--red2);
+  background: rgba(255,45,85,.08); border: 1px solid rgba(255,45,85,.2); color: var(--red2);
 }
-.footer-sep {
-  width: 1px; height: 16px; background: var(--bd2);
-}
-.footer-hw {
-  font-family: var(--disp); font-size: 13px; letter-spacing: 3px;
-  color: var(--mute);
-}
+.footer-sep { width: 1px; height: 16px; background: var(--bd2); }
+.footer-hw { font-family: var(--disp); font-size: 13px; letter-spacing: 3px; color: var(--mute); }
 .footer-hw span { color: var(--red); }
-.footer-right {
-  display: flex; align-items: center; gap: 8px;
-}
-.footer-version {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--dim);
-}
+.footer-right { display: flex; align-items: center; gap: 8px; }
+.footer-version { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
 .footer-bug-btn {
   display: flex; align-items: center; gap: 5px;
   padding: 4px 10px; border-radius: 5px;
   background: rgba(255,45,85,.07); border: 1px solid rgba(255,45,85,.18);
   font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
   text-transform: uppercase; color: var(--red2);
-  cursor: pointer; text-decoration: none;
-  transition: all .18s;
+  cursor: pointer; text-decoration: none; transition: all .18s;
 }
 .footer-bug-btn:hover { background: rgba(255,45,85,.14); border-color: rgba(255,45,85,.35); }
-.footer-bug-dot {
-  width: 5px; height: 5px; border-radius: 50%; background: var(--red);
-  animation: pipblink 2s ease-in-out infinite;
-}
+.footer-bug-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); animation: pipblink 2s ease-in-out infinite; }
 </style>
 </head>
 <body>
 
 <!-- ══ LOGIN SCREEN ══ -->
 <div id="loginScreen">
-  <!-- Video background -->
   <video id="loginVideoBg" autoplay muted loop playsinline>
     <source src="https://cdn.octathorpeweb.com/v1/webstore/webstore-login.mp4" type="video/mp4">
   </video>
 
   <div class="login-card">
-    <!-- HW Logo -->
     <div class="login-logo-wrap">
       <img src="https://cdn.octathorpeweb.com/v1/webstore/hitwicket-logo.png" alt="Hitwicket" onerror="this.style.display='none';document.querySelector('.login-emblem-fallback').style.display='flex'">
     </div>
@@ -682,17 +684,13 @@ select option { background: var(--s2); }
     <div class="nav-tab admin-tab" id="t-kb"     onclick="goTab('kb')">☁️ KB <span class="nav-badge" id="kbCnt">0</span></div>
   </div>
   <div class="nav-end">
-    <!-- Bug Sheet link -->
     <a class="bug-sheet-btn" href="https://kunaljade066.github.io/MasterBugs/" target="_blank" rel="noopener" title="Master Bug Sheet">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.355 5.833a1 1 0 0 1 .94-.666h5.41a1 1 0 0 1 .94.666L12.5 8H3.5l.855-2.167zM2 9h12v1a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9zm6-8a3 3 0 0 0-3 3h6a3 3 0 0 0-3-3z"/></svg>
       Bugs
     </a>
-
-    <!-- Theme toggle -->
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">
       <span id="themeIcon">☀️</span>
     </button>
-
     <span class="provider-badge" id="providerBadge"></span>
     <div class="cloud-row">
       <div class="cloud-pip" id="cpip"></div>
@@ -734,13 +732,15 @@ select option { background: var(--s2); }
 <!-- ══ MAIN CONTENT ══ -->
 <div class="wrap">
 
+<!-- ══ IMPACT ANALYZER TAB ══ -->
 <div class="tab-pane on" id="p-impact">
   <div class="page-hd">
     <h2>Impact <span>Analyzer</span></h2>
     <p>Input any dev change, feature update, bug fix, or requirement → AI analyzes using full KB context → generates detailed impact analysis and comprehensive QA test cases including edge cases and cross-feature validations.</p>
   </div>
   <div class="g2">
-    <div style="display:flex;flex-direction:column;gap:14px;">
+    <!-- LEFT COL: inputs -->
+    <div class="g2-col">
       <div class="panel">
         <div class="panel-hd"><div class="pdot r"></div><span class="panel-title">Change Input</span></div>
         <div class="panel-body">
@@ -778,13 +778,14 @@ select option { background: var(--s2); }
       </div>
       <div class="panel">
         <div class="panel-body" id="kbCtxPanel">
-          <div class="info-row"><span class="info-dot">○</span> Loading KB context…</div>
+          <div class="info-row"><span class="info-dot" style="color:var(--mute)">○</span> Loading KB context…</div>
         </div>
       </div>
       <button class="btn btn-red" id="iBtn" onclick="runImpact()">⚡ Run Deep Analysis</button>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:14px;">
+    <!-- RIGHT COL: results -->
+    <div class="g2-col">
       <div class="panel" id="iResultPanel" style="display:none;">
         <div class="panel-hd">
           <div class="pdot r"></div><span class="panel-title">Report</span>
@@ -799,9 +800,9 @@ select option { background: var(--s2); }
         </div>
         <div id="iOut" style="display:none;">
           <div class="stats-bar" id="iStats"></div>
-          <div style="padding:16px;">
+          <div style="padding:16px;min-width:0;overflow:hidden;">
             <div class="impact-grid" id="iCards"></div>
-            <div id="iTCWrap" style="margin-top:16px;"></div>
+            <div id="iTCWrap" style="margin-top:16px;min-width:0;overflow:hidden;"></div>
           </div>
           <div class="dl-bar">
             <span class="dl-lbl">Export:</span>
@@ -815,13 +816,15 @@ select option { background: var(--s2); }
   </div>
 </div>
 
+<!-- ══ PRD → TCs TAB ══ -->
 <div class="tab-pane" id="p-prd">
   <div class="page-hd">
     <h2>PRD <span>→ Test Cases</span></h2>
     <p>Upload or paste a feature spec → AI generates full 14-column test suite using KB context</p>
   </div>
   <div class="g2">
-    <div style="display:flex;flex-direction:column;gap:14px;">
+    <!-- LEFT COL -->
+    <div class="g2-col">
       <div class="panel">
         <div class="panel-hd"><div class="pdot"></div><span class="panel-title">PRD Input</span></div>
         <div class="panel-body">
@@ -875,7 +878,8 @@ select option { background: var(--s2); }
       <button class="btn btn-red" id="prdBtn" onclick="runPRD()">📋 Generate Test Suite</button>
     </div>
 
-    <div class="panel" style="display:flex;flex-direction:column;">
+    <!-- RIGHT COL -->
+    <div class="panel g2-col" style="display:flex;flex-direction:column;">
       <div class="panel-hd">
         <div class="pdot g"></div><span class="panel-title">Generated Test Cases</span>
         <span id="prdProviderTag" style="margin-left:8px;"></span>
@@ -891,7 +895,7 @@ select option { background: var(--s2); }
         <div class="load-lbl" id="prdLbl">Reading document…</div>
         <div class="load-provider" id="prdProviderStatus"></div>
       </div>
-      <div id="prdOut" style="display:none;flex:1;">
+      <div id="prdOut" style="display:none;flex:1;min-width:0;overflow:hidden;">
         <div style="padding:10px 14px 0;font-family:var(--mono);font-size:11px;color:var(--mute);" id="prdStats"></div>
         <div class="tbl-scroll" style="padding:10px 0 0;">
           <table class="tc-table">
@@ -913,13 +917,14 @@ select option { background: var(--s2); }
   </div>
 </div>
 
+<!-- ══ BULK IMPORT TAB ══ -->
 <div class="tab-pane" id="p-import">
   <div class="page-hd">
     <h2>Bulk <span>Import</span></h2>
     <p>Admin only · Upload any file type → preview chunks → save to cloud KB</p>
   </div>
   <div class="g2">
-    <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="g2-col">
       <div class="panel">
         <div class="panel-hd"><div class="pdot" style="background:var(--purple)"></div><span class="panel-title">Upload Files</span></div>
         <div class="panel-body">
@@ -974,7 +979,7 @@ select option { background: var(--s2); }
         </div>
       </div>
     </div>
-    <div>
+    <div class="g2-col">
       <div id="importPreview" style="display:none;">
         <div class="import-preview">
           <div class="import-preview-hd">
@@ -996,6 +1001,7 @@ select option { background: var(--s2); }
   </div>
 </div>
 
+<!-- ══ KB TAB ══ -->
 <div class="tab-pane" id="p-kb">
   <div class="page-hd">
     <h2>Cloud <span>Knowledge Base</span></h2>
@@ -1362,7 +1368,6 @@ function onLoginSuccess() {
   const ls = document.getElementById('loginScreen');
   ls.style.transition = 'opacity .35s'; ls.style.opacity = '0';
   setTimeout(() => ls.style.display = 'none', 360);
-  // Stop the video after login to save bandwidth
   const vid = document.getElementById('loginVideoBg');
   if (vid) { setTimeout(() => vid.pause(), 400); }
   applyRole(G.user.role);
@@ -2116,10 +2121,8 @@ function toast(msg, type = 'ok') {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // Init theme first
   initTheme();
 
-  // Build feature tags
   const wrap = document.getElementById('iTags');
   FEATURES.forEach(f => {
     const s = document.createElement('span');
