@@ -3,9 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://cdn.octathorpeweb.com/v1/webstore/hitwicket-logo.png">
 <title>QA Blueprint · Hitwicket</title>
+<!-- FIX 1: Inline SVG favicon — eliminates the 404 entirely, no external file needed -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff2d55'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='20'>🏏</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- NO Google GSI script — using pure OAuth2 popup flow instead.
+     This means zero dependency on Google's One Tap / FedCM APIs which keep changing.
+     Pure id_token flow via popup works on all domains including Vercel, forever. -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
@@ -31,7 +36,6 @@
   --input-bg: rgba(0,0,0,.3);
   --grid-line: rgba(61,142,255,.018);
   --shadow: rgba(0,0,0,.5);
-  --theme-icon: '☀️';
 }
 :root[data-theme="light"] {
   --bg:   #f0f2f8;
@@ -54,7 +58,6 @@
   --input-bg: rgba(255,255,255,.8);
   --grid-line: rgba(61,142,255,.06);
   --shadow: rgba(0,0,20,.15);
-  --theme-icon: '🌙';
 }
 
 :root {
@@ -102,12 +105,6 @@ body::after {
   background:
     radial-gradient(ellipse 700px 450px at 10% 0%, rgba(61,142,255,.06) 0%, transparent 60%),
     radial-gradient(ellipse 500px 350px at 90% 100%, rgba(184,127,255,.05) 0%, transparent 60%);
-}
-
-:root[data-theme="light"] body::after {
-  background:
-    radial-gradient(ellipse 700px 450px at 10% 0%, rgba(61,142,255,.04) 0%, transparent 60%),
-    radial-gradient(ellipse 500px 350px at 90% 100%, rgba(184,127,255,.03) 0%, transparent 60%);
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -183,6 +180,7 @@ body::after {
   cursor: pointer; transition: all .2s;
 }
 .google-btn:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+.google-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 .google-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 .login-note { margin-top: 14px; font-family: var(--mono); font-size: 10px; color: rgba(84,84,120,.8); line-height: 1.8; }
 .login-note b { color: #7ab4ff; }
@@ -320,12 +318,10 @@ body::after {
 .page-hd h2 span { color: var(--red); }
 .page-hd p { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere; max-width: 100%; }
 
-/* FIX: minmax(0,1fr) is the correct way — prevents tracks from ever being wider than available space */
 .g2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; width: 100%; max-width: 100%; box-sizing: border-box; }
 .g2 > * { min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; }
 @media(max-width:840px) { .g2 { grid-template-columns: minmax(0,1fr); } }
 
-/* FIX: flex column containers inside grid cells */
 .g2-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; }
 
 .panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; transition: background .3s, border-color .3s; min-width: 0; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; box-sizing: border-box; width: 100%; }
@@ -422,7 +418,6 @@ select option { background: var(--s2); }
 .c-ghost  { color: var(--ghost); }
 .c-purple { color: var(--purple); }
 
-/* FIX: impact grid — minmax(0,...) prevents cards from inflating grid track width */
 .impact-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
@@ -460,7 +455,6 @@ select option { background: var(--s2); }
 .p2 { background: rgba(61,142,255,.1);  color: var(--blue2); }
 .p3 { background: rgba(0,212,160,.08);  color: var(--jade); }
 
-/* FIX: tbl-scroll bounded to its container */
 .tbl-scroll {
   overflow-x: auto;
   max-height: 520px;
@@ -478,14 +472,13 @@ select option { background: var(--s2); }
 .import-stat { font-family: var(--mono); font-size: 11px; color: var(--mute); }
 .import-stat b { color: var(--text); }
 .chunk-item { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.03); display: flex; align-items: flex-start; gap: 10px; }
-:root[data-theme="light"] .chunk-item { border-bottom: 1px solid rgba(0,0,0,.04); }
 .chunk-item:last-child { border-bottom: none; }
 .chunk-check { width: 14px; height: 14px; accent-color: var(--blue); cursor: pointer; margin-top: 2px; flex-shrink: 0; }
-.chunk-body { flex: 1; min-width: 0; } /* FIX: min-width:0 on flex child */
+.chunk-body { flex: 1; min-width: 0; }
 .chunk-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 3px; }
 .chunk-title { font-size: 12px; font-weight: 500; color: var(--text); }
 .chunk-meta { font-family: var(--mono); font-size: 10px; color: var(--mute); margin-bottom: 4px; }
-.chunk-preview { font-family: var(--mono); font-size: 10px; color: var(--dim); line-height: 1.5; word-break: break-word; } /* FIX: word-break */
+.chunk-preview { font-family: var(--mono); font-size: 10px; color: var(--dim); line-height: 1.5; word-break: break-word; }
 .chunk-edit { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
 .chunk-edit input, .chunk-edit select { padding: 3px 8px; font-size: 10px; background: var(--s3); border: 1px solid var(--bd2); color: var(--text); border-radius: 4px; outline: none; }
 .chunk-edit input { flex: 1; min-width: 100px; }
@@ -509,13 +502,6 @@ select option { background: var(--s2); }
 .load-bar { height: 100%; background: linear-gradient(90deg, var(--red), var(--purple), var(--blue)); animation: loadslide 1.8s ease-in-out infinite; border-radius: 1px; }
 @keyframes loadslide { 0%{width:0%;margin-left:0} 50%{width:60%;margin-left:20%} 100%{width:0%;margin-left:100%} }
 .load-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--mute); text-transform: uppercase; }
-
-.load-provider {
-  font-family: var(--mono); font-size: 9px; color: var(--mute);
-  letter-spacing: 1px; text-transform: uppercase;
-  display: flex; align-items: center; gap: 5px;
-}
-.load-provider-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--mute); }
 
 #toast {
   position: fixed; bottom: 72px; right: 20px; z-index: 9999;
@@ -567,7 +553,6 @@ select option { background: var(--s2); }
 .hist-filter-btn:hover { color: var(--ghost); }
 .hist-filter-btn.on { color: var(--blue2); border-bottom-color: var(--blue); }
 .hist-list { flex: 1; overflow-y: auto; padding: 8px; }
-.hist-list::-webkit-scrollbar { width: 3px; }
 .hist-item { background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; padding: 11px 13px; margin-bottom: 7px; cursor: pointer; transition: all .15s; position: relative; }
 .hist-item:hover { border-color: var(--blue); background: rgba(61,142,255,.04); }
 .hist-item-top { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
@@ -590,20 +575,11 @@ select option { background: var(--s2); }
   font-family: var(--mono); font-size: 9px; color: var(--blue2); margin-left: 8px;
 }
 
-/* ══ RESULT PANEL OVERFLOW FIXES ══ */
 #iResultPanel { min-width: 0; max-width: 100%; overflow: hidden; }
 #iOut { min-width: 0; max-width: 100%; overflow: hidden; }
-
-/* Ensure the iTCWrap scrollable table area is bounded */
 #iTCWrap { min-width: 0; max-width: 100%; overflow: hidden; }
-
-/* PRD output panel */
 #prdOut { min-width: 0; max-width: 100%; overflow: hidden; }
-
-/* Executive summary paragraph */
 #iCards p { word-break: break-word; overflow-wrap: anywhere; }
-
-/* Regression scope tag row — must wrap, never overflow */
 #iCards .regression-tags { display: flex; flex-wrap: wrap; gap: 5px; max-width: 100%; overflow: hidden; }
 
 /* ══ FOOTER ══ */
@@ -645,11 +621,6 @@ select option { background: var(--s2); }
 .footer-bug-btn:hover { background: rgba(255,45,85,.14); border-color: rgba(255,45,85,.35); }
 .footer-bug-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); animation: pipblink 2s ease-in-out infinite; }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE BREAKPOINTS
-   ══════════════════════════════════════════ */
-
-/* ── TABLET: ≤ 960px ── */
 @media (max-width: 960px) {
   .wrap { padding: 20px 16px 100px; }
   .nav { padding: 0 12px; }
@@ -662,74 +633,46 @@ select option { background: var(--s2); }
   .impact-grid { grid-template-columns: repeat(auto-fill, minmax(min(200px,100%), 1fr)); }
 }
 
-/* ── MOBILE: ≤ 640px ── */
 @media (max-width: 640px) {
   body { font-size: 13px; }
   .wrap { padding: 16px 12px 90px; }
   .page-hd { margin-bottom: 16px; }
   .page-hd h2 { font-size: 22px; letter-spacing: 2px; }
-
-  /* Nav */
   .nav { height: 48px; padding: 0 8px; }
   .nav-brand { font-size: 13px; letter-spacing: 1px; padding: 0 8px 0 0; margin-right: 2px; }
   .nav-tab { padding: 0 10px; font-size: 9px; letter-spacing: 1px; }
   .nav-end { gap: 6px; padding-left: 8px; }
-  .bug-sheet-btn span:last-child { display: none; } /* hide "Bugs" text, keep icon */
+  .bug-sheet-btn span:last-child { display: none; }
   .bug-sheet-btn { padding: 4px 7px; }
   .theme-toggle { width: 28px; height: 28px; font-size: 13px; }
   .hist-btn { padding: 0 8px; font-size: 9px; }
-  .hist-btn span:first-of-type { display: none; } /* hide clock emoji label */
-
-  /* History drawer full width */
+  .hist-btn span:first-of-type { display: none; }
   .hist-drawer { width: 100%; border-left: none; top: 48px; }
-
-  /* Two-col form grid → single col */
   .g2-f { grid-template-columns: 1fr; }
-
-  /* Panel */
   .panel-body { padding: 12px; }
   .panel-hd   { padding: 9px 12px; }
-
-  /* Stats bar */
   .stat-cell { padding: 8px 10px; flex: 1 1 28%; min-width: 0; }
   .stat-num  { font-size: 17px; }
   .stat-lbl  { font-size: 8px; letter-spacing: 1px; }
-
-  /* Impact cards: single col */
   .impact-grid { grid-template-columns: 1fr; }
-
-  /* TC table scroll */
   .tbl-scroll { max-height: 360px; }
   .tc-table th, .tc-table td { padding: 5px 6px; font-size: 10px; }
-
-  /* Drop zone */
   .drop-zone { padding: 18px 12px; }
   .drop-icon { font-size: 20px; }
   .drop-text { font-size: 10px; }
-
-  /* Export bar */
   .dl-bar { gap: 5px; padding: 8px 10px; }
   .btn-sm { padding: 5px 9px; font-size: 10px; }
-
-  /* Footer */
   .site-footer { height: auto; padding: 8px 12px; }
   .footer-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
   .footer-credit { gap: 6px; flex-wrap: wrap; }
   .footer-right { gap: 6px; }
   .footer-version, .footer-sep, .footer-hw { display: none; }
-
-  /* Login card */
   .login-card { padding: 28px 20px 24px; margin: 0 12px; max-width: 100%; }
   .login-title { font-size: 24px; letter-spacing: 3px; }
-
-  /* Toast full width */
   #toast { right: 10px; left: 10px; max-width: unset; font-size: 10px; bottom: 60px; }
-
-  /* Nav end — hide less important items */
   .user-role { display: none; }
 }
 
-/* ── SMALL MOBILE: ≤ 400px ── */
 @media (max-width: 400px) {
   .nav-brand { display: none; }
   .nav-tab   { padding: 0 8px; font-size: 8px; letter-spacing: 0; }
@@ -761,7 +704,7 @@ select option { background: var(--s2); }
     <div class="login-title">QA BLUEPRINT</div>
     <div class="login-sub">Hitwicket Internal · v6</div>
 
-    <button class="google-btn" onclick="doGoogleSignIn()">
+    <button class="google-btn" id="googleSignInBtn" onclick="doGoogleSignIn()">
       <svg viewBox="0 0 48 48">
         <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.2 6.6 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
         <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.2 6.6 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
@@ -829,10 +772,15 @@ select option { background: var(--s2); }
     <button class="hist-filter-btn"    id="hf-impact" onclick="setHistFilter('impact')">⚡ Impact</button>
     <button class="hist-filter-btn"    id="hf-prd"    onclick="setHistFilter('prd')">📋 PRD</button>
   </div>
+  <div style="padding:8px 10px;border-bottom:1px solid var(--bd);flex-shrink:0;">
+    <input type="text" id="histSearch" placeholder="Search history…" oninput="renderHistoryDrawer()"
+      style="width:100%;padding:6px 10px;font-size:11px;background:var(--s3);border:1px solid var(--bd2);color:var(--text);border-radius:6px;outline:none;font-family:var(--mono);">
+  </div>
   <div class="hist-list" id="histList">
     <div class="hist-empty">No history yet.<br>Run an analysis to see it here.</div>
   </div>
-  <div style="padding:10px 12px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;">
+  <div style="padding:8px 12px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:6px;flex-shrink:0;">
+    <button class="btn btn-ghost btn-xs" onclick="debugHistory()" style="color:var(--blue2);border-color:rgba(61,142,255,.25);">🔍 Debug</button>
     <button class="btn btn-ghost btn-xs" onclick="clearHistory()" style="color:var(--red2);border-color:rgba(255,45,85,.25);">🗑 Clear History</button>
   </div>
 </div>
@@ -847,7 +795,6 @@ select option { background: var(--s2); }
     <p>Input any dev change, feature update, bug fix, or requirement → AI analyzes using full KB context → generates detailed impact analysis and comprehensive QA test cases including edge cases and cross-feature validations.</p>
   </div>
   <div class="g2">
-    <!-- LEFT COL: inputs -->
     <div class="g2-col">
       <div class="panel">
         <div class="panel-hd"><div class="pdot r"></div><span class="panel-title">Change Input</span></div>
@@ -892,7 +839,6 @@ select option { background: var(--s2); }
       <button class="btn btn-red" id="iBtn" onclick="runImpact()">⚡ Run Deep Analysis</button>
     </div>
 
-    <!-- RIGHT COL: results -->
     <div class="g2-col">
       <div class="panel" id="iResultPanel" style="display:none;">
         <div class="panel-hd">
@@ -904,7 +850,6 @@ select option { background: var(--s2); }
           <div class="spin"></div>
           <div class="load-track"><div class="load-bar"></div></div>
           <div class="load-lbl" id="iLbl">Analyzing…</div>
-          <div class="load-provider" id="iProviderStatus"></div>
         </div>
         <div id="iOut" style="display:none;">
           <div class="stats-bar" id="iStats"></div>
@@ -931,7 +876,6 @@ select option { background: var(--s2); }
     <p>Upload or paste a feature spec → AI generates full 14-column test suite using KB context</p>
   </div>
   <div class="g2">
-    <!-- LEFT COL -->
     <div class="g2-col">
       <div class="panel">
         <div class="panel-hd"><div class="pdot"></div><span class="panel-title">PRD Input</span></div>
@@ -986,7 +930,6 @@ select option { background: var(--s2); }
       <button class="btn btn-red" id="prdBtn" onclick="runPRD()">📋 Generate Test Suite</button>
     </div>
 
-    <!-- RIGHT COL -->
     <div class="panel g2-col" style="display:flex;flex-direction:column;">
       <div class="panel-hd">
         <div class="pdot g"></div><span class="panel-title">Generated Test Cases</span>
@@ -1001,7 +944,6 @@ select option { background: var(--s2); }
         <div class="spin"></div>
         <div class="load-track"><div class="load-bar"></div></div>
         <div class="load-lbl" id="prdLbl">Reading document…</div>
-        <div class="load-provider" id="prdProviderStatus"></div>
       </div>
       <div id="prdOut" style="display:none;flex:1;min-width:0;overflow:hidden;">
         <div style="padding:10px 14px 0;font-family:var(--mono);font-size:11px;color:var(--mute);" id="prdStats"></div>
@@ -1185,6 +1127,9 @@ select option { background: var(--s2); }
 
 const WORKER = 'https://gameanalyzer.kunaljadework.workers.dev';
 
+// ══ Pure OAuth2 — NO Google GSI / One Tap dependency ══
+// This approach works on every domain forever regardless of FedCM changes.
+// We open a plain Google OAuth2 popup, read the id_token from the hash, done.
 let GOOGLE_CLIENT = '';
 let ALLOWED       = '';
 
@@ -1226,31 +1171,24 @@ function toggleTheme() {
 }
 
 let G = {
-  user: null,
-  kb: [],
-  prdFile: null,
-  importChunks: [],
-  lastImpact: null,
-  lastPRD: null,
-  histFilter: 'all',
-  lastProvider: null,
-  sessionToken: null,
-  configLoaded: false,
+  user: null, kb: [], kbCount: 0, kbAreas: [], kbTypes: {},
+  prdFile: null, importChunks: [],
+  lastImpact: null, lastPRD: null, histFilter: 'all',
+  lastProvider: null, sessionToken: null, configLoaded: false,
 };
 
-const SESSION_KEY    = 'qabp_session_v7';
-const LAST_EMAIL_KEY = 'qabp_last_email'; // persists independently of session expiry
+// ══ SESSION ══
+// Auth session: 7.5h localStorage (matches worker's 8h expiry)
+// History: IndexedDB lifetime — never expires, no entry cap, survives sign-out
+const SESSION_KEY    = 'qabp_session_v8';
+const LAST_EMAIL_KEY = 'qabp_last_email';
 
 function saveSession() {
   if (!G.user) return;
   try {
     localStorage.setItem(SESSION_KEY, JSON.stringify({
-      user:         G.user,
-      sessionToken: G.sessionToken,
-      savedAt:      Date.now()
+      user: G.user, sessionToken: G.sessionToken, savedAt: Date.now()
     }));
-    // Always keep last known email in a separate key — never expires
-    // This ensures history is readable even after session token expires
     localStorage.setItem(LAST_EMAIL_KEY, G.user.email);
   } catch(e) {}
 }
@@ -1260,8 +1198,8 @@ function loadSession() {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
-    // Extended to 30 days — was 8h which caused silent history loss on long sessions
-    if (!s.user || !s.savedAt || (Date.now() - s.savedAt) > 30 * 24 * 60 * 60 * 1000) {
+    // 7.5h — slightly under worker's 8h so we never hit a stale token
+    if (!s.user || !s.savedAt || (Date.now() - s.savedAt) > 7.5 * 60 * 60 * 1000) {
       localStorage.removeItem(SESSION_KEY); return null;
     }
     return s;
@@ -1270,84 +1208,299 @@ function loadSession() {
 
 function clearSession() {
   localStorage.removeItem(SESSION_KEY);
-  // NOTE: intentionally do NOT remove LAST_EMAIL_KEY here —
-  // sign-out should preserve history so it's accessible on next login
+  // NOTE: intentionally keep LAST_EMAIL_KEY and all IndexedDB history on sign-out
 }
 
-// Returns the best available email for history key resolution.
-// Falls back to last-known email so history is never "lost" due to G.user being null.
 function resolveHistEmail() {
   return G.user?.email || localStorage.getItem(LAST_EMAIL_KEY) || null;
 }
 
-function histKey(email) {
-  return `qabp_hist_${(email||'').replace(/[^a-z0-9]/gi,'_')}`;
-}
-function loadHistory(email) {
-  try { const r = localStorage.getItem(histKey(email)); return r ? JSON.parse(r) : []; } catch(e) { return []; }
-}
-function saveHistory(email, entries) {
-  try { localStorage.setItem(histKey(email), JSON.stringify(entries.slice(0, 50))); } catch(e) {}
-}
-function addHistoryEntry(type, input, output, title) {
-  if (!G.user?.email) return;
-  const entries = loadHistory(G.user.email);
-  entries.unshift({
-    id: Date.now(), type,
-    title: title || 'Untitled',
-    input, output,
-    ts: Date.now(),
-    provider: G.lastProvider,
-    dateStr: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })
+// ══ INDEXEDDB HISTORY — lifetime, unlimited entries ══
+// Why IndexedDB vs localStorage:
+//   - localStorage cap is ~5MB total across all keys — easily blown with 600+ KB entries
+//   - IndexedDB gives 50MB+ per origin, handles large JSON results fine
+//   - History never expires, never truncated, persists across sign-out/sign-in
+const IDB_NAME    = 'qabp_history_v2';
+const IDB_STORE   = 'entries';
+let   _idb        = null;
+
+function openIDB() {
+  if (_idb) return Promise.resolve(_idb);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        const store = db.createObjectStore(IDB_STORE, { keyPath: 'idbKey' });
+        store.createIndex('email', 'email', { unique: false });
+        store.createIndex('ts',    'ts',    { unique: false });
+      }
+    };
+    req.onsuccess = e => { _idb = e.target.result; resolve(_idb); };
+    req.onerror   = e => reject(e.target.error);
   });
-  saveHistory(G.user.email, entries);
+}
+
+async function idbGetAll(email) {
+  try {
+    const db    = await openIDB();
+    const tx    = db.transaction(IDB_STORE, 'readonly');
+    const index = tx.objectStore(IDB_STORE).index('email');
+    return new Promise((resolve, reject) => {
+      const req = index.getAll(email);
+      req.onsuccess = e => resolve((e.target.result || []).sort((a,b) => b.ts - a.ts));
+      req.onerror   = e => reject(e.target.error);
+    });
+  } catch(e) { return []; }
+}
+
+async function idbPut(entry) {
+  try {
+    const db = await openIDB();
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(entry);
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = resolve; tx.onerror = e => reject(e.target.error);
+    });
+  } catch(e) {}
+}
+
+async function idbDelete(idbKey) {
+  try {
+    const db = await openIDB();
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).delete(idbKey);
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = resolve; tx.onerror = e => reject(e.target.error);
+    });
+  } catch(e) {}
+}
+
+async function idbClearEmail(email) {
+  try {
+    const db    = await openIDB();
+    const tx    = db.transaction(IDB_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_STORE);
+    const index = store.index('email');
+    const req   = index.getAllKeys(email);
+    req.onsuccess = e => { (e.target.result||[]).forEach(k => store.delete(k)); };
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = resolve; tx.onerror = e => reject(e.target.error);
+    });
+  } catch(e) {}
+}
+
+// ══ MIGRATION: localStorage → IndexedDB ══
+// Scans ALL localStorage keys and imports history to IDB.
+// Smart: re-runs if IDB is empty (handles fresh installs after IDB switch).
+async function migrateLocalStorageHistory(email) {
+  const flagKey    = `qabp_migrated_v2_${email.replace(/[^a-z0-9]/gi,'_')}`;
+  const alreadyRan = localStorage.getItem(flagKey);
+  const existing   = await idbGetAll(email);
+
+  // Skip only if migration already ran AND there are entries in IDB.
+  // If IDB is empty (user first logged in after IDB switch), always retry.
+  if (alreadyRan && existing.length > 0) return 0;
+
+  let migrated   = 0;
+  const alreadyIn = new Set(existing.map(e => String(e.ts || e.id)));
+  const emailSlug = email.replace(/[^a-z0-9]/gi,'_');
+  const emailUser = email.split('@')[0];
+
+  // Collect every possible localStorage key — covers all past versions
+  const candidateKeys = new Set([
+    `qabp_hist_${emailSlug}`,
+    `qabp_history_${emailSlug}`,
+    `qaBlueprint_history_${emailSlug}`,
+    `qabp_hist_${emailUser}`,
+  ]);
+
+  // Scan ALL localStorage keys — catch any format we haven't seen before
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k) continue;
+    const isHistKey = k.includes('hist') || k.includes('history');
+    const matchesUser = emailSlug.length >= 4 && k.includes(emailSlug.substring(0,4));
+    const matchesEmail = k.includes(emailUser.substring(0, Math.min(6, emailUser.length)));
+    if (isHistKey && (matchesUser || matchesEmail)) candidateKeys.add(k);
+  }
+
+  for (const key of candidateKeys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw || raw.length < 10) continue;
+      const entries = JSON.parse(raw);
+      if (!Array.isArray(entries) || !entries.length) continue;
+
+      for (const e of entries) {
+        if (!e.output && !e.input) continue;
+        const tsKey = String(e.ts || e.id || '');
+        if (tsKey && alreadyIn.has(tsKey)) continue; // no duplicates
+
+        const ts = e.ts || e.id || Date.now();
+        const idbEntry = {
+          idbKey:    `${email}::${ts}::${Math.random().toString(36).slice(2)}`,
+          email,
+          id:        e.id || ts,
+          type:      e.type || 'impact',
+          title:     e.title || 'Recovered entry',
+          input:     e.input  || {},
+          output:    e.output || {},
+          ts,
+          provider:  e.provider || null,
+          dateStr:   e.dateStr || new Date(ts).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'short',timeStyle:'short'}),
+          _migrated: true,
+        };
+        await idbPut(idbEntry);
+        alreadyIn.add(tsKey);
+        migrated++;
+      }
+    } catch(err) {}
+  }
+
+  localStorage.setItem(flagKey, Date.now().toString());
+  return migrated;
+}
+async function addHistoryEntry(type, input, output, title) {
+  const email = G.user?.email;
+  if (!email) return;
+  const entry = {
+    idbKey:   `${email}::${Date.now()}::${Math.random().toString(36).slice(2)}`,
+    email,
+    id:       Date.now(),
+    type,
+    title:    title || 'Untitled',
+    input,
+    output,
+    ts:       Date.now(),
+    provider: G.lastProvider,
+    dateStr:  new Date().toLocaleString('en-IN', { timeZone:'Asia/Kolkata', dateStyle:'short', timeStyle:'short' })
+  };
+  await idbPut(entry);
   renderHistoryDrawer();
 }
-function getHistory() { return G.user?.email ? loadHistory(G.user.email) : []; }
-function clearHistory() {
-  if (!G.user?.email || !confirm('Clear all your history?')) return;
-  localStorage.removeItem(histKey(G.user.email));
-  renderHistoryDrawer(); toast('History cleared', 'ok');
+
+async function getHistory() {
+  const email = resolveHistEmail();
+  if (!email) return [];
+  return await idbGetAll(email);
 }
-function deleteHistoryEntry(id) {
-  if (!G.user?.email) return;
-  saveHistory(G.user.email, loadHistory(G.user.email).filter(e => e.id !== id));
+
+async function clearHistory() {
+  const email = G.user?.email;
+  if (!email || !confirm('Clear all your history? This cannot be undone.')) return;
+  await idbClearEmail(email);
   renderHistoryDrawer();
+  toast('History cleared', 'ok');
+}
+
+async function deleteHistoryEntry(idbKey) {
+  await idbDelete(idbKey);
+  renderHistoryDrawer();
+}
+
+// Debug + Force-Recover history
+async function debugHistory() {
+  const email  = resolveHistEmail();
+  const idbAll = email ? await idbGetAll(email) : [];
+
+  const lsKeys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && (k.includes('hist') || k.includes('history'))) lsKeys.push(k);
+  }
+  const lsTotal = lsKeys.reduce((sum, k) => {
+    try { const v = localStorage.getItem(k); const a = v ? JSON.parse(v) : []; return sum + (Array.isArray(a) ? a.length : 0); } catch { return sum; }
+  }, 0);
+
+  const flagKey  = email ? `qabp_migrated_v2_${email.replace(/[^a-z0-9]/gi,'_')}` : null;
+  const migrated = flagKey ? localStorage.getItem(flagKey) : null;
+
+  const lines = [
+    `Email: ${email || 'NOT RESOLVED'}`,
+    `IndexedDB entries: ${idbAll.length}`,
+    `localStorage history keys: ${lsKeys.length ? lsKeys.join(', ') : 'none'}`,
+    `localStorage history entries: ${lsTotal}`,
+    `Migration flag: ${migrated ? 'done at ' + new Date(+migrated).toLocaleString() : 'NOT RUN'}`,
+    '',
+    idbAll.length === 0 && lsTotal > 0
+      ? `ISSUE: Found ${lsTotal} entries in localStorage but 0 in IndexedDB.`
+      : idbAll.length > 0
+      ? `OK: ${idbAll.length} entries in IndexedDB.`
+      : 'No history found in either location.',
+    '',
+    'Click OK to force-recover ALL history now.'
+  ];
+
+  const go = window.confirm(lines.join('\n'));
+  if (go && email) {
+    // Reset flag so migration runs fresh
+    if (flagKey) localStorage.removeItem(flagKey);
+    const count = await migrateLocalStorageHistory(email);
+    await renderHistoryDrawer();
+    toast(count > 0 ? `Recovered ${count} entries` : 'No new entries found in localStorage', count > 0 ? 'ok' : 'info');
+  }
 }
 function setHistFilter(f) {
   G.histFilter = f;
   ['all','impact','prd'].forEach(k => document.getElementById('hf-'+k)?.classList.toggle('on', k === f));
-  renderHistoryDrawer();
+  renderHistoryDrawer(); // async — fire and forget is fine here
 }
-function renderHistoryDrawer() {
-  const all     = getHistory();
-  const entries = G.histFilter === 'all' ? all : all.filter(e => e.type === G.histFilter);
-  const list    = document.getElementById('histList');
-  const cnt     = document.getElementById('histCnt');
+async function renderHistoryDrawer() {
+  const all       = await getHistory();
+  const searchVal = (document.getElementById('histSearch')?.value || '').toLowerCase().trim();
+  let   entries   = G.histFilter === 'all' ? all : all.filter(e => e.type === G.histFilter);
+
+  // Apply search filter if any
+  if (searchVal) {
+    entries = entries.filter(e =>
+      (e.title      || '').toLowerCase().includes(searchVal) ||
+      (e.output?.summary       || '').toLowerCase().includes(searchVal) ||
+      (e.output?.feature_name  || '').toLowerCase().includes(searchVal) ||
+      (e.input?.desc           || '').toLowerCase().includes(searchVal) ||
+      (e.input?.txt            || '').toLowerCase().includes(searchVal) ||
+      (e.dateStr               || '').toLowerCase().includes(searchVal)
+    );
+  }
+
+  const list = document.getElementById('histList');
+  const cnt  = document.getElementById('histCnt');
   if (cnt) cnt.textContent = all.length;
   const lbl = document.getElementById('histUserLabel');
-  if (lbl && G.user) lbl.textContent = G.user.email.split('@')[0];
+  if (lbl && G.user) lbl.textContent = `${G.user.email.split('@')[0]} · ${all.length} total`;
+
   if (!entries.length) {
-    list.innerHTML = `<div class="hist-empty">${all.length ? 'No entries for this filter.' : 'No history yet.<br>Run an analysis to see it here.'}</div>`;
+    if (all.length === 0) {
+      list.innerHTML = `<div class="hist-empty">No history yet.<br>Run an analysis to see it here.<br><br><span style="color:var(--dim);font-size:10px;">If you had history before, click 🔍 Debug below.</span></div>`;
+    } else if (searchVal) {
+      list.innerHTML = `<div class="hist-empty">No results for "<b style="color:var(--text)">${escHtml(searchVal)}</b>"</div>`;
+    } else {
+      list.innerHTML = `<div class="hist-empty">No entries for this filter.</div>`;
+    }
     return;
   }
+
   list.innerHTML = entries.map(e => {
     const pm = PROVIDER_META[e.provider];
     const pBadge = pm ? `<span class="provider-badge on ${pm.cls}" style="font-size:8px;padding:1px 5px;">${pm.label}</span>` : '';
-    return `<div class="hist-item" onclick="restoreHistory(${e.id})">
+    const safeKey = (e.idbKey || String(e.id)).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const tcCount = e.output?.test_cases?.length || 0;
+    const migratedBadge = e._migrated ? `<span style="font-family:var(--mono);font-size:8px;color:var(--mute);padding:1px 5px;background:var(--s3);border-radius:3px;">migrated</span>` : '';
+    return `<div class="hist-item" onclick="restoreHistory('${safeKey}')">
       <div class="hist-item-top">
         <span class="hist-item-type ${e.type === 'impact' ? 'ht-impact' : 'ht-prd'}">${e.type === 'impact' ? '⚡ Impact' : '📋 PRD'}</span>
         <span class="hist-item-title">${escHtml(e.title)}</span>
-        ${pBadge}
-        <button class="hist-item-del" onclick="event.stopPropagation();deleteHistoryEntry(${e.id})" title="Delete">✕</button>
+        ${pBadge}${migratedBadge}
+        <button class="hist-item-del" onclick="event.stopPropagation();deleteHistoryEntry('${safeKey}')" title="Delete">✕</button>
       </div>
-      <div class="hist-item-meta">${e.dateStr} · ${e.output?.test_cases?.length || 0} test cases</div>
-      <div class="hist-item-preview">${escHtml(e.output?.summary || e.output?.feature_name || '—')}</div>
+      <div class="hist-item-meta">${e.dateStr}${tcCount ? ` · ${tcCount} TCs` : ''}</div>
+      <div class="hist-item-preview">${escHtml(e.output?.summary || e.output?.feature_name || e.input?.desc || '—')}</div>
     </div>`;
   }).join('');
 }
-function restoreHistory(id) {
-  const entry = getHistory().find(e => e.id === id);
+async function restoreHistory(keyOrId) {
+  const all   = await getHistory();
+  const entry = all.find(e => (e.idbKey && e.idbKey === keyOrId) || String(e.id) === String(keyOrId));
   if (!entry) return;
   closeHistory();
   if (entry.type === 'impact') {
@@ -1410,9 +1563,9 @@ async function fetchConfig() {
     const res  = await fetch(WORKER + '/config');
     const data = await res.json();
     if (data.google_client_id) {
-      GOOGLE_CLIENT     = data.google_client_id;
-      ALLOWED           = data.allowed_domain || 'hitwicket.com';
-      G.configLoaded    = true;
+      GOOGLE_CLIENT  = data.google_client_id;
+      ALLOWED        = data.allowed_domain || 'hitwicket.com';
+      G.configLoaded = true;
     } else {
       throw new Error('Config missing google_client_id');
     }
@@ -1422,43 +1575,49 @@ async function fetchConfig() {
   }
 }
 
+// ══ PURE OAUTH2 POPUP — zero GSI / One Tap / FedCM dependency ══
+// Works on every domain forever. No SDK to break. Google can change One Tap all they want.
+// Flow: open oauth2 popup → read id_token from hash fragment → verify on worker → done.
 function doGoogleSignIn() {
   if (!G.configLoaded) { loginErr('App config not loaded yet, please wait…'); return; }
-  if (typeof google === 'undefined') { loginErr('Google SDK not loaded. Check your internet connection.'); return; }
-  google.accounts.id.initialize({
-    client_id:             GOOGLE_CLIENT,
-    callback:              handleGoogleCred,
-    auto_select:           false,
-    cancel_on_tap_outside: false,
-  });
-  google.accounts.id.prompt(notification => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      const url = `https://accounts.google.com/o/oauth2/v2/auth`
-        + `?client_id=${GOOGLE_CLIENT}`
-        + `&redirect_uri=${encodeURIComponent(location.origin + location.pathname)}`
-        + `&response_type=id_token`
-        + `&scope=openid%20email%20profile`
-        + `&nonce=${Math.random().toString(36).slice(2)}`
-        + `&hd=${ALLOWED}`;
-      const popup = window.open(url, 'gauth', 'width=480,height=580');
-      const timer = setInterval(() => {
-        try {
-          const h = popup?.location?.hash || '';
-          if (h.includes('id_token')) {
-            clearInterval(timer); popup.close();
-            const p = new URLSearchParams(h.slice(1));
-            handleGoogleCred({ credential: p.get('id_token') });
-          }
-        } catch(e) {}
-        if (!popup || popup.closed) clearInterval(timer);
-      }, 500);
+  document.getElementById('googleSignInBtn').disabled = true;
+  const nonce = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  const url = 'https://accounts.google.com/o/oauth2/v2/auth'
+    + '?client_id='     + encodeURIComponent(GOOGLE_CLIENT)
+    + '&redirect_uri='  + encodeURIComponent(location.origin + location.pathname)
+    + '&response_type=id_token'
+    + '&scope=openid%20email%20profile'
+    + '&nonce='         + nonce
+    + '&hd='            + encodeURIComponent(ALLOWED)
+    + '&prompt=select_account';
+  const popup = window.open(url, 'gauth', 'width=500,height=620,left=200,top=80,scrollbars=yes');
+  if (!popup) {
+    document.getElementById('googleSignInBtn').disabled = false;
+    loginErr('Popup was blocked. Please allow popups for this site and try again.');
+    return;
+  }
+  const timer = setInterval(() => {
+    try {
+      // Cross-origin check: will throw if still on accounts.google.com — that's fine
+      const h = popup.location.hash || '';
+      if (h.includes('id_token')) {
+        clearInterval(timer);
+        popup.close();
+        const params = new URLSearchParams(h.startsWith('#') ? h.slice(1) : h);
+        const token  = params.get('id_token');
+        if (token) { handleGoogleToken(token); }
+        else { loginErr('No id_token in response. Try again.'); document.getElementById('googleSignInBtn').disabled = false; }
+      }
+      // Detect if user closed popup without signing in
+      if (popup.closed) { clearInterval(timer); document.getElementById('googleSignInBtn').disabled = false; }
+    } catch(crossOriginErr) {
+      // Still on google.com — this is expected, keep polling
+      if (popup.closed) { clearInterval(timer); document.getElementById('googleSignInBtn').disabled = false; }
     }
-  });
+  }, 400);
 }
 
-async function handleGoogleCred(response) {
-  const token = response.credential;
-  if (!token) { loginErr('No credential received.'); return; }
+async function handleGoogleToken(token) {
   document.getElementById('loginSpinner').style.display = 'block';
   document.getElementById('loginErr').classList.remove('on');
   try {
@@ -1475,6 +1634,7 @@ async function handleGoogleCred(response) {
   } catch(e) {
     loginErr(e.message);
     document.getElementById('loginSpinner').style.display = 'none';
+    document.getElementById('googleSignInBtn').disabled = false;
   }
 }
 
@@ -1499,7 +1659,23 @@ function onLoginSuccess() {
   document.getElementById('uNm').textContent = (G.user.name || G.user.email).split(' ')[0];
   const rt = document.getElementById('uRole');
   rt.textContent = G.user.role; rt.className = `role-tag role-${G.user.role}`;
-  renderHistoryDrawer();
+
+  // Show drawer placeholder immediately
+  const histList = document.getElementById('histList');
+  if (histList) histList.innerHTML = '<div class="hist-empty" style="opacity:.5;">Loading history…</div>';
+  if (document.getElementById('histCnt')) document.getElementById('histCnt').textContent = '…';
+
+  // Run migration then render — async, non-blocking
+  migrateLocalStorageHistory(G.user.email).then(async count => {
+    if (count > 0) {
+      // Small delay so user sees the toast
+      setTimeout(() => toast(`↩ Recovered ${count} old history entries`, 'ok'), 600);
+    }
+    await renderHistoryDrawer();
+  }).catch(async () => {
+    await renderHistoryDrawer();
+  });
+
   loadKB();
   toast(`Welcome back, ${(G.user.name || '').split(' ')[0]} 👋`, 'ok');
 }
@@ -1512,7 +1688,7 @@ function applyRole(role) {
 
 function doSignOut() {
   if (!confirm('Sign out?')) return;
-  try { google.accounts.id.disableAutoSelect(); } catch(e) {}
+  // History (IndexedDB) is intentionally preserved — lifetime storage
   clearSession(); G.user = null; G.sessionToken = null; location.reload();
 }
 
@@ -1533,6 +1709,13 @@ async function wFetch(path, method = 'GET', body = null) {
   if (body) opts.body = JSON.stringify(body);
   const res  = await fetch(WORKER + path, opts);
   const data = await res.json();
+  // FIX 8: Handle session expiry gracefully — prompt re-login instead of cryptic error
+  if (res.status === 401) {
+    clearSession();
+    toast('Session expired — please sign in again', 'err');
+    setTimeout(() => location.reload(), 1800);
+    throw new Error('Session expired');
+  }
   if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
   return data;
 }
@@ -1558,16 +1741,21 @@ async function loadKB() {
   try {
     const d = await wFetch('/kb');
     G.kb = d.entries || [];
+    // For viewer role, store count + areas from response even though entries array is empty
+    G.kbCount  = d.count  ?? G.kb.length;
+    G.kbAreas  = d.areas  || [];
+    G.kbTypes  = d.types  || {};
     updateKBUI();
-    const cnt = d.count ?? G.kb.length;
-    setCloud('ok', `☁ ${cnt}`);
+    setCloud('ok', `☁ ${G.kbCount}`);
   } catch(e) {
-    setCloud('err', 'error'); toast(e.message, 'err');
+    if (e.message !== 'Session expired') {
+      setCloud('err', 'error'); toast(e.message, 'err');
+    }
   }
 }
 
 function updateKBUI() {
-  const n = G.kb.length;
+  const n = G.kbCount ?? G.kb.length;
   document.getElementById('kbCnt').textContent   = n;
   document.getElementById('kbTotal').textContent = n;
   const panel = document.getElementById('kbCtxPanel');
@@ -1575,18 +1763,22 @@ function updateKBUI() {
     panel.innerHTML = '<div class="info-row"><span class="info-dot" style="color:var(--mute)">○</span> KB empty — add entries to improve AI output</div>';
     return;
   }
-  const tc = G.kb.filter(e=>e.type==='test_cases').length;
-  const co = G.kb.filter(e=>e.type==='code').length;
-  const pr = G.kb.filter(e=>e.type==='prd').length;
-  const no = G.kb.filter(e=>e.type==='note').length;
-  const fe = G.kb.filter(e=>e.type==='feat').length;
+  // Use real entry counts if admin (has full entries), else use type summary from viewer response
+  const tc = G.kb.length ? G.kb.filter(e=>e.type==='test_cases').length : (G.kbTypes?.test_cases||0);
+  const co = G.kb.length ? G.kb.filter(e=>e.type==='code').length       : (G.kbTypes?.code||0);
+  const pr = G.kb.length ? G.kb.filter(e=>e.type==='prd').length        : (G.kbTypes?.prd||0);
+  const no = G.kb.length ? G.kb.filter(e=>e.type==='note').length       : (G.kbTypes?.note||0);
+  const fe = G.kb.length ? G.kb.filter(e=>e.type==='feat').length       : (G.kbTypes?.feat||0);
+  const areaSnippet = G.kbAreas?.slice(0,8).join(', ');
   panel.innerHTML = `
-    <div class="info-row"><span class="info-dot">✓</span> <b style="color:var(--jade)">${n} KB entries</b> injected server-side into every analysis</div>
+    <div class="info-row"><span class="info-dot">✓</span> <b style="color:var(--jade)">${n} KB entries</b> — ranked by relevance, injected server-side into every analysis</div>
     ${tc ? `<div class="info-row"><span class="info-dot">›</span> ${tc} test case set${tc>1?'s':''}</div>` : ''}
     ${pr ? `<div class="info-row"><span class="info-dot">›</span> ${pr} PRD / spec</div>` : ''}
     ${fe ? `<div class="info-row"><span class="info-dot">›</span> ${fe} feature doc${fe>1?'s':''}</div>` : ''}
     ${co ? `<div class="info-row"><span class="info-dot">›</span> ${co} code snippet${co>1?'s':''}</div>` : ''}
     ${no ? `<div class="info-row"><span class="info-dot">›</span> ${no} QA note${no>1?'s':''}</div>` : ''}
+    ${areaSnippet ? `<div class="info-row"><span class="info-dot" style="color:var(--mute)">›</span> <span style="color:var(--dim);font-size:10px;">Areas: ${areaSnippet}${G.kbAreas.length>8?' …':''}
+</span></div>` : ''}
   `;
 }
 
@@ -1607,7 +1799,7 @@ async function saveKB() {
     document.getElementById('kbArea').value    = '';
     document.getElementById('kbContent').value = '';
     toast('Saved ✓', 'ok');
-  } catch(e) { setCloud('err', 'error'); toast(e.message, 'err'); }
+  } catch(e) { if (e.message !== 'Session expired') { setCloud('err', 'error'); toast(e.message, 'err'); } }
   btn.disabled = false; btn.textContent = '☁ Save to KB';
 }
 
@@ -1674,7 +1866,7 @@ async function savePRDKB() {
   } catch(e) { toast(e.message, 'err'); }
 }
 
-// ══ EXCEL EXPORT — ExcelJS full styling ══
+// ══ EXCEL EXPORT ══
 async function dlExcel(src) {
   const tcs = src === 'impact' ? (G.lastImpact?.test_cases||[]) : (G.lastPRD?.test_cases||[]);
   if (!tcs.length) { toast('No test cases to download', 'err'); return; }
@@ -1689,45 +1881,25 @@ async function dlExcel(src) {
   const sheetName = featureName.replace(/[\\\/\?\*\[\]:]/g,'').substring(0,31);
   const fname = `${featureName.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'')}_TCs_${new Date().toISOString().slice(0,10)}.xlsx`;
 
-  // ── colour maps ──
   const PRIO_ROW_BG = { P0:'FFE8E8',P1:'FFF0D9',P2:'FFFDE7',P3:'E8F5E9',Critical:'FFE8E8',High:'FFF0D9',Medium:'FFFDE7',Low:'E8F5E9' };
   const PRIO_FG     = { P0:'C0392B',P1:'D35400',P2:'B7950B',P3:'1E8449',Critical:'C0392B',High:'D35400',Medium:'B7950B',Low:'1E8449' };
   const PRIO_CELL   = { P0:'FDDCDC',P1:'FDEBD0',P2:'FEF9E7',P3:'D5F5E3',Critical:'FDDCDC',High:'FDEBD0',Medium:'FEF9E7',Low:'D5F5E3' };
   const CAT_BG      = { Functional:'D6EAF8',Regression:'E8DAED','Edge Case':'FEF9E7',UI:'D5F5E3',Performance:'FDEDEC',Integration:'DDEEFF',Security:'FDF2F8' };
   const STATUS_FG   = { 'Not Started':'7F8C8D','In Progress':'1A5276',Pass:'1E8449',Passed:'1E8449',Fail:'C0392B',Failed:'C0392B',Blocked:'D35400' };
   const STATUS_BG   = { 'Not Started':'F2F3F4','In Progress':'D6EAF8',Pass:'D5F5E3',Passed:'D5F5E3',Fail:'FDEDEC',Failed:'FDEDEC',Blocked:'FEF9E7' };
+  const HDR_BG = '1F3864', HDR_FG = 'FFFFFF', TITLE_BG = '0D0D1A';
 
-  const HDR_BG = '1F3864', HDR_FG = 'FFFFFF';
-  const TITLE_BG = '0D0D1A';
-
-  function thinBorder(color='C5CAE9') {
-    const s = { style:'thin', color:{ argb:'FF'+color } };
-    return { top:s, left:s, bottom:s, right:s };
-  }
-  function medBorder(color='3D8EFF') {
-    const s = { style:'medium', color:{ argb:'FF'+color } };
-    return { top:s, left:s, bottom:s, right:s };
-  }
+  function thinBorder(c='C5CAE9') { const s={style:'thin',color:{argb:'FF'+c}}; return {top:s,left:s,bottom:s,right:s}; }
+  function medBorder(c='3D8EFF')  { const s={style:'medium',color:{argb:'FF'+c}}; return {top:s,left:s,bottom:s,right:s}; }
 
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'QA Blueprint · Hitwicket';
-  wb.created = new Date();
-
-  // ══ SHEET 1: Test Cases ══
-  const ws = wb.addWorksheet(sheetName, {
-    pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1 }
-  });
+  wb.creator = 'QA Blueprint · Hitwicket'; wb.created = new Date();
+  const ws = wb.addWorksheet(sheetName, { pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1 } });
   ws.properties.tabColor = { argb:'FF1F3864' };
-
-  const HEADERS = ['TC ID','Feature','Test Title','Category','Preconditions',
-                   'Steps','Expected Result','Break Point','Systems','Edge Case',
-                   'Priority','Status','Dev Result','QA Result'];
+  const HEADERS = ['TC ID','Feature','Test Title','Category','Preconditions','Steps','Expected Result','Break Point','Systems','Edge Case','Priority','Status','Dev Result','QA Result'];
   const COL_W   = [10,18,44,14,32,46,46,30,18,11,11,13,13,13];
-
-  // set column widths
   COL_W.forEach((w,i) => { ws.getColumn(i+1).width = w; });
 
-  // ── Row 1: Title banner ──
   ws.mergeCells(1,1,1,14);
   const titleCell = ws.getCell('A1');
   titleCell.value = `  QA Blueprint · Hitwicket  —  ${featureName}`;
@@ -1736,9 +1908,7 @@ async function dlExcel(src) {
   titleCell.alignment = { horizontal:'left', vertical:'middle' };
   ws.getRow(1).height = 38;
 
-  // ── Row 2: Headers ──
-  const hdrRow = ws.getRow(2);
-  hdrRow.height = 32;
+  const hdrRow = ws.getRow(2); hdrRow.height = 32;
   HEADERS.forEach((h, i) => {
     const cell = hdrRow.getCell(i+1);
     cell.value = h;
@@ -1748,196 +1918,61 @@ async function dlExcel(src) {
     cell.border    = medBorder();
   });
 
-  // ── Data rows ──
   tcs.forEach((tc, idx) => {
     const rowNum = idx + 3;
-    const prio   = String(tc.priority||''). trim();
-    const cat    = String(tc.category||''). trim();
+    const prio   = String(tc.priority||'').trim();
+    const cat    = String(tc.category||'').trim();
     const status = String(tc.status||'Not Started').trim() || 'Not Started';
     const edge   = String(tc.edge_case || tc.is_edge_case || '').trim();
     const rowBg  = PRIO_ROW_BG[prio] || (rowNum%2===0 ? 'F7F9FC' : 'FFFFFF');
-    const steps  = String(tc.steps||''). replace(/\\n/g,'\n');
-
+    const steps  = String(tc.steps||'').replace(/\\n/g,'\n');
     const vals = [
-      tc.id||''                                , // 1  TC ID
-      tc.feature||''                           , // 2  Feature
-      tc.title||tc.test_title||''              , // 3  Test Title
-      cat                                       , // 4  Category
-      tc.preconditions||''                     , // 5  Preconditions
-      steps                                     , // 6  Steps
-      tc.expected||tc.expected_result||''      , // 7  Expected Result
-      tc.break_point||tc.breakpoint||''        , // 8  Break Point
-      tc.systems||tc.affected_systems||''      , // 9  Systems
-      edge                                      , // 10 Edge Case
-      prio                                      , // 11 Priority
-      status                                    , // 12 Status
-      tc.dev_result||''                        , // 13 Dev Result
-      tc.qa_result||''                         , // 14 QA Result
+      tc.id||'', tc.feature||'', tc.title||tc.test_title||'', cat,
+      tc.preconditions||'', steps, tc.expected||tc.expected_result||'',
+      tc.break_point||tc.breakpoint||'', tc.systems||tc.affected_systems||'',
+      edge, prio, status, tc.dev_result||'', tc.qa_result||'',
     ];
-
-    const row = ws.getRow(rowNum);
-    row.height = 75;
-
+    const row = ws.getRow(rowNum); row.height = 75;
     vals.forEach((val, ci) => {
       const cell = row.getCell(ci+1);
       cell.value  = String(val||'');
       cell.border = thinBorder();
-
-      if (ci === 0) { // TC ID
-        cell.font      = { name:'Courier New', size:9, bold:true, color:{argb:'FF1565C0'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFE3F2FD':'FFEEF6FD'} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else if (ci === 1) { // Feature
-        cell.font      = { name:'Calibri', size:10, bold:true, color:{argb:'FF2C3E50'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+rowBg} };
-        cell.alignment = { horizontal:'left', vertical:'middle' };
-
-      } else if (ci === 2) { // Test Title
-        cell.font      = { name:'Calibri', size:10, bold:true, color:{argb:'FF0D0D1A'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+rowBg} };
-        cell.alignment = { horizontal:'left', vertical:'middle', wrapText:true };
-
-      } else if (ci === 3) { // Category
-        const catBg = CAT_BG[cat] || 'EAF2FF';
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF2C3E50'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+catBg} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else if (ci === 4) { // Preconditions
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF5D6D7E'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFFAFBFC':'FFF5F6F8'} };
-        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
-
-      } else if (ci === 5) { // Steps
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF1A1A2E'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF0F6FF':'FFE8F2FF'} };
-        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
-
-      } else if (ci === 6) { // Expected Result
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF145A32'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF0FBF5':'FFE8F8EE'} };
-        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
-
-      } else if (ci === 7) { // Break Point
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FFC0392B'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFFEF5F5':'FFFDF0F0'} };
-        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
-
-      } else if (ci === 8) { // Systems
-        cell.font      = { name:'Calibri', size:8, color:{argb:'FF5D6D7E'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF8F9FA':'FFF2F3F4'} };
-        cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
-
-      } else if (ci === 9) { // Edge Case
-        const isYes = val.toLowerCase() === 'yes';
-        cell.font      = { name:'Calibri', size:9, bold:isYes, color:{argb: isYes?'FFCA6F1E':'FF7F8C8D'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: isYes?'FFFEF5E7':'FF'+rowBg} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else if (ci === 10) { // Priority
-        const pfg = PRIO_FG[prio]   || '555555';
-        const pbg = PRIO_CELL[prio] || 'EEEEEE';
-        cell.font      = { name:'Calibri', size:9, bold:true, color:{argb:'FF'+pfg} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+pbg} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else if (ci === 11) { // Status
-        const sfg = STATUS_FG[status] || '7F8C8D';
-        const sbg = STATUS_BG[status] || 'F2F3F4';
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF'+sfg} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+sbg} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else { // Dev Result, QA Result
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF7F8C8D'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF8F9FA'} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-      }
+      const bg = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+rowBg} };
+      const bgAlt = n => ({ type:'pattern', pattern:'solid', fgColor:{argb:'FF'+n} });
+      if (ci===0) { cell.font={name:'Courier New',size:9,bold:true,color:{argb:'FF1565C0'}}; cell.fill=bgAlt(rowNum%2===0?'E3F2FD':'EEF6FD'); cell.alignment={horizontal:'center',vertical:'middle'}; }
+      else if (ci===1) { cell.font={name:'Calibri',size:10,bold:true,color:{argb:'FF2C3E50'}}; cell.fill=bg; cell.alignment={horizontal:'left',vertical:'middle'}; }
+      else if (ci===2) { cell.font={name:'Calibri',size:10,bold:true,color:{argb:'FF0D0D1A'}}; cell.fill=bg; cell.alignment={horizontal:'left',vertical:'middle',wrapText:true}; }
+      else if (ci===3) { const cb=CAT_BG[cat]||'EAF2FF'; cell.font={name:'Calibri',size:9,color:{argb:'FF2C3E50'}}; cell.fill=bgAlt(cb); cell.alignment={horizontal:'center',vertical:'middle'}; }
+      else if (ci===4) { cell.font={name:'Calibri',size:9,color:{argb:'FF5D6D7E'}}; cell.fill=bgAlt(rowNum%2===0?'FAFBFC':'F5F6F8'); cell.alignment={horizontal:'left',vertical:'top',wrapText:true}; }
+      else if (ci===5) { cell.font={name:'Calibri',size:9,color:{argb:'FF1A1A2E'}}; cell.fill=bgAlt(rowNum%2===0?'F0F6FF':'E8F2FF'); cell.alignment={horizontal:'left',vertical:'top',wrapText:true}; }
+      else if (ci===6) { cell.font={name:'Calibri',size:9,color:{argb:'FF145A32'}}; cell.fill=bgAlt(rowNum%2===0?'F0FBF5':'E8F8EE'); cell.alignment={horizontal:'left',vertical:'top',wrapText:true}; }
+      else if (ci===7) { cell.font={name:'Calibri',size:9,color:{argb:'FFC0392B'}}; cell.fill=bgAlt(rowNum%2===0?'FEF5F5':'FDF0F0'); cell.alignment={horizontal:'left',vertical:'top',wrapText:true}; }
+      else if (ci===8) { cell.font={name:'Calibri',size:8,color:{argb:'FF5D6D7E'}}; cell.fill=bgAlt(rowNum%2===0?'F8F9FA':'F2F3F4'); cell.alignment={horizontal:'center',vertical:'middle',wrapText:true}; }
+      else if (ci===9) { const isYes=val.toLowerCase()==='yes'; cell.font={name:'Calibri',size:9,bold:isYes,color:{argb:isYes?'FFCA6F1E':'FF7F8C8D'}}; cell.fill=bgAlt(isYes?'FEF5E7':rowBg); cell.alignment={horizontal:'center',vertical:'middle'}; }
+      else if (ci===10) { const pfg=PRIO_FG[prio]||'555555'; const pbg=PRIO_CELL[prio]||'EEEEEE'; cell.font={name:'Calibri',size:9,bold:true,color:{argb:'FF'+pfg}}; cell.fill=bgAlt(pbg); cell.alignment={horizontal:'center',vertical:'middle'}; }
+      else if (ci===11) { const sfg=STATUS_FG[status]||'7F8C8D'; const sbg=STATUS_BG[status]||'F2F3F4'; cell.font={name:'Calibri',size:9,color:{argb:'FF'+sfg}}; cell.fill=bgAlt(sbg); cell.alignment={horizontal:'center',vertical:'middle'}; }
+      else { cell.font={name:'Calibri',size:9,color:{argb:'FF7F8C8D'}}; cell.fill=bgAlt('F8F9FA'); cell.alignment={horizontal:'center',vertical:'middle'}; }
     });
   });
 
-  // Freeze below title+header, auto-filter on header row
   ws.views = [{ state:'frozen', xSplit:0, ySplit:2, activeCell:'A3' }];
   ws.autoFilter = { from:'A2', to:{ row:2, column:14 } };
 
-  // ══ SHEET 2: Summary ══
+  // Summary sheet
   const p = k => tcs.filter(t=>t.priority===k).length;
-  const ec = tcs.filter(t=>(t.edge_case||t.is_edge_case||''). toLowerCase()==='yes').length;
-
-  const ws2 = wb.addWorksheet('Summary', {});
+  const ec = tcs.filter(t=>(t.edge_case||t.is_edge_case||'').toLowerCase()==='yes').length;
+  const ws2 = wb.addWorksheet('Summary');
   ws2.properties.tabColor = { argb:'FF00D4A0' };
-  ws2.getColumn(1).width = 28;
-  ws2.getColumn(2).width = 16;
-  ws2.getColumn(3).width = 20;
-
+  ws2.getColumn(1).width = 28; ws2.getColumn(2).width = 16; ws2.getColumn(3).width = 20;
   ws2.mergeCells('A1:C1');
-  const st = ws2.getCell('A1');
-  st.value     = '  Test Suite Summary';
-  st.font      = { name:'Calibri', size:14, bold:true, color:{argb:'FFFFFFFF'} };
-  st.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+TITLE_BG} };
-  st.alignment = { horizontal:'left', vertical:'middle' };
-  ws2.getRow(1).height = 42;
+  const st=ws2.getCell('A1'); st.value='  Test Suite Summary'; st.font={name:'Calibri',size:14,bold:true,color:{argb:'FFFFFFFF'}}; st.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+TITLE_BG}}; st.alignment={horizontal:'left',vertical:'middle'}; ws2.getRow(1).height=42;
+  ws2.mergeCells('A2:C2'); const ss=ws2.getCell('A2'); ss.value=`  ${featureName}  ·  ${tcs.length} Test Cases`; ss.font={name:'Calibri',size:10,color:{argb:'FFAAAACC'}}; ss.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1A1A2E'}}; ss.alignment={horizontal:'left',vertical:'middle'}; ws2.getRow(2).height=24;
+  ws2.getRow(3).height=10;
+  ['METRIC','COUNT','BADGE'].forEach((h,i) => { const c=ws2.getRow(4).getCell(i+1); c.value=h; c.font={name:'Calibri',size:10,bold:true,color:{argb:'FF'+HDR_FG}}; c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+HDR_BG}}; c.alignment={horizontal:'center',vertical:'middle'}; c.border=medBorder(); });
+  ws2.getRow(4).height=28;
+  const sRows=[['Total Test Cases',tcs.length,'All','2471A3','E8F4FD'],['────','',' ','CCCCCC','F0F2F5'],['P0 — Blocker',p('P0')+p('Critical'),'Critical','C0392B','FDDCDC'],['P1 — Critical',p('P1')+p('High'),'High','D35400','FDEBD0'],['P2 — Important',p('P2')+p('Medium'),'Medium','B7950B','FEF9E7'],['P3 — Low',p('P3')+p('Low'),'Low','1E8449','D5F5E3'],['────','',' ','CCCCCC','F0F2F5'],['Edge Cases',ec,'Watch','CA6F1E','FEF5E7']];
+  sRows.forEach(([label,count,badge,fg,bg],i) => { const row=ws2.getRow(i+5); row.height=30; if(String(label).startsWith('────')){[1,2,3].forEach(c=>{row.getCell(c).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF0F2F5'}};}); return;} const la=row.getCell(1),lb=row.getCell(2),lc=row.getCell(3); la.value=label; lb.value=count; lc.value=badge; la.font={name:'Calibri',size:10,color:{argb:'FF2C3E50'}}; la.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8F9FA'}}; la.alignment={horizontal:'left',vertical:'middle',indent:2}; la.border=thinBorder(); [lb,lc].forEach(c=>{c.font={name:'Calibri',size:c===lb?14:9,bold:c===lb,color:{argb:'FF'+fg}}; c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+bg}}; c.alignment={horizontal:'center',vertical:'middle'}; c.border=thinBorder();}); });
 
-  ws2.mergeCells('A2:C2');
-  const ss = ws2.getCell('A2');
-  ss.value     = `  ${featureName}  ·  ${tcs.length} Test Cases`;
-  ss.font      = { name:'Calibri', size:10, color:{argb:'FFAAAACC'} };
-  ss.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1A1A2E'} };
-  ss.alignment = { horizontal:'left', vertical:'middle' };
-  ws2.getRow(2).height = 24;
-
-  ws2.getRow(3).height = 10;
-
-  // Summary header
-  ['METRIC','COUNT','BADGE'].forEach((h,i) => {
-    const c = ws2.getRow(4).getCell(i+1);
-    c.value = h;
-    c.font   = { name:'Calibri', size:10, bold:true, color:{argb:'FF'+HDR_FG} };
-    c.fill   = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+HDR_BG} };
-    c.alignment = { horizontal:'center', vertical:'middle' };
-    c.border = medBorder();
-  });
-  ws2.getRow(4).height = 28;
-
-  const summaryRows = [
-    ['Total Test Cases', tcs.length, 'All',        '2471A3','E8F4FD'],
-    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
-    ['P0 — Blocker',    p('P0')+p('Critical'),'Critical', 'C0392B','FDDCDC'],
-    ['P1 — Critical',   p('P1')+p('High'),   'High',     'D35400','FDEBD0'],
-    ['P2 — Important',  p('P2')+p('Medium'), 'Medium',   'B7950B','FEF9E7'],
-    ['P3 — Low',        p('P3')+p('Low'),    'Low',      '1E8449','D5F5E3'],
-    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
-    ['Edge Cases',      ec,           'Watch',    'CA6F1E','FEF5E7'],
-    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
-    ['Not Started',     tcs.length,   'Pending',  '7F8C8D','F2F3F4'],
-    ['In Progress',     0,            'Active',   '1A5276','D6EAF8'],
-    ['Passed',          0,            'Done',     '1E8449','D5F5E3'],
-    ['Failed',          0,            'Action',   'C0392B','FDEDEC'],
-  ];
-
-  summaryRows.forEach(([label, count, badge, fg, bg], i) => {
-    const row = ws2.getRow(i+5);
-    row.height = 30;
-    if (String(label).startsWith('────')) {
-      [1,2,3].forEach(c => { row.getCell(c).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF0F2F5'} }; });
-      return;
-    }
-    const la = row.getCell(1), lb = row.getCell(2), lc = row.getCell(3);
-    la.value = label; lb.value = count; lc.value = badge;
-    la.font      = { name:'Calibri', size:10, color:{argb:'FF2C3E50'} };
-    la.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF8F9FA'} };
-    la.alignment = { horizontal:'left', vertical:'middle', indent:2 };
-    la.border    = thinBorder();
-    [lb,lc].forEach(c => {
-      c.font   = { name:'Calibri', size: c===lb?14:9, bold: c===lb, color:{argb:'FF'+fg} };
-      c.fill   = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+bg} };
-      c.alignment = { horizontal:'center', vertical:'middle' };
-      c.border = thinBorder();
-    });
-  });
-
-  // ── Write & download ──
   try {
     const buffer = await wb.xlsx.writeBuffer();
     const blob   = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -1999,17 +2034,7 @@ function parseAIJson(raw) {
         if (tcs.length > 0) {
           const summaryMatch = raw.match(/"summary"\s*:\s*"((?:[^"\\]|\\.)*)"/);
           const riskMatch    = raw.match(/"risk_score"\s*:\s*"([A-Z]+)"/);
-          return {
-            summary:          summaryMatch ? summaryMatch[1] : 'Analysis completed (response was partially truncated)',
-            risk_score:       riskMatch    ? riskMatch[1]    : 'MEDIUM',
-            impact_areas:     [],
-            test_cases:       tcs,
-            edge_cases:       [],
-            downstream_risks: [],
-            regression_scope: [],
-            _partial:         true,
-            _recovered_tcs:   tcs.length,
-          };
+          return { summary: summaryMatch?summaryMatch[1]:'Analysis completed (response was partially truncated)', risk_score: riskMatch?riskMatch[1]:'MEDIUM', impact_areas:[], test_cases:tcs, edge_cases:[], downstream_risks:[], regression_scope:[], _partial:true, _recovered_tcs:tcs.length };
         }
       } catch {}
       throw new Error(`JSON parse failed: ${e2?.message}. The AI response may have been truncated — try again.`);
@@ -2036,18 +2061,10 @@ async function runImpact() {
   const lbl    = document.getElementById('iLbl');
   const ticker = setInterval(() => { lbl.textContent = steps[si=(si+1)%steps.length]; }, 2200);
 
-  const prompt = `You are a PRINCIPAL QA ENGINEER at Hitwicket — a mobile cricket strategy game (Android + iOS).
+  const prompt = `You are a PRINCIPAL QA ENGINEER at Hitwicket — a mobile cricket strategy game (Android + iOS) with 600+ KB entries about every feature, bug pattern, and edge case in the system.
 
-You have expert-level knowledge of the entire Hitwicket tech stack:
-- GAMEPLAY: Super Ability (SA) system with mana/threshold mechanics, Match Engine (batting/bowling/fielding AI), Player Stats (OVR, PER, form), Squad/Lineup builder, Training system
-- PROGRESSION: League Mode, Trophy Road, Season Pass, Alliance, PvP matchmaking
-- ECONOMY: Store (chests, EPB/SPB player scouts, offers, bundles), Auction house, in-app purchases
-- SOCIAL: Alliance chat, PvP challenges, HW TV (replays), Player Scout system
-- PLATFORM: iOS (Game Center, Sign-in with Apple), Android (Play Games, Google Sign-In), WhatsApp/Facebook auth
-- ONBOARDING: FTUE (First Time User Experience) with all tutorial steps
-- INFRASTRUCTURE: Push notifications, offline mode, network retry logic, Analytics events
+CRITICAL: The KB context below contains hundreds of real Hitwicket test cases, PRDs, bug reports, and feature docs. You MUST read ALL of it and cross-reference every relevant entry against the change below. Do NOT produce generic test cases — every TC must reference actual Hitwicket systems, screens, and known bug patterns from the KB.
 
-A developer made the following change:
 CHANGE TYPE: ${type}
 PLATFORM: ${platform}
 FEATURE TAGS: ${tags.join(', ')||'not specified'}
@@ -2055,58 +2072,70 @@ FEATURE TAGS: ${tags.join(', ')||'not specified'}
 CHANGE DESCRIPTION:
 ${descSafe}
 
-Your task: perform an EXHAUSTIVE QA impact analysis. Every field must be FULLY detailed — no short answers.
+TASK: Perform an EXHAUSTIVE QA impact analysis using every relevant KB entry. Generate the maximum possible test cases covering all affected areas, all known bug patterns related to this change, all platform-specific concerns, and all cross-feature interactions.
 
-Return ONLY a valid JSON object (no markdown, no code fences, nothing before {, nothing after }):
+Return ONLY a valid JSON object (nothing before {, nothing after }):
 
 {
-  "summary": "A thorough 4-5 sentence executive summary covering: what changed, all systems that could be affected, key risks, platform-specific concerns, and the critical path for testing. Be specific about Hitwicket screen names and flows.",
+  "summary": "5-6 sentence executive summary: what changed, every system affected, platform-specific risks, known historical bugs this touches from KB, critical test path, and deployment risk level. Name actual Hitwicket screens and service names.",
   "risk_score": "CRITICAL|HIGH|MEDIUM|LOW",
   "impact_areas": [
     {
-      "title": "Exact impacted area name",
+      "title": "Exact Hitwicket feature/system name",
       "severity": "critical|high|medium|low",
       "items": [
-        "Detailed check item 1 — reference exact screen name, button, or flow in Hitwicket",
-        "Detailed check item 2 — include expected behavior and what could break",
-        "Detailed check item 3",
-        "Detailed check item 4"
+        "Specific check referencing exact screen name, button label, or API in Hitwicket",
+        "What could break and the exact failure mode",
+        "Known historical bug pattern from KB that could regress",
+        "Cross-system interaction to verify",
+        "Platform-specific concern (Android vs iOS)",
+        "Edge case specific to this area"
       ]
     }
   ],
   "test_cases": [
     {
       "id": "TC-001",
-      "feature": "Exact Hitwicket feature/screen name",
-      "title": "Full descriptive test case title — what is being verified",
-      "category": "Functional|Regression|Edge Case|UI|Performance|Integration",
-      "preconditions": "Exact setup state required: account type, player state, mana level, screen to start from, any prerequisite actions",
-      "steps": "1. Navigate to [exact screen]\\n2. [Exact action with specific element name]\\n3. [Next action]\\n4. [Verification step]",
-      "expected": "Precise expected outcome — what the user sees, what data should be stored, what events fire, what the UI shows",
-      "break_point": "Exact condition that would cause this test to fail — the specific failure mode",
-      "systems": "SA Manager, Match Engine (comma-separated Hitwicket systems involved)",
+      "feature": "Exact Hitwicket feature/screen name from KB",
+      "title": "Full descriptive title — specific, not generic",
+      "category": "Functional|Regression|Edge Case|UI|Performance|Integration|Security",
+      "preconditions": "Exact game state: account level, player OVR, mana amount, current screen, any required setup steps",
+      "steps": "1. Navigate to [exact screen name]\\n2. [Exact UI action with element name]\\n3. [Next step with specifics]\\n4. [Verification step]\\n5. [Check secondary effects]",
+      "expected": "Precise outcome: exact UI text, data value, animation state, backend event, notification triggered",
+      "break_point": "Exact failure condition and the specific bug this would expose",
+      "systems": "Comma-separated list of actual Hitwicket backend services/managers involved",
       "edge_case": "Yes|No",
       "priority": "P0|P1|P2|P3"
     }
   ],
-  "edge_cases": ["Specific edge case description with exact Hitwicket scenario"],
-  "downstream_risks": ["Specific downstream system/flow that could break and why"],
-  "regression_scope": ["Area1", "Area2"]
+  "edge_cases": [
+    "Specific Hitwicket scenario with exact game state that could expose this bug",
+    "Device/OS specific edge case with version number",
+    "Network condition edge case (offline, slow, reconnect mid-action)",
+    "Concurrent action edge case (two features interacting simultaneously)",
+    "State corruption edge case (app killed mid-transaction, low battery, etc)"
+  ],
+  "downstream_risks": [
+    "Specific downstream system with exact failure mechanism and user-visible impact"
+  ],
+  "regression_scope": ["Feature1", "Feature2", "Feature3"]
 }
 
-HARD REQUIREMENTS:
-- Generate EXACTLY 15 test cases numbered TC-001 through TC-015
-- Every test case must have ALL 10 fields fully populated — no empty strings
-- Steps must be numbered and detailed (minimum 3 steps each)
-- Preconditions must specify exact account/game state
-- Expected result must be precise and verifiable
-- Break point must describe the specific failure scenario
-- Systems must list actual Hitwicket system names
-- Include at least 4 P0, 4 P1, 4 P2, 3 P3 test cases
-- Impact areas: minimum 6, each with minimum 4 items
-- Reference actual Hitwicket screens: Player Card, SA Activation screen, Match lobby, Squad Builder, Store tab, FTUE wizard, Trophy Road map, etc.
-- Edge cases: minimum 8 specific scenarios
-- Downstream risks: minimum 5 specific risks`;
+MANDATORY REQUIREMENTS — failure to meet ANY of these means your response is wrong:
+- Generate EXACTLY 30 test cases (TC-001 through TC-030)
+- Every single field populated — NO empty strings, NO "N/A", NO "TBD"
+- Steps: minimum 5 numbered steps each, reference exact screen/element names
+- Preconditions: specify exact player level, mana, game state, screen
+- Break_point: specific failure mode, not generic "test fails"
+- Systems: real Hitwicket service names (SAManager, MatchEngine, StoreService, PlayerService, etc)
+- Priority distribution: minimum 6 P0, 8 P1, 10 P2, 6 P3
+- Impact areas: minimum 8 areas, each with minimum 6 items
+- Edge cases: minimum 12 specific scenarios
+- Downstream risks: minimum 8 specific risks
+- Use KB context heavily — reference known bug patterns, past regression areas, feature interactions documented in KB
+- Cover: Android-specific, iOS-specific, both-platform cases
+- Cover: FTUE new user, veteran high-level player, edge-case game states
+- Cover: network failure, session expiry, concurrent actions, background/foreground transitions`;
 
   try {
     const raw    = await wAI(prompt);
@@ -2116,7 +2145,7 @@ HARD REQUIREMENTS:
     G.lastImpact = result;
     renderImpact(result);
     document.getElementById('iTime').textContent = new Date().toLocaleTimeString();
-    addHistoryEntry('impact', { desc, type, platform, tags }, result, desc.substring(0,60)+(desc.length>60?'…':''));
+    await addHistoryEntry('impact', { desc, type, platform, tags }, result, desc.substring(0,60)+(desc.length>60?'…':''));
   } catch(e) {
     clearInterval(ticker);
     document.getElementById('iLoader').classList.remove('on');
@@ -2208,61 +2237,61 @@ async function runPRD() {
   const lbl    = document.getElementById('prdLbl');
   const ticker = setInterval(() => { lbl.textContent = steps[si=(si+1)%steps.length]; }, 2000);
 
-  const prompt = `You are a PRINCIPAL QA ENGINEER at Hitwicket (mobile cricket strategy game, Android + iOS).
+  const prompt = `You are a PRINCIPAL QA ENGINEER at Hitwicket (mobile cricket strategy game, Android + iOS) with access to 600+ KB entries covering every feature, known bug, historical regression, and test pattern in the entire Hitwicket ecosystem.
 
-Analyze the following PRD / feature specification and generate a COMPREHENSIVE, DETAILED test suite. Every single test case must be fully filled out — no empty fields, no placeholder text.
+CRITICAL: The KB context injected into this prompt contains real Hitwicket test cases, PRDs, bug reports, and feature docs. Read ALL of it. Cross-reference this PRD against every related KB entry. Your test cases must reflect actual Hitwicket knowledge — not generic mobile app testing.
 
 PRD CONTENT:
-${G.prdFile?.type === 'pdf' ? '[PDF attached — analyze the document provided]' : contentSafe}
+${G.prdFile?.type === 'pdf' ? `[PDF: ${G.prdFile.name} — use filename + KB context to infer feature details]` : contentSafe}
 
-${focus ? `SPECIAL FOCUS: ${focus}` : ''}
+${focus ? `SPECIAL FOCUS AREAS: ${focus}` : ''}
 PLATFORM: ${platform}
 PRIORITY SYSTEM: ${prio}
 
-Return ONLY valid JSON (no markdown, no code fences, nothing before {, nothing after }):
+TASK: Generate a comprehensive, production-ready test suite using ALL relevant KB context. Every test case must be specific to Hitwicket's actual codebase, screens, and known bug patterns.
+
+Return ONLY valid JSON (nothing before {, nothing after }):
 
 {
-  "feature_name": "Exact feature name from the PRD",
+  "feature_name": "Exact feature name from PRD",
   "test_cases": [
     {
       "id": "TC-001",
-      "feature": "Sub-feature or component name",
-      "title": "Full descriptive title of what is being tested",
+      "feature": "Exact sub-feature or Hitwicket screen name",
+      "title": "Specific, non-generic test case title describing exactly what is verified",
       "category": "Functional|UI|Regression|Edge Case|Performance|Integration|Security",
-      "preconditions": "Exact prerequisite state — account type, game state, data setup needed, screen to navigate to first",
-      "steps": "1. [Exact step with specific screen/element name]\\n2. [Next step]\\n3. [Verification or input step]\\n4. [Check result step]",
-      "expected_result": "Precise verifiable outcome — what the user sees, data saved, UI state, any backend events",
-      "break_point": "The exact condition or failure mode that would make this test fail",
-      "systems": "Affected Hitwicket systems (e.g. SAManager, StoreService, MatchEngine)",
+      "preconditions": "Exact game state: account level, player roster state, currency amounts, screen to navigate to, any prerequisite actions needed",
+      "steps": "1. [Exact screen name and navigation path]\\n2. [Exact UI element to interact with]\\n3. [Specific input or action with values]\\n4. [Verification step with exact expected value]\\n5. [Check secondary system effects]",
+      "expected_result": "Precise outcome: exact UI state, values displayed, animations triggered, backend data saved, analytics events fired",
+      "break_point": "Exact condition and failure mode — what specific bug or regression this would catch",
+      "systems": "Real Hitwicket service names (SAManager, MatchEngine, StoreService, PlayerService, LeagueService, etc)",
       "edge_case": "Yes|No",
       "priority": "${prio === 'P0-P3' ? 'P0|P1|P2|P3' : 'Critical|High|Medium|Low'}"
     }
   ]
 }
 
-REQUIREMENTS:
-- Generate 20 test cases (TC-001 through TC-020)
-- ALL 10 fields fully populated for every test case — no empty strings allowed
-- Steps must be numbered and have minimum 4 steps each
-- Cover: happy path, negative/failure flows, boundary values, UI states, error messages, loading states, empty states
-- Include both Android and iOS specific cases where behaviors differ
-- preconditions must specify the exact starting game state
-- break_point must identify the specific failure scenario
-- Reference actual Hitwicket UI: specific screen names, button labels, tabs
-- Distribute priorities: ~4 P0, ~6 P1, ~6 P2, ~4 P3`;
+MANDATORY — every requirement must be met:
+- Generate EXACTLY 30 test cases (TC-001 through TC-030)
+- ALL fields fully populated, no empty strings, no "N/A", no generic placeholders
+- Steps: minimum 5 numbered steps, exact screen names and UI element names
+- Preconditions: exact game/account state (e.g. "Player with OVR 85+, 3 SA charges, in League Season 5")
+- Expected_result: specific verifiable outcome, not "feature works correctly"
+- Break_point: exact failure mode, not "test fails"
+- Systems: real Hitwicket backend service names
+- Priority: ${prio === 'P0-P3' ? '~6 P0, ~9 P1, ~9 P2, ~6 P3' : '~6 Critical, ~9 High, ~9 Medium, ~6 Low'}
+- Coverage: happy path, error flows, boundary values, empty states, loading states, network failure, session expiry
+- Platform: include Android-specific AND iOS-specific cases where behavior differs
+- Use KB knowledge: reference known bug patterns and regression areas relevant to this feature
+- User types: new FTUE user, mid-game player, high-level veteran, edge-case states`;
 
   try {
-    let raw;
-    if (G.prdFile?.type === 'pdf') {
-      raw = await wAI(prompt.replace('[PDF attached — analyze the document provided]', `[PDF: ${G.prdFile.name} — please analyze based on filename context and the KB entries]`));
-    } else {
-      raw = await wAI(prompt);
-    }
+    const raw    = await wAI(prompt);
     clearInterval(ticker);
     const result = parseAIJson(raw);
     G.lastPRD = result;
     renderPRD(result);
-    addHistoryEntry('prd', { txt: txt.substring(0,500), prio, platform, focus }, result, result.feature_name || txt.substring(0,50) || 'PRD Analysis');
+    await addHistoryEntry('prd', { txt: txt.substring(0,500), prio, platform, focus }, result, result.feature_name || txt.substring(0,50) || 'PRD Analysis');
   } catch(e) {
     clearInterval(ticker);
     document.getElementById('prdLoader').classList.remove('on');
@@ -2350,102 +2379,59 @@ async function importFiles(e) {
   renderImportPreview();
   document.getElementById('importInput').value = '';
 }
+
 async function parseExcel(file) {
-  const splitSheets = document.getElementById('splitSheets').checked;
-  const defType = document.getElementById('importType').value;
-  const defArea = document.getElementById('importArea').value.trim();
-  return new Promise((res, rej) => {
-    const rd = new FileReader();
-    rd.onload = e => {
-      try {
-        const wb = XLSX.read(e.target.result, { type: 'array' });
-        if (splitSheets) {
-          wb.SheetNames.forEach(sn => {
-            const csv = XLSX.utils.sheet_to_csv(wb.Sheets[sn]);
-            if (csv.trim().length > 20) G.importChunks.push({ title:`${file.name.replace(/\.(xlsx|xls)$/i,'')} — ${sn}`, area:defArea||sn, type:defType, content:csv, selected:true, meta:`${csv.split('\n').length-1} rows` });
-          });
-        } else {
-          let c = ''; wb.SheetNames.forEach(sn => { c += `\n=== ${sn} ===\n${XLSX.utils.sheet_to_csv(wb.Sheets[sn])}\n`; });
-          G.importChunks.push({ title:file.name, area:defArea, type:defType, content:c.trim(), selected:true, meta:`${wb.SheetNames.length} sheets` });
-        }
-        res();
-      } catch(err) { rej(err); }
-    };
-    rd.onerror = rej; rd.readAsArrayBuffer(file);
-  });
-}
-async function parseCSV(file) {
-  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
-  return new Promise((res,rej) => {
-    const rd=new FileReader();
-    rd.onload=e => { G.importChunks.push({ title:file.name.replace(/\.csv$/i,''), area:defArea, type:defType, content:e.target.result, selected:true, meta:`${e.target.result.split('\n').filter(r=>r.trim()).length} rows` }); res(); };
-    rd.onerror=rej; rd.readAsText(file);
-  });
-}
-async function parseTxt(file) {
-  const splitH=document.getElementById('splitHeadings').checked;
+  const splitSheets=document.getElementById('splitSheets').checked;
   const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
   return new Promise((res,rej) => {
     const rd=new FileReader();
     rd.onload=e => {
-      const content=e.target.result;
-      if (splitH && /\n#{1,3}\s/.test(content)) {
-        const secs=content.split(/\n(?=#{1,3}\s)/); let added=0;
-        secs.forEach((sec,i) => {
-          if (sec.trim().length<30) return;
-          G.importChunks.push({ title:sec.split('\n')[0].replace(/^#+\s*/,'').trim()||`${file.name} §${i+1}`, area:defArea, type:defType, content:sec.trim(), selected:true, meta:`${sec.split('\n').length} lines` }); added++;
-        });
-        if (!added) G.importChunks.push({ title:file.name.replace(/\.(txt|md)$/i,''), area:defArea, type:defType, content, selected:true, meta:`${content.split('\n').length} lines` });
-      } else {
-        G.importChunks.push({ title:file.name.replace(/\.(txt|md)$/i,''), area:defArea, type:defType, content, selected:true, meta:`${content.split('\n').length} lines` });
-      }
-      res();
-    };
-    rd.onerror=rej; rd.readAsText(file);
-  });
-}
-async function parsePDF(file) {
-  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
-  return new Promise((res,rej) => {
-    const rd=new FileReader();
-    rd.onload=e => { G.importChunks.push({ title:file.name.replace(/\.pdf$/i,''), area:defArea, type:defType, content:`[PDF FILE: ${file.name}]\n[Size: ${(file.size/1024).toFixed(1)} KB]`, selected:true, meta:`PDF · ${(file.size/1024).toFixed(1)} KB`, pdfData:e.target.result.split(',')[1] }); res(); };
-    rd.onerror=rej; rd.readAsDataURL(file);
-  });
-}
-async function parseDocx(file) {
-  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
-  return new Promise((res,rej) => {
-    const rd=new FileReader();
-    rd.onload=async e => {
-      let text='';
-      try { const wb=XLSX.read(e.target.result,{type:'array'}); wb.SheetNames.forEach(sn=>{text+=XLSX.utils.sheet_to_csv(wb.Sheets[sn])+'\n';}); }
-      catch { try { const raw=new TextDecoder('utf-8').decode(new Uint8Array(e.target.result)); text=raw.replace(/[^\x20-\x7E\n\r\t]/g,' ').replace(/\s{3,}/g,'\n').trim(); if(text.length<50) text=`[DOCX: ${file.name}]`; } catch { text=`[DOCX: ${file.name}]`; } }
-      G.importChunks.push({ title:file.name.replace(/\.(doc|docx)$/i,''), area:defArea, type:defType, content:text.substring(0,8000), selected:true, meta:`DOCX · ${(file.size/1024).toFixed(1)} KB` }); res();
+      try {
+        const wb=XLSX.read(e.target.result,{type:'array'});
+        if (splitSheets) {
+          wb.SheetNames.forEach(sn => {
+            const csv=XLSX.utils.sheet_to_csv(wb.Sheets[sn]);
+            if (csv.trim().length>20) G.importChunks.push({title:`${file.name.replace(/\.(xlsx|xls)$/i,'')} — ${sn}`,area:defArea||sn,type:defType,content:csv,selected:true,meta:`${csv.split('\n').length-1} rows`});
+          });
+        } else {
+          let c=''; wb.SheetNames.forEach(sn=>{c+=`\n=== ${sn} ===\n${XLSX.utils.sheet_to_csv(wb.Sheets[sn])}\n`;});
+          G.importChunks.push({title:file.name,area:defArea,type:defType,content:c.trim(),selected:true,meta:`${wb.SheetNames.length} sheets`});
+        }
+        res();
+      } catch(err){rej(err);}
     };
     rd.onerror=rej; rd.readAsArrayBuffer(file);
   });
 }
+async function parseCSV(file) {
+  const defType=document.getElementById('importType').value,defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=e=>{G.importChunks.push({title:file.name.replace(/\.csv$/i,''),area:defArea,type:defType,content:e.target.result,selected:true,meta:`${e.target.result.split('\n').filter(r=>r.trim()).length} rows`});res();};rd.onerror=rej;rd.readAsText(file);});
+}
+async function parseTxt(file) {
+  const splitH=document.getElementById('splitHeadings').checked;
+  const defType=document.getElementById('importType').value,defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=e=>{const content=e.target.result;if(splitH&&/\n#{1,3}\s/.test(content)){const secs=content.split(/\n(?=#{1,3}\s)/);let added=0;secs.forEach((sec,i)=>{if(sec.trim().length<30)return;G.importChunks.push({title:sec.split('\n')[0].replace(/^#+\s*/,'').trim()||`${file.name} §${i+1}`,area:defArea,type:defType,content:sec.trim(),selected:true,meta:`${sec.split('\n').length} lines`});added++;});if(!added)G.importChunks.push({title:file.name.replace(/\.(txt|md)$/i,''),area:defArea,type:defType,content,selected:true,meta:`${content.split('\n').length} lines`});}else{G.importChunks.push({title:file.name.replace(/\.(txt|md)$/i,''),area:defArea,type:defType,content,selected:true,meta:`${content.split('\n').length} lines`});}res();};rd.onerror=rej;rd.readAsText(file);});
+}
+async function parsePDF(file) {
+  const defType=document.getElementById('importType').value,defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=e=>{G.importChunks.push({title:file.name.replace(/\.pdf$/i,''),area:defArea,type:defType,content:`[PDF FILE: ${file.name}]\n[Size: ${(file.size/1024).toFixed(1)} KB]`,selected:true,meta:`PDF · ${(file.size/1024).toFixed(1)} KB`,pdfData:e.target.result.split(',')[1]});res();};rd.onerror=rej;rd.readAsDataURL(file);});
+}
+async function parseDocx(file) {
+  const defType=document.getElementById('importType').value,defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=async e=>{let text='';try{const wb=XLSX.read(e.target.result,{type:'array'});wb.SheetNames.forEach(sn=>{text+=XLSX.utils.sheet_to_csv(wb.Sheets[sn])+'\n';});}catch{try{const raw=new TextDecoder('utf-8').decode(new Uint8Array(e.target.result));text=raw.replace(/[^\x20-\x7E\n\r\t]/g,' ').replace(/\s{3,}/g,'\n').trim();if(text.length<50)text=`[DOCX: ${file.name}]`;}catch{text=`[DOCX: ${file.name}]`;}}G.importChunks.push({title:file.name.replace(/\.(doc|docx)$/i,''),area:defArea,type:defType,content:text.substring(0,8000),selected:true,meta:`DOCX · ${(file.size/1024).toFixed(1)} KB`});res();};rd.onerror=rej;rd.readAsArrayBuffer(file);});
+}
 async function parseJSON(file) {
-  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
-  return new Promise((res,rej) => {
-    const rd=new FileReader();
-    rd.onload=e => { let c=e.target.result; try{c=JSON.stringify(JSON.parse(c),null,2);}catch{} G.importChunks.push({ title:file.name.replace(/\.json$/i,''), area:defArea, type:defType, content:c, selected:true, meta:`JSON · ${c.split('\n').length} lines` }); res(); };
-    rd.onerror=rej; rd.readAsText(file);
-  });
+  const defType=document.getElementById('importType').value,defArea=document.getElementById('importArea').value.trim();
+  return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=e=>{let c=e.target.result;try{c=JSON.stringify(JSON.parse(c),null,2);}catch{}G.importChunks.push({title:file.name.replace(/\.json$/i,''),area:defArea,type:defType,content:c,selected:true,meta:`JSON · ${c.split('\n').length} lines`});res();};rd.onerror=rej;rd.readAsText(file);});
 }
 async function parsePptx(file) {
-  const defType=document.getElementById('importType').value, defArea=document.getElementById('importArea').value.trim();
-  return new Promise(res => {
-    const rd=new FileReader();
-    rd.onload=e => { let c=''; try{const wb=XLSX.read(e.target.result,{type:'array'});wb.SheetNames.forEach(sn=>{c+=`\n=== ${sn} ===\n${XLSX.utils.sheet_to_csv(wb.Sheets[sn])}\n`;});}catch{c=`[PowerPoint: ${file.name}]`;} G.importChunks.push({ title:file.name.replace(/\.(pptx|ppt)$/i,''), area:defArea, type:defType, content:c.trim()||`[${file.name}]`, selected:true, meta:`PPT · ${(file.size/1024).toFixed(1)} KB` }); res(); };
-    rd.onerror=()=>{ G.importChunks.push({ title:file.name, area:'', type:defType, content:`[PPT: ${file.name}]`, selected:true, meta:'PPT' }); res(); };
-    rd.readAsArrayBuffer(file);
-  });
+  const defType=document.getElementById('importType').value,defArea=document.getElementById('importArea').value.trim();
+  return new Promise(res=>{const rd=new FileReader();rd.onload=e=>{let c='';try{const wb=XLSX.read(e.target.result,{type:'array'});wb.SheetNames.forEach(sn=>{c+=`\n=== ${sn} ===\n${XLSX.utils.sheet_to_csv(wb.Sheets[sn])}\n`;});}catch{c=`[PowerPoint: ${file.name}]`;}G.importChunks.push({title:file.name.replace(/\.(pptx|ppt)$/i,''),area:defArea,type:defType,content:c.trim()||`[${file.name}]`,selected:true,meta:`PPT · ${(file.size/1024).toFixed(1)} KB`});res();};rd.onerror=()=>{G.importChunks.push({title:file.name,area:'',type:defType,content:`[PPT: ${file.name}]`,selected:true,meta:'PPT'});res();};rd.readAsArrayBuffer(file);});
 }
 function renderImportPreview() {
-  const wrap=document.getElementById('importPreview'), empty=document.getElementById('importEmpty');
-  if (!G.importChunks.length) { wrap.style.display='none'; empty.style.display='block'; empty.innerHTML='<span class="empty-icon">📥</span>No chunks detected.'; return; }
-  wrap.style.display='block'; empty.style.display='none';
+  const wrap=document.getElementById('importPreview'),empty=document.getElementById('importEmpty');
+  if (!G.importChunks.length){wrap.style.display='none';empty.style.display='block';empty.innerHTML='<span class="empty-icon">📥</span>No chunks detected.';return;}
+  wrap.style.display='block';empty.style.display='none';
   const tl={test_cases:'TC',code:'Code',prd:'PRD',note:'Note',feat:'Feature'};
   const tcl={test_cases:'tb-tc',code:'tb-code',prd:'tb-prd',note:'tb-note',feat:'tb-feat'};
   document.getElementById('chunkList').innerHTML=G.importChunks.map((c,i)=>`
@@ -2471,32 +2457,29 @@ function renderImportPreview() {
   updateChunkCounts();
 }
 function updateChunkCounts() {
-  document.getElementById('chunkCnt').textContent = G.importChunks.length;
-  document.getElementById('chunkSel').textContent = G.importChunks.filter(c=>c.selected).length;
+  document.getElementById('chunkCnt').textContent=G.importChunks.length;
+  document.getElementById('chunkSel').textContent=G.importChunks.filter(c=>c.selected).length;
 }
 function selAll(val) { G.importChunks.forEach(c=>c.selected=val); renderImportPreview(); }
 async function saveChunks() {
-  const sel = G.importChunks.filter(c=>c.selected);
-  if (!sel.length) { toast('Nothing selected','err'); return; }
-  const btn=document.getElementById('saveChunksBtn'); btn.disabled=true;
+  const sel=G.importChunks.filter(c=>c.selected);
+  if (!sel.length){toast('Nothing selected','err');return;}
+  const btn=document.getElementById('saveChunksBtn');btn.disabled=true;
   document.getElementById('importProgPanel').style.display='block';
-  const bar=document.getElementById('progBar'), lbl=document.getElementById('progLbl'), log=document.getElementById('progLog');
-  log.innerHTML=''; let saved=0, failed=0;
-  for (let i=0;i<sel.length;i++) {
-    const c=sel[i]; lbl.textContent=`${i+1} / ${sel.length}`;
-    bar.style.width=`${Math.round((i/sel.length)*100)}%`;
-    try {
-      const d=await wFetch('/kb','POST',{ type:c.type, title:c.title||`Import ${i+1}`, area:c.area||'', content:c.content });
-      G.kb.unshift(d.entry); saved++; log.innerHTML+=`<span style="color:var(--jade)">✓</span> ${c.title}<br>`;
-    } catch(e) { failed++; log.innerHTML+=`<span style="color:var(--red)">✗</span> ${c.title}: ${e.message}<br>`; }
+  const bar=document.getElementById('progBar'),lbl=document.getElementById('progLbl'),log=document.getElementById('progLog');
+  log.innerHTML='';let saved=0,failed=0;
+  for(let i=0;i<sel.length;i++){
+    const c=sel[i];lbl.textContent=`${i+1} / ${sel.length}`;bar.style.width=`${Math.round((i/sel.length)*100)}%`;
+    try{const d=await wFetch('/kb','POST',{type:c.type,title:c.title||`Import ${i+1}`,area:c.area||'',content:c.content});G.kb.unshift(d.entry);saved++;log.innerHTML+=`<span style="color:var(--jade)">✓</span> ${c.title}<br>`;}
+    catch(e){failed++;log.innerHTML+=`<span style="color:var(--red)">✗</span> ${c.title}: ${e.message}<br>`;}
     log.scrollTop=log.scrollHeight;
     await new Promise(r=>setTimeout(r,150));
   }
-  bar.style.width='100%'; lbl.textContent=`${saved} saved${failed?`, ${failed} failed`:''}`;
-  updateKBUI(); setCloud('ok',`☁ ${G.kb.length}`); btn.disabled=false;
-  toast(`${saved} entries saved to KB ✓`, saved>0?'ok':'err');
+  bar.style.width='100%';lbl.textContent=`${saved} saved${failed?`, ${failed} failed`:''}`;
+  updateKBUI();setCloud('ok',`☁ ${G.kb.length}`);btn.disabled=false;
+  toast(`${saved} entries saved to KB ✓`,saved>0?'ok':'err');
   G.importChunks=G.importChunks.filter(c=>!c.selected);
-  setTimeout(renderImportPreview, 500);
+  setTimeout(renderImportPreview,500);
 }
 
 let _tt;
@@ -2506,9 +2489,11 @@ function toast(msg, type = 'ok') {
   clearTimeout(_tt); _tt = setTimeout(() => el.className = '', 3500);
 }
 
+// ══ INIT ══
 window.addEventListener('DOMContentLoaded', async () => {
   initTheme();
 
+  // Build feature tag pills
   const wrap = document.getElementById('iTags');
   FEATURES.forEach(f => {
     const s = document.createElement('span');
@@ -2517,37 +2502,36 @@ window.addEventListener('DOMContentLoaded', async () => {
     wrap.appendChild(s);
   });
 
+  // Pre-open IndexedDB so first history access is instant
+  openIDB().catch(() => {});
+
+  // Load config (google client ID + allowed domain) from worker
   try {
     await fetchConfig();
   } catch(e) {
-    return;
+    return; // Error shown in login card
   }
 
-  if (typeof google !== 'undefined') {
-    google.accounts.id.initialize({
-      client_id:   GOOGLE_CLIENT,
-      callback:    handleGoogleCred,
-      auto_select: false,
-    });
-  }
-
+  // Try to restore existing session — no GSI needed
   const saved = loadSession();
   if (saved?.user && saved?.sessionToken) {
     G.user         = saved.user;
     G.sessionToken = saved.sessionToken;
     try {
-      await wFetch('/kb');
-      saveSession();
+      await wFetch('/kb'); // Validate token is still alive on worker
+      saveSession();       // Refresh savedAt timestamp
       onLoginSuccess();
       toast('Session restored ✓', 'ok');
     } catch(e) {
+      // Session dead — clear and let user sign in fresh via OAuth popup
       clearSession(); G.user = null; G.sessionToken = null;
-      if (typeof google !== 'undefined') {
-        google.accounts.id.initialize({ client_id: GOOGLE_CLIENT, callback: handleGoogleCred, auto_select: false });
-      }
+      // No GSI to init — button click goes straight to OAuth popup
     }
   }
+  // If no session or session restore failed, login screen is already visible.
+  // User clicks "Sign in with Google" → doGoogleSignIn() → pure OAuth2 popup.
 });
+
 </script>
 </body>
 </html>
