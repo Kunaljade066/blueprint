@@ -1323,17 +1323,15 @@ async function fetchConfig() {
   }
 }
 
+// ── FIX 1: doGoogleSignIn no longer calls initialize() ──
+// GSI is initialized exactly once in DOMContentLoaded below.
+// This function only calls prompt(), which is correct.
 function doGoogleSignIn() {
   if (!G.configLoaded) { loginErr('App config not loaded yet, please wait…'); return; }
   if (typeof google === 'undefined') { loginErr('Google SDK not loaded. Check your internet connection.'); return; }
-  google.accounts.id.initialize({
-    client_id:             GOOGLE_CLIENT,
-    callback:              handleGoogleCred,
-    auto_select:           false,
-    cancel_on_tap_outside: false,
-  });
+
   google.accounts.id.prompt(notification => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+    if (notification.isNotDisplayed() || notification.isDismissedMoment()) {
       const url = `https://accounts.google.com/o/oauth2/v2/auth`
         + `?client_id=${GOOGLE_CLIENT}`
         + `&redirect_uri=${encodeURIComponent(location.origin + location.pathname)}`
@@ -2142,6 +2140,8 @@ function toast(msg, type = 'ok') {
   clearTimeout(_tt); _tt = setTimeout(() => el.className = '', 3500);
 }
 
+// ── FIX 2: DOMContentLoaded — initialize GSI exactly once, with FedCM opt-in ──
+// FIX 3: session restore catch block no longer re-initializes GSI
 window.addEventListener('DOMContentLoaded', async () => {
   initTheme();
 
@@ -2159,11 +2159,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  // ── Single GSI initialization — never called again anywhere ──
   if (typeof google !== 'undefined') {
     google.accounts.id.initialize({
-      client_id:   GOOGLE_CLIENT,
-      callback:    handleGoogleCred,
-      auto_select: false,
+      client_id:             GOOGLE_CLIENT,
+      callback:              handleGoogleCred,
+      auto_select:           false,
+      cancel_on_tap_outside: false,
+      use_fedcm_for_prompt:  true,   // FIX 4: opt into FedCM, silences deprecation warnings
     });
   }
 
@@ -2177,10 +2180,8 @@ window.addEventListener('DOMContentLoaded', async () => {
       onLoginSuccess();
       toast('Session restored ✓', 'ok');
     } catch(e) {
+      // FIX 3: removed google.accounts.id.initialize() re-call that was here
       clearSession(); G.user = null; G.sessionToken = null;
-      if (typeof google !== 'undefined') {
-        google.accounts.id.initialize({ client_id: GOOGLE_CLIENT, callback: handleGoogleCred, auto_select: false });
-      }
     }
   }
 });
