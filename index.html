@@ -6,8 +6,7 @@
 <title>QA Blueprint · Hitwicket</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* ══ THEME VARIABLES ══ */
 :root[data-theme="dark"] {
@@ -308,31 +307,29 @@ body::after {
 .wrap {
   position: relative; z-index: 1; max-width: 1320px; margin: 0 auto;
   padding: 28px 20px 120px;
-  overflow-x: hidden;
-  width: 100%;
-  box-sizing: border-box;
+  overflow-x: hidden; /* FIX: prevent horizontal overflow */
 }
-.tab-pane { display: none; width: 100%; box-sizing: border-box; }
-.tab-pane.on { display: block; animation: fadein .22s ease; width: 100%; }
+.tab-pane { display: none; }
+.tab-pane.on { display: block; animation: fadein .22s ease; }
 @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.page-hd { margin-bottom: 24px; overflow: hidden; }
+.page-hd { margin-bottom: 24px; }
 .page-hd h2 { font-family: var(--disp); font-size: 30px; letter-spacing: 4px; color: var(--text); }
 .page-hd h2 span { color: var(--red); }
-.page-hd p { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere; max-width: 100%; }
+.page-hd p { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.7; }
 
 /* FIX: minmax(0,1fr) is the correct way — prevents tracks from ever being wider than available space */
-.g2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; width: 100%; max-width: 100%; box-sizing: border-box; }
-.g2 > * { min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; }
+.g2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; width: 100%; }
+.g2 > * { min-width: 0; max-width: 100%; overflow: hidden; }
 @media(max-width:840px) { .g2 { grid-template-columns: minmax(0,1fr); } }
 
 /* FIX: flex column containers inside grid cells */
-.g2-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; }
+.g2-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; max-width: 100%; overflow: hidden; }
 
-.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; transition: background .3s, border-color .3s; min-width: 0; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; box-sizing: border-box; width: 100%; }
+.panel { background: var(--s1); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; transition: background .3s, border-color .3s; min-width: 0; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; }
 .panel-hd {
   padding: 11px 16px; border-bottom: 1px solid var(--bd); background: var(--s2);
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  transition: background .3s, border-color .3s; min-width: 0; overflow: hidden;
+  display: flex; align-items: center; gap: 8px;
+  transition: background .3s, border-color .3s;
 }
 .pdot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
 .pdot.r { background: var(--red); }
@@ -644,103 +641,6 @@ select option { background: var(--s2); }
 }
 .footer-bug-btn:hover { background: rgba(255,45,85,.14); border-color: rgba(255,45,85,.35); }
 .footer-bug-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); animation: pipblink 2s ease-in-out infinite; }
-
-/* ══════════════════════════════════════════
-   RESPONSIVE BREAKPOINTS
-   ══════════════════════════════════════════ */
-
-/* ── TABLET: ≤ 960px ── */
-@media (max-width: 960px) {
-  .wrap { padding: 20px 16px 100px; }
-  .nav { padding: 0 12px; }
-  .nav-brand { font-size: 16px; letter-spacing: 2px; padding: 0 12px 0 0; }
-  .cloud-lbl { display: none; }
-  .provider-badge { display: none; }
-  .user-nm { display: none; }
-  .stat-cell { padding: 10px 14px; }
-  .stat-num  { font-size: 20px; }
-  .impact-grid { grid-template-columns: repeat(auto-fill, minmax(min(200px,100%), 1fr)); }
-}
-
-/* ── MOBILE: ≤ 640px ── */
-@media (max-width: 640px) {
-  body { font-size: 13px; }
-  .wrap { padding: 16px 12px 90px; }
-  .page-hd { margin-bottom: 16px; }
-  .page-hd h2 { font-size: 22px; letter-spacing: 2px; }
-
-  /* Nav */
-  .nav { height: 48px; padding: 0 8px; }
-  .nav-brand { font-size: 13px; letter-spacing: 1px; padding: 0 8px 0 0; margin-right: 2px; }
-  .nav-tab { padding: 0 10px; font-size: 9px; letter-spacing: 1px; }
-  .nav-end { gap: 6px; padding-left: 8px; }
-  .bug-sheet-btn span:last-child { display: none; } /* hide "Bugs" text, keep icon */
-  .bug-sheet-btn { padding: 4px 7px; }
-  .theme-toggle { width: 28px; height: 28px; font-size: 13px; }
-  .hist-btn { padding: 0 8px; font-size: 9px; }
-  .hist-btn span:first-of-type { display: none; } /* hide clock emoji label */
-
-  /* History drawer full width */
-  .hist-drawer { width: 100%; border-left: none; top: 48px; }
-
-  /* Two-col form grid → single col */
-  .g2-f { grid-template-columns: 1fr; }
-
-  /* Panel */
-  .panel-body { padding: 12px; }
-  .panel-hd   { padding: 9px 12px; }
-
-  /* Stats bar */
-  .stat-cell { padding: 8px 10px; flex: 1 1 28%; min-width: 0; }
-  .stat-num  { font-size: 17px; }
-  .stat-lbl  { font-size: 8px; letter-spacing: 1px; }
-
-  /* Impact cards: single col */
-  .impact-grid { grid-template-columns: 1fr; }
-
-  /* TC table scroll */
-  .tbl-scroll { max-height: 360px; }
-  .tc-table th, .tc-table td { padding: 5px 6px; font-size: 10px; }
-
-  /* Drop zone */
-  .drop-zone { padding: 18px 12px; }
-  .drop-icon { font-size: 20px; }
-  .drop-text { font-size: 10px; }
-
-  /* Export bar */
-  .dl-bar { gap: 5px; padding: 8px 10px; }
-  .btn-sm { padding: 5px 9px; font-size: 10px; }
-
-  /* Footer */
-  .site-footer { height: auto; padding: 8px 12px; }
-  .footer-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .footer-credit { gap: 6px; flex-wrap: wrap; }
-  .footer-right { gap: 6px; }
-  .footer-version, .footer-sep, .footer-hw { display: none; }
-
-  /* Login card */
-  .login-card { padding: 28px 20px 24px; margin: 0 12px; max-width: 100%; }
-  .login-title { font-size: 24px; letter-spacing: 3px; }
-
-  /* Toast full width */
-  #toast { right: 10px; left: 10px; max-width: unset; font-size: 10px; bottom: 60px; }
-
-  /* Nav end — hide less important items */
-  .user-role { display: none; }
-}
-
-/* ── SMALL MOBILE: ≤ 400px ── */
-@media (max-width: 400px) {
-  .nav-brand { display: none; }
-  .nav-tab   { padding: 0 8px; font-size: 8px; letter-spacing: 0; }
-  .page-hd h2 { font-size: 19px; }
-  .stat-cell { padding: 6px 8px; }
-  .stat-num  { font-size: 15px; }
-  .panel-body { padding: 10px; }
-  .wrap { padding: 12px 8px 80px; }
-  .g2 { gap: 10px; }
-  .g2-col { gap: 10px; }
-}
 </style>
 </head>
 <body>
@@ -792,7 +692,7 @@ select option { background: var(--s2); }
     <div class="nav-tab admin-tab" id="t-kb"     onclick="goTab('kb')">☁️ KB <span class="nav-badge" id="kbCnt">0</span></div>
   </div>
   <div class="nav-end">
-    <a class="bug-sheet-btn" href="https://kunaljade066.github.io/MasterBugs/" target="_blank" rel="noopener" title="Master Bug Sheet">
+    <a class="bug-sheet-btn" href="https://hitwicket-bugpulse.vercel.app/" target="_blank" rel="noopener" title="Master Bug Sheet">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.355 5.833a1 1 0 0 1 .94-.666h5.41a1 1 0 0 1 .94.666L12.5 8H3.5l.855-2.167zM2 9h12v1a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9zm6-8a3 3 0 0 0-3 3h6a3 3 0 0 0-3-3z"/></svg>
       Bugs
     </a>
@@ -1183,7 +1083,7 @@ select option { background: var(--s2); }
 
 <script>
 
-const WORKER = 'https://orange-waterfall-030e.kunal-249.workers.dev';
+const WORKER = 'https://gameanalyzer.kunaljadework.workers.dev';
 
 let GOOGLE_CLIENT = '';
 let ALLOWED       = '';
@@ -1674,293 +1574,28 @@ async function savePRDKB() {
   } catch(e) { toast(e.message, 'err'); }
 }
 
-// ══ EXCEL EXPORT — ExcelJS full styling ══
-async function dlExcel(src) {
-  const tcs = src === 'impact' ? (G.lastImpact?.test_cases||[]) : (G.lastPRD?.test_cases||[]);
-  if (!tcs.length) { toast('No test cases to download', 'err'); return; }
-  if (typeof ExcelJS === 'undefined') { toast('Excel library loading… try again in 2s', 'info'); return; }
-
-  const btn = document.querySelector(`button[onclick="dlExcel('${src}')"]`);
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Building…'; }
-
-  const featureName = src === 'impact'
-    ? (document.getElementById('iDesc').value.substring(0,40) || 'Impact Analysis')
-    : (G.lastPRD?.feature_name || 'PRD');
-  const sheetName = featureName.replace(/[\\\/\?\*\[\]:]/g,'').substring(0,31);
-  const fname = `${featureName.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'')}_TCs_${new Date().toISOString().slice(0,10)}.xlsx`;
-
-  // ── colour maps ──
-  const PRIO_ROW_BG = { P0:'FFE8E8',P1:'FFF0D9',P2:'FFFDE7',P3:'E8F5E9',Critical:'FFE8E8',High:'FFF0D9',Medium:'FFFDE7',Low:'E8F5E9' };
-  const PRIO_FG     = { P0:'C0392B',P1:'D35400',P2:'B7950B',P3:'1E8449',Critical:'C0392B',High:'D35400',Medium:'B7950B',Low:'1E8449' };
-  const PRIO_CELL   = { P0:'FDDCDC',P1:'FDEBD0',P2:'FEF9E7',P3:'D5F5E3',Critical:'FDDCDC',High:'FDEBD0',Medium:'FEF9E7',Low:'D5F5E3' };
-  const CAT_BG      = { Functional:'D6EAF8',Regression:'E8DAED','Edge Case':'FEF9E7',UI:'D5F5E3',Performance:'FDEDEC',Integration:'DDEEFF',Security:'FDF2F8' };
-  const STATUS_FG   = { 'Not Started':'7F8C8D','In Progress':'1A5276',Pass:'1E8449',Passed:'1E8449',Fail:'C0392B',Failed:'C0392B',Blocked:'D35400' };
-  const STATUS_BG   = { 'Not Started':'F2F3F4','In Progress':'D6EAF8',Pass:'D5F5E3',Passed:'D5F5E3',Fail:'FDEDEC',Failed:'FDEDEC',Blocked:'FEF9E7' };
-
-  const HDR_BG = '1F3864', HDR_FG = 'FFFFFF';
-  const TITLE_BG = '0D0D1A';
-
-  function thinBorder(color='C5CAE9') {
-    const s = { style:'thin', color:{ argb:'FF'+color } };
-    return { top:s, left:s, bottom:s, right:s };
-  }
-  function medBorder(color='3D8EFF') {
-    const s = { style:'medium', color:{ argb:'FF'+color } };
-    return { top:s, left:s, bottom:s, right:s };
-  }
-
-  const wb = new ExcelJS.Workbook();
-  wb.creator = 'QA Blueprint · Hitwicket';
-  wb.created = new Date();
-
-  // ══ SHEET 1: Test Cases ══
-  const ws = wb.addWorksheet(sheetName, {
-    pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1 }
-  });
-  ws.properties.tabColor = { argb:'FF1F3864' };
-
-  const HEADERS = ['TC ID','Feature','Test Title','Category','Preconditions',
-                   'Steps','Expected Result','Break Point','Systems','Edge Case',
-                   'Priority','Status','Dev Result','QA Result'];
-  const COL_W   = [10,18,44,14,32,46,46,30,18,11,11,13,13,13];
-
-  // set column widths
-  COL_W.forEach((w,i) => { ws.getColumn(i+1).width = w; });
-
-  // ── Row 1: Title banner ──
-  ws.mergeCells(1,1,1,14);
-  const titleCell = ws.getCell('A1');
-  titleCell.value = `  QA Blueprint · Hitwicket  —  ${featureName}`;
-  titleCell.font  = { name:'Calibri', size:13, bold:true, color:{argb:'FF'+HDR_FG} };
-  titleCell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+TITLE_BG} };
-  titleCell.alignment = { horizontal:'left', vertical:'middle' };
-  ws.getRow(1).height = 38;
-
-  // ── Row 2: Headers ──
-  const hdrRow = ws.getRow(2);
-  hdrRow.height = 32;
-  HEADERS.forEach((h, i) => {
-    const cell = hdrRow.getCell(i+1);
-    cell.value = h;
-    cell.font      = { name:'Calibri', size:10, bold:true, color:{argb:'FF'+HDR_FG} };
-    cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+HDR_BG} };
-    cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
-    cell.border    = medBorder();
-  });
-
-  // ── Data rows ──
-  tcs.forEach((tc, idx) => {
-    const rowNum = idx + 3;
-    const prio   = String(tc.priority||''). trim();
-    const cat    = String(tc.category||''). trim();
-    const status = String(tc.status||'Not Started').trim() || 'Not Started';
-    const edge   = String(tc.edge_case || tc.is_edge_case || '').trim();
-    const rowBg  = PRIO_ROW_BG[prio] || (rowNum%2===0 ? 'F7F9FC' : 'FFFFFF');
-    const steps  = String(tc.steps||''). replace(/\\n/g,'\n');
-
-    const vals = [
-      tc.id||''                                , // 1  TC ID
-      tc.feature||''                           , // 2  Feature
-      tc.title||tc.test_title||''              , // 3  Test Title
-      cat                                       , // 4  Category
-      tc.preconditions||''                     , // 5  Preconditions
-      steps                                     , // 6  Steps
-      tc.expected||tc.expected_result||''      , // 7  Expected Result
-      tc.break_point||tc.breakpoint||''        , // 8  Break Point
-      tc.systems||tc.affected_systems||''      , // 9  Systems
-      edge                                      , // 10 Edge Case
-      prio                                      , // 11 Priority
-      status                                    , // 12 Status
-      tc.dev_result||''                        , // 13 Dev Result
-      tc.qa_result||''                         , // 14 QA Result
-    ];
-
-    const row = ws.getRow(rowNum);
-    row.height = 75;
-
-    vals.forEach((val, ci) => {
-      const cell = row.getCell(ci+1);
-      cell.value  = String(val||'');
-      cell.border = thinBorder();
-
-      if (ci === 0) { // TC ID
-        cell.font      = { name:'Courier New', size:9, bold:true, color:{argb:'FF1565C0'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFE3F2FD':'FFEEF6FD'} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else if (ci === 1) { // Feature
-        cell.font      = { name:'Calibri', size:10, bold:true, color:{argb:'FF2C3E50'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+rowBg} };
-        cell.alignment = { horizontal:'left', vertical:'middle' };
-
-      } else if (ci === 2) { // Test Title
-        cell.font      = { name:'Calibri', size:10, bold:true, color:{argb:'FF0D0D1A'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+rowBg} };
-        cell.alignment = { horizontal:'left', vertical:'middle', wrapText:true };
-
-      } else if (ci === 3) { // Category
-        const catBg = CAT_BG[cat] || 'EAF2FF';
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF2C3E50'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+catBg} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else if (ci === 4) { // Preconditions
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF5D6D7E'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFFAFBFC':'FFF5F6F8'} };
-        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
-
-      } else if (ci === 5) { // Steps
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF1A1A2E'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF0F6FF':'FFE8F2FF'} };
-        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
-
-      } else if (ci === 6) { // Expected Result
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF145A32'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF0FBF5':'FFE8F8EE'} };
-        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
-
-      } else if (ci === 7) { // Break Point
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FFC0392B'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFFEF5F5':'FFFDF0F0'} };
-        cell.alignment = { horizontal:'left', vertical:'top', wrapText:true };
-
-      } else if (ci === 8) { // Systems
-        cell.font      = { name:'Calibri', size:8, color:{argb:'FF5D6D7E'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: rowNum%2===0?'FFF8F9FA':'FFF2F3F4'} };
-        cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
-
-      } else if (ci === 9) { // Edge Case
-        const isYes = val.toLowerCase() === 'yes';
-        cell.font      = { name:'Calibri', size:9, bold:isYes, color:{argb: isYes?'FFCA6F1E':'FF7F8C8D'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: isYes?'FFFEF5E7':'FF'+rowBg} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else if (ci === 10) { // Priority
-        const pfg = PRIO_FG[prio]   || '555555';
-        const pbg = PRIO_CELL[prio] || 'EEEEEE';
-        cell.font      = { name:'Calibri', size:9, bold:true, color:{argb:'FF'+pfg} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+pbg} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else if (ci === 11) { // Status
-        const sfg = STATUS_FG[status] || '7F8C8D';
-        const sbg = STATUS_BG[status] || 'F2F3F4';
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF'+sfg} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+sbg} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-
-      } else { // Dev Result, QA Result
-        cell.font      = { name:'Calibri', size:9, color:{argb:'FF7F8C8D'} };
-        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF8F9FA'} };
-        cell.alignment = { horizontal:'center', vertical:'middle' };
-      }
-    });
-  });
-
-  // Freeze below title+header, auto-filter on header row
-  ws.views = [{ state:'frozen', xSplit:0, ySplit:2, activeCell:'A3' }];
-  ws.autoFilter = { from:'A2', to:{ row:2, column:14 } };
-
-  // ══ SHEET 2: Summary ══
-  const p = k => tcs.filter(t=>t.priority===k).length;
-  const ec = tcs.filter(t=>(t.edge_case||t.is_edge_case||''). toLowerCase()==='yes').length;
-
-  const ws2 = wb.addWorksheet('Summary', {});
-  ws2.properties.tabColor = { argb:'FF00D4A0' };
-  ws2.getColumn(1).width = 28;
-  ws2.getColumn(2).width = 16;
-  ws2.getColumn(3).width = 20;
-
-  ws2.mergeCells('A1:C1');
-  const st = ws2.getCell('A1');
-  st.value     = '  Test Suite Summary';
-  st.font      = { name:'Calibri', size:14, bold:true, color:{argb:'FFFFFFFF'} };
-  st.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+TITLE_BG} };
-  st.alignment = { horizontal:'left', vertical:'middle' };
-  ws2.getRow(1).height = 42;
-
-  ws2.mergeCells('A2:C2');
-  const ss = ws2.getCell('A2');
-  ss.value     = `  ${featureName}  ·  ${tcs.length} Test Cases`;
-  ss.font      = { name:'Calibri', size:10, color:{argb:'FFAAAACC'} };
-  ss.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1A1A2E'} };
-  ss.alignment = { horizontal:'left', vertical:'middle' };
-  ws2.getRow(2).height = 24;
-
-  ws2.getRow(3).height = 10;
-
-  // Summary header
-  ['METRIC','COUNT','BADGE'].forEach((h,i) => {
-    const c = ws2.getRow(4).getCell(i+1);
-    c.value = h;
-    c.font   = { name:'Calibri', size:10, bold:true, color:{argb:'FF'+HDR_FG} };
-    c.fill   = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+HDR_BG} };
-    c.alignment = { horizontal:'center', vertical:'middle' };
-    c.border = medBorder();
-  });
-  ws2.getRow(4).height = 28;
-
-  const summaryRows = [
-    ['Total Test Cases', tcs.length, 'All',        '2471A3','E8F4FD'],
-    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
-    ['P0 — Blocker',    p('P0')+p('Critical'),'Critical', 'C0392B','FDDCDC'],
-    ['P1 — Critical',   p('P1')+p('High'),   'High',     'D35400','FDEBD0'],
-    ['P2 — Important',  p('P2')+p('Medium'), 'Medium',   'B7950B','FEF9E7'],
-    ['P3 — Low',        p('P3')+p('Low'),    'Low',      '1E8449','D5F5E3'],
-    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
-    ['Edge Cases',      ec,           'Watch',    'CA6F1E','FEF5E7'],
-    ['────────────────', '',         '',           'CCCCCC','F0F2F5'],
-    ['Not Started',     tcs.length,   'Pending',  '7F8C8D','F2F3F4'],
-    ['In Progress',     0,            'Active',   '1A5276','D6EAF8'],
-    ['Passed',          0,            'Done',     '1E8449','D5F5E3'],
-    ['Failed',          0,            'Action',   'C0392B','FDEDEC'],
-  ];
-
-  summaryRows.forEach(([label, count, badge, fg, bg], i) => {
-    const row = ws2.getRow(i+5);
-    row.height = 30;
-    if (String(label).startsWith('────')) {
-      [1,2,3].forEach(c => { row.getCell(c).fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF0F2F5'} }; });
-      return;
-    }
-    const la = row.getCell(1), lb = row.getCell(2), lc = row.getCell(3);
-    la.value = label; lb.value = count; lc.value = badge;
-    la.font      = { name:'Calibri', size:10, color:{argb:'FF2C3E50'} };
-    la.fill      = { type:'pattern', pattern:'solid', fgColor:{argb:'FFF8F9FA'} };
-    la.alignment = { horizontal:'left', vertical:'middle', indent:2 };
-    la.border    = thinBorder();
-    [lb,lc].forEach(c => {
-      c.font   = { name:'Calibri', size: c===lb?14:9, bold: c===lb, color:{argb:'FF'+fg} };
-      c.fill   = { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+bg} };
-      c.alignment = { horizontal:'center', vertical:'middle' };
-      c.border = thinBorder();
-    });
-  });
-
-  // ── Write & download ──
-  try {
-    const buffer = await wb.xlsx.writeBuffer();
-    const blob   = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url    = URL.createObjectURL(blob);
-    const a      = document.createElement('a');
-    a.href = url; a.download = fname; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-    toast(`Downloaded ${fname} (${tcs.length} TCs) ✓`, 'ok');
-  } catch(e) {
-    toast('Export failed: ' + e.message, 'err');
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '⬇ Excel'; }
-  }
-}
-
 function tcToRow(tc) {
   return [
     tc.id||'', tc.feature||'', tc.title||tc.test_title||'', tc.category||'',
-    tc.preconditions||'', (tc.steps||'').replace(/\\n/g,'\n'),
-    tc.expected||tc.expected_result||'',
+    tc.preconditions||'', tc.steps||'', tc.expected||tc.expected_result||'',
     tc.break_point||tc.breakpoint||'', tc.systems||tc.affected_systems||'',
-    tc.edge_case||tc.is_edge_case||'', tc.priority||'', tc.status||'Not Started', '', ''
+    tc.edge_case||tc.is_edge_case||'', tc.priority||'', '', '', ''
   ];
+}
+
+function dlExcel(src) {
+  const tcs = src === 'impact' ? (G.lastImpact?.test_cases||[]) : (G.lastPRD?.test_cases||[]);
+  if (!tcs.length) { toast('No test cases to download', 'err'); return; }
+  const label = src === 'impact'
+    ? (document.getElementById('iDesc').value.substring(0,28) || 'Impact')
+    : (G.lastPRD?.feature_name || 'PRD');
+  const fname = `${label.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'')}_TCs_${new Date().toISOString().slice(0,10)}.xlsx`;
+  const wb    = XLSX.utils.book_new();
+  const ws    = XLSX.utils.aoa_to_sheet([EXCEL_COLS, ...tcs.map(tcToRow)]);
+  ws['!cols'] = [{wch:8},{wch:16},{wch:40},{wch:13},{wch:28},{wch:42},{wch:42},{wch:20},{wch:14},{wch:9},{wch:9},{wch:10},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws, label.substring(0,31));
+  XLSX.writeFile(wb, fname);
+  toast(`Downloaded ${fname} ✓`, 'ok');
 }
 
 function copyToClipboard(src) {
